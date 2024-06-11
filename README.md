@@ -1,2 +1,10 @@
 # cpp-basic-library
-my Cpp library for basic usage
+my CPP library for basic usage
+
+## plan
+
+- [ ] basic type
+- [ ] datetime
+- [ ] linear vector
+- [ ] cartsedian vector
+- [ ] hash table

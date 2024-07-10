@@ -1,8 +1,6 @@
 #ifndef _BASIC_H_
 #define _BASIC_H_
 
-#define USE_64_BIT 1
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>

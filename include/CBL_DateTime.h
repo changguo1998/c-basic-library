@@ -1,13 +1,11 @@
 // @copyright
 
-#ifndef _DATETIME_H_
-#define _DATETIME_H_
+#ifndef _CBL_DATETIME_H_
+#define _CBL_DATETIME_H_
 
-#include "Basic.h"
+#include "CBL_Basic.h"
 
 // #define _DATETIME_DEBUG_
-
-#define _TIME_PRECISION 3 // 10^(-n) second n=0,3,6,9
 
 typedef Int Year;
 typedef Int Month;
@@ -42,13 +40,13 @@ TimePrecision DT_second2precision(Float s);
 
 Float DT_precision2second(TimePrecision tp);
 
-typedef struct _DT_date_t{
+typedef struct _DT_date_t {
     Year year;
     Month month;
     Day day;
 } Date;
 
-/// @brief get corrent date
+/// @brief get current date
 /// @param tz 0-GMT,1-local time
 /// @return Date
 Date DT_today(Int tz);
@@ -56,24 +54,24 @@ Date DT_today(Int tz);
 /// @brief test if is leap year
 /// @param y
 /// @return bool
-bool DT_is_leap_year(Year y);
+Bool DT_is_leap_year(Year y);
 
 /// @brief test if date1 < date2
 /// @param d1 date1
 /// @param d2 date2
 /// @return bool: d1 < d2
-bool DT_date_isless(Date d1, Date d2);
+Bool DT_date_isless(Date d1, Date d2);
 
 /// @brief test if date1 == date2
 /// @param d1 date1
 /// @param d2 date2
 /// @return bool: d1 == d2
-bool DT_date_isequal(Date d1, Date d2);
+Bool DT_date_isequal(Date d1, Date d2);
 
 /// @brief day of year. January 1st is 1
 /// @param date
 /// @return Day
-Day DT_dayofyear(Date date);
+Day DT_day_of_year(Date date);
 
 /// @brief modified julian date: date from 1858-11-16
 /// @param date
@@ -95,7 +93,7 @@ Day DT_date_diff(Date d1, Date d2);
 
 Date DT_date_plus_day(Date d, Day day);
 
-typedef struct _DT_time_t{
+typedef struct _DT_time_t {
     Hour hour;
     Minute minute;
     Second second;
@@ -110,14 +108,15 @@ typedef struct _DT_time_t{
 #endif
 } Time;
 
+Time DT_zero_time();
+
 Time DT_regularize_time(Time t);
 
 TimePrecision DT_time_diff(Time t1, Time t2);
 
 Time DT_time_plus_precision(Time t, TimePrecision s);
 
-
-typedef struct _DT_datetime_t{
+typedef struct _DT_datetime_t {
     Date date;
     Time time;
 } DateTime;
@@ -137,4 +136,4 @@ Float DT_datetime2julian(DateTime dt);
 
 DateTime DT_julian2datetime(Float jn);
 
-#endif // _DATETIME_H_
+#endif // _CBL_DATETIME_H_

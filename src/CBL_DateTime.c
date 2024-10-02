@@ -1,4 +1,4 @@
-#include "DateTime.h"
+#include "CBL_DateTime.h"
 
 #if _TIME_PRECISION > 6
 const Float _DT_SECOND_PRECISION_RATIO = 1e9;
@@ -12,53 +12,50 @@ const Float _DT_SECOND_PRECISION_RATIO = 1.0;
 
 const Int _DT_DAYS_PER_MONTH[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-TimePrecision DT_second2precision(Float s){ return s*_DT_SECOND_PRECISION_RATIO; }
+TimePrecision DT_second2precision(Float s) { return s * _DT_SECOND_PRECISION_RATIO; }
 
-Float DT_precision2second(TimePrecision tp){ return ((Float)tp)/_DT_SECOND_PRECISION_RATIO; }
+Float DT_precision2second(TimePrecision tp) { return ((Float)tp) / _DT_SECOND_PRECISION_RATIO; }
 
-Date DT_today(Int tz){
+Date DT_today(Int tz) {
     DateTime buffer;
     buffer = DT_now(tz);
     return buffer.date;
 }
 
-bool DT_is_leap_year(Year year){
-    if(year % 100){
-        if(year % 4)
-            return false;
-        else
-            return true;
+bool DT_is_leap_year(Year year) {
+    if(year % 100) {
+        if(year % 4) return false;
+        else return true;
     }
-    else{
-        if(year % 400)
-            return false;
-        else
-            return true;
+    else {
+        if(year % 400) return false;
+        else return true;
     }
 }
 
-Day _DT_day_diff_year_to_year(Year y1, Year y2){
+Day _DT_day_diff_year_to_year(Year y1, Year y2) {
     Day dcount;
     Int nleap;
     Year y, ya, yb;
-    if(y1 == y2) return (Day) 0;
-    if(y1 < y2){
+    if(y1 == y2) return (Day)0;
+    if(y1 < y2) {
         ya = y1;
         yb = y2;
-    }else{
+    }
+    else {
         ya = y2;
         yb = y1;
     }
     nleap = 0;
-    for(y = ya; y < yb; y+=1) if(DT_is_leap_year(y)) nleap += 1;
-    y = 365*(yb - ya) + nleap;
+    for(y = ya; y < yb; y += 1) if(DT_is_leap_year(y)) nleap += 1;
+    y = 365 * (yb - ya) + nleap;
     if(y1 < y2) return (Day)(-y);
     else return (Day)y;
 }
 
-bool DT_date_isless(Date d1, Date d2){
+bool DT_date_isless(Date d1, Date d2) {
     if(d1.year < d2.year) return true;
-    else if (d1.year > d2.year) return false;
+    else if(d1.year > d2.year) return false;
 
     if(d1.month < d2.month) return true;
     else if(d1.month > d2.month) return false;
@@ -67,23 +64,21 @@ bool DT_date_isless(Date d1, Date d2){
     else return false;
 }
 
-bool DT_date_isequal(Date d1, Date d2){
-    if((d1.year == d2.year) && (d1.month == d2.month) && (d1.day == d2.day))
-        return true;
-    else
-        return false;
+bool DT_date_isequal(Date d1, Date d2) {
+    if((d1.year == d2.year) && (d1.month == d2.month) && (d1.day == d2.day)) return true;
+    else return false;
 }
 
-Day DT_dayofyear(Date date){
-    Day dcount=0;
+Day DT_day_of_year(Date date) {
+    Day dcount = 0;
     Int imon;
-    for(imon=1; imon<date.month; imon+=1) dcount += _DT_DAYS_PER_MONTH[imon-1];
+    for(imon = 1; imon < date.month; imon += 1) dcount += _DT_DAYS_PER_MONTH[imon - 1];
     dcount += date.day;
     if(DT_is_leap_year(date.year) && (date.month > 2)) dcount += 1;
     return dcount;
 }
 
-Day DT_modified_julian_date(Date date){
+Day DT_modified_julian_date(Date date) {
     Date td;
     td.year = 1858;
     td.month = 11;
@@ -91,9 +86,9 @@ Day DT_modified_julian_date(Date date){
     return DT_date_diff(date, td);
 }
 
-Date DT_date_from_mjd(Day daynum){
+Date DT_date_from_mjd(Day daynum) {
     Date tdate;
-    Day tdaynum, dayres,isleapyear;
+    Day tdaynum, dayres, isleapyear;
 #ifdef _DATETIME_DEBUG_
     printf("(DT_date_from_mjd) \n");
     printf("(DT_date_from_mjd) daynum: %d\n", daynum);
@@ -102,34 +97,29 @@ Date DT_date_from_mjd(Day daynum){
 #ifdef _DATETIME_DEBUG_
     printf("(DT_date_from_mjd) tdaynum: %d\n", tdaynum);
 #endif
-    tdate.year = tdaynum/366 + 1858;
+    tdate.year = tdaynum / 366 + 1858;
 
-    while(true){
+    while(true) {
         dayres = tdaynum - _DT_day_diff_year_to_year(tdate.year, 1858);
 #ifdef _DATETIME_DEBUG_
         printf("(DT_date_from_mjd) tdate.year: %d\n", tdate.year);
         printf("(DT_date_from_mjd) dayres: %d\n", dayres);
 #endif
-        if(dayres<0)
-            tdate.year -= 1;
-        else if(dayres>(364+DT_is_leap_year(tdate.year)))
-            tdate.year += 1;
-        else
-            break;
+        if(dayres < 0) tdate.year -= 1;
+        else if(dayres > (364 + DT_is_leap_year(tdate.year))) tdate.year += 1;
+        else break;
     } // while
     tdate.month = 0;
     isleapyear = DT_is_leap_year(tdate.year);
-    if(dayres < 31){
-        tdate.month = 0;
-    }
-    else if(dayres < (31+28+isleapyear)){
+    if(dayres < 31) { tdate.month = 0; }
+    else if(dayres < (31 + 28 + isleapyear)) {
         tdate.month = 1;
         dayres -= 31;
     }
-    else{
+    else {
         tdate.month = 2;
-        dayres -= (31+28+isleapyear);
-        while(dayres>=_DT_DAYS_PER_MONTH[tdate.month]){
+        dayres -= (31 + 28 + isleapyear);
+        while(dayres >= _DT_DAYS_PER_MONTH[tdate.month]) {
             dayres -= _DT_DAYS_PER_MONTH[tdate.month];
             tdate.month += 1;
         }
@@ -143,31 +133,30 @@ Date DT_date_from_mjd(Day daynum){
     return tdate;
 }
 
-Date DT_regularize_date(Date d){
+Date DT_regularize_date(Date d) {
     Date td;
     Day tmjd;
     td.year = d.year;
     td.month = d.month;
     td.day = 1;
     tmjd = DT_modified_julian_date(td);
-    tmjd += d.day-1;
+    tmjd += d.day - 1;
     return DT_date_from_mjd(tmjd);
 }
 
-Day DT_date_diff(Date d1, Date d2){
+Day DT_date_diff(Date d1, Date d2) {
 #ifdef _DATETIME_DEBUG_
     // printf("(DT_date_diff) d1: %d-%02d-%02d\n", d1.year, d1.month, d1.day);
-    // printf("(DT_date_diff) day of year 1: %d\n", DT_dayofyear(d1));
+    // printf("(DT_date_diff) day of year 1: %d\n", DT_day_of_year(d1));
     // printf("(DT_date_diff) d2: %d-%02d-%02d\n", d2.year, d2.month, d2.day);
-    // printf("(DT_date_diff) day of year 2: %d\n", DT_dayofyear(d2));
+    // printf("(DT_date_diff) day of year 2: %d\n", DT_day_of_year(d2));
     // printf("(DT_date_diff) _DT_day_diff_year_to_year: %d\n",
     //     _DT_day_diff_year_to_year(d1.year, d2.year));
 #endif
-    return (Day)(_DT_day_diff_year_to_year(d1.year, d2.year) +
-        DT_dayofyear(d1) - DT_dayofyear(d2));
+    return (Day)(_DT_day_diff_year_to_year(d1.year, d2.year) + DT_day_of_year(d1) - DT_day_of_year(d2));
 }
 
-Date DT_date_plus_day(Date d, Day day){
+Date DT_date_plus_day(Date d, Day day) {
 #ifdef _DATETIME_DEBUG_
     Day td;
     Date tdate;
@@ -185,11 +174,28 @@ Date DT_date_plus_day(Date d, Day day){
     return DT_date_from_mjd(DT_modified_julian_date(d) + day);
 }
 
-Time DT_regularize_time(Time t){
-    t.minute      += t.hour*60;
-    t.second      += t.minute*60;
+Time DT_zero_time() {
+    Time t;
+    t.hour = 0;
+    t.minute = 0;
+    t.second = 0;
 #if _TIME_PRECISION > 0
-    t.millisecond += t.second*1000;
+    t.millisecond = 0;
+#endif
+#if _TIME_PRECISION > 3
+    t.macrosecond =0;
+#endif
+#if _TIME_PRECISION > 6
+    t.nanosecond  =0;
+#endif
+    return t;
+}
+
+Time DT_regularize_time(Time t) {
+    t.minute += t.hour * 60;
+    t.second += t.minute * 60;
+#if _TIME_PRECISION > 0
+    t.millisecond += t.second * 1000;
 #endif
 #if _TIME_PRECISION > 3
     t.macrosecond += t.millisecond*1000;
@@ -202,14 +208,17 @@ Time DT_regularize_time(Time t){
     t.millisecond = t.macrosecond/1000; t.macrosecond %= 1000;
 #endif
 #if _TIME_PRECISION > 0
-    t.second      = t.millisecond/1000; t.millisecond %= 1000;
+    t.second = t.millisecond / 1000;
+    t.millisecond %= 1000;
 #endif
-    t.minute      = t.second/60;        t.second      %= 60;
-    t.hour        = t.minute/60;        t.minute      %= 60;
+    t.minute = t.second / 60;
+    t.second %= 60;
+    t.hour = t.minute / 60;
+    t.minute %= 60;
     return t;
 }
 
-TimePrecision DT_time_diff(Time t1, Time t2){
+TimePrecision DT_time_diff(Time t1, Time t2) {
     TimePrecision buf = 0;
     buf = t1.hour - t2.hour;
     buf = buf * 60 + t1.minute - t2.minute;
@@ -226,7 +235,7 @@ TimePrecision DT_time_diff(Time t1, Time t2){
     return buf;
 }
 
-Time DT_time_plus_precision(Time t, TimePrecision s){
+Time DT_time_plus_precision(Time t, TimePrecision s) {
 #if _TIME_PRECISION > 6
     t.nanosecond += s;
 #elif _TIME_PRECISION > 3
@@ -239,9 +248,9 @@ Time DT_time_plus_precision(Time t, TimePrecision s){
     return DT_regularize_time(t);
 }
 
-DateTime DT_now(Int tz){
+DateTime DT_now(Int tz) {
     DateTime buffer;
-    struct tm *ptr=NULL;
+    struct tm* ptr = NULL;
     time_t rawtime;
 
     time(&rawtime);
@@ -250,15 +259,13 @@ DateTime DT_now(Int tz){
     // printf("(DT_now) rawtime: %ld\n", rawtime);
     // printf("(DT_now) tz: %d\n", tz);
 #endif
-    if(tz==0)
-        ptr = gmtime(&rawtime);
-    else
-        ptr = localtime(&rawtime);
+    if(tz == 0) ptr = gmtime(&rawtime);
+    else ptr = localtime(&rawtime);
 #ifdef _DATETIME_DEBUG_
     // printf("(DT_now) ptr: %lX\n", ptr);
 #endif
-    buffer.date.year = ptr->tm_year+1900;
-    buffer.date.month = ptr->tm_mon+1;
+    buffer.date.year = ptr->tm_year + 1900;
+    buffer.date.month = ptr->tm_mon + 1;
     buffer.date.day = ptr->tm_mday;
     buffer.time.hour = ptr->tm_hour;
     buffer.time.minute = ptr->tm_min;
@@ -300,32 +307,35 @@ DateTime DT_now(Int tz){
     return buffer;
 }
 
-DateTime DT_regularize_datetime(DateTime datetime){
+DateTime DT_regularize_datetime(DateTime datetime) {
     DateTime buf;
     // memcpy(&buf, &datetime, sizeof(DateTime));
     buf = datetime;
 
     buf.time = DT_regularize_time(datetime.time);
-    buf.date.day += buf.time.hour/24; buf.time.hour %= 24;
+    buf.date.day += buf.time.hour / 24;
+    buf.time.hour %= 24;
 
-    buf.time.hour += 24; buf.date.day -= 1;
+    buf.time.hour += 24;
+    buf.date.day -= 1;
 
     buf.time = DT_regularize_time(buf.time);
-    buf.date.day += buf.time.hour/24; buf.time.hour %= 24;
+    buf.date.day += buf.time.hour / 24;
+    buf.time.hour %= 24;
 
     buf.date = DT_regularize_date(buf.date);
     return buf;
 }
 
-TimePrecision DT_datetime_diff(DateTime dt1, DateTime dt2){
+TimePrecision DT_datetime_diff(DateTime dt1, DateTime dt2) {
     Day daydiff;
     TimePrecision timediff;
     daydiff = DT_date_diff(dt1.date, dt2.date);
     timediff = DT_time_diff(dt1.time, dt2.time);
-    return ((TimePrecision)(86400*_DT_SECOND_PRECISION_RATIO))*daydiff+timediff;
+    return ((TimePrecision)(86400 * _DT_SECOND_PRECISION_RATIO)) * daydiff + timediff;
 }
 
-DateTime DT_datetime_plus_precision(DateTime dt, TimePrecision s){
+DateTime DT_datetime_plus_precision(DateTime dt, TimePrecision s) {
 #if _TIME_PRECISION > 6
     dt.time.nanosecond += s;
 #elif _TIME_PRECISION > 3
@@ -338,7 +348,7 @@ DateTime DT_datetime_plus_precision(DateTime dt, TimePrecision s){
     return DT_regularize_datetime(dt);
 }
 
-Float DT_datetime2julian(DateTime dt){
+Float DT_datetime2julian(DateTime dt) {
     Float prec;
     Time tt;
     tt.hour = 0;
@@ -353,18 +363,18 @@ Float DT_datetime2julian(DateTime dt){
 #if _TIME_PRECISION > 6
     tt.nanosecond = 0;
 #endif
-    prec = DT_precision2second(DT_time_diff(dt.time, tt))/(24.0*60.0*60.0);
-    return (Float)DT_modified_julian_date(dt.date)+2400000-0.5+prec;
+    prec = DT_precision2second(DT_time_diff(dt.time, tt)) / (24.0 * 60.0 * 60.0);
+    return (Float)DT_modified_julian_date(dt.date) + 2400000 - 0.5 + prec;
 }
 
-DateTime DT_julian2datetime(Float jn){
+DateTime DT_julian2datetime(Float jn) {
     Day rdays;
     TimePrecision dt;
     Float tj;
     DateTime buf;
-    tj = jn+0.5-2400000;
+    tj = jn + 0.5 - 2400000;
     rdays = (Day)tj;
-    dt = DT_second2precision((tj-(Float)rdays)*24*60*60);
+    dt = DT_second2precision((tj - (Float)rdays) * 24 * 60 * 60);
     buf.date = DT_date_from_mjd(rdays);
     buf.time.hour = 0;
     buf.time.minute = 0;

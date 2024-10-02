@@ -1,10 +1,13 @@
-# cpp-basic-library
-my CPP library for basic usage
+# c-basic-library
+
+my C library for basic usage
 
 ## plan
 
-- [ ] basic type
-- [ ] datetime
+- [x] basic type
+- [x] datetime
+- [x] log
+- [x] String
 - [ ] linear vector
-- [ ] cartsedian vector
+- [ ] cartsedian array
 - [ ] hash table

@@ -7,12 +7,12 @@
 // String.h
 #define STR_MAX_STRING_LENGTH 1024
 
-// Dict.h
-#define DICT_MAX_KEY_LENGTH 64
-#define DICT_DEFAULT_MAX_ELEMENTS 1024
-
 // DateTime.h
-#define _TIME_PRECISION 3 // 10^(-n) second n=0,3,6,9
+// 10^(-n) second
+// #define _TIME_PRECISION 0
+#define _TIME_PRECISION 3
+// #define _TIME_PRECISION 6
+// #define _TIME_PRECISION 9
 
 // Log.h
 #define LOG_MAX_FILE_NAME_LENGTH 2048

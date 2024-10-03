@@ -10,4 +10,5 @@ my C library for basic usage
 - [x] String
 - [ ] linear vector
 - [ ] cartsedian array
-- [ ] hash table
+- [x] dict
+- [x] sheet

@@ -1,59 +1,59 @@
+#include <stdlib.h>
+#include <string.h>
 #include "CBL_Vector.h"
 
-
-Vector VEC_new(size_t elsize, UInt8 typecode, Int len) {
+Vector VEC_allocate(UInt8 typecode, size_t element_size, Int len) {
     Vector v;
-    v.elsize = elsize;
-    v.typecode = typecode;
-    v.len = len;
-    v.value = calloc(len, elsize);
+    v.typecode       = typecode;
+    v.element_elsize = element_size;
+    v.len            = len;
+    v.data           = calloc(len, element_size);
     return v;
 }
 
 Vector VEC_empty_vector() {
     Vector v;
-    v.elsize = sizeof(Int);
-    v.len = 0;
-    v.typecode = TYPECODE_INT;
-    v.value = NULL;
+    v.typecode       = TYPECODE_UNKNOWN;
+    v.element_elsize = sizeof(Int);
+    v.len            = 0;
+    v.data           = NULL;
     return v;
 }
 
-Vector VEC_copy(Vector v) {
+Vector VEC_copy(const Vector v) {
     Vector w;
-    w.elsize = v.elsize;
-    w.typecode = v.typecode;
-    w.len = v.len;
-    w.value = calloc(v.len, w.elsize);
-    memcpy(w.value, v.value, v.len * v.elsize);
+    w.typecode       = v.typecode;
+    w.element_elsize = v.element_elsize;
+    w.len            = v.len;
+    w.data           = calloc(v.len, w.element_elsize);
+    memcpy(w.data, v.data, v.len * v.element_elsize);
     return w;
 }
 
 void VEC_free(Vector* v) {
-    if(v->value != NULL) {
-        free(v->value);
-        v->len = 0;
+    if(v->data != NULL) {
+        free(v->data);
+        v->data = NULL;
+        v->len  = 0;
     }
 }
 
-void* VEC_addr(Vector v, UInt i) { return (void*)((Int*)v.value + i * v.elsize); }
+void* VEC_address(const Vector v, Int i) { return v.data + i * v.element_elsize; }
 
-size_t VEC_write(Vector v, FILE* fp) {
+size_t VEC_write(const Vector v, FILE* fp) {
     size_t count = 0;
-    count += fwrite(&(v.elsize), sizeof(size_t), 1, fp);
-    count += fwrite(&(v.typecode), sizeof(UInt8), 1, fp);
+    count += fwrite(&(v.element_elsize), sizeof(size_t), 1, fp);
     count += fwrite(&(v.len), sizeof(Int), 1, fp);
-    count += fwrite(v.value, v.elsize, v.len, fp);
+    count += fwrite(v.data, v.element_elsize, v.len, fp);
     return count;
 }
 
 Vector VEC_read(FILE* fp) {
     Vector v;
     v = VEC_empty_vector();
-    fread(&(v.elsize), sizeof(size_t), 1, fp);
-    fread(&(v.typecode), sizeof(UInt8), 1, fp);
+    fread(&(v.element_elsize), sizeof(size_t), 1, fp);
     fread(&(v.len), sizeof(Int), 1, fp);
-    v.value = calloc(v.len, v.elsize);
-    fread(v.value, v.elsize, v.len, fp);
+    v.data = calloc(v.len, v.element_elsize);
+    fread(v.data, v.element_elsize, v.len, fp);
     return v;
 }

@@ -41,9 +41,9 @@ TimePrecision DT_second2precision(Float s);
 Float DT_precision2second(TimePrecision tp);
 
 typedef struct _DT_date_t {
-    Year year;
+    Year  year;
     Month month;
-    Day day;
+    Day   day;
 } Date;
 
 /// @brief get current date
@@ -52,20 +52,20 @@ typedef struct _DT_date_t {
 Date DT_today(Int tz);
 
 /// @brief test if is leap year
-/// @param y
-/// @return bool
-Bool DT_is_leap_year(Year y);
+/// @param year
+/// @return Bool
+Bool DT_is_leap_year(Year year);
 
 /// @brief test if date1 < date2
 /// @param d1 date1
 /// @param d2 date2
-/// @return bool: d1 < d2
+/// @return Bool: d1 < d2
 Bool DT_date_isless(Date d1, Date d2);
 
 /// @brief test if date1 == date2
 /// @param d1 date1
 /// @param d2 date2
-/// @return bool: d1 == d2
+/// @return Bool: d1 == d2
 Bool DT_date_isequal(Date d1, Date d2);
 
 /// @brief day of year. January 1st is 1
@@ -79,11 +79,13 @@ Day DT_day_of_year(Date date);
 Day DT_modified_julian_date(Date date);
 
 /// @brief date struct from modified julian date
-/// @param daynum
+/// @param julian_day_number
 /// @return Date
-Date DT_date_from_mjd(Day daynum);
+Date DT_date_from_mjd(Day julian_day_number);
 
-Date DT_regularize_date(Date d);
+Date DT_regularize_date(Date date);
+
+void DT_date_string(Date date, char* string);
 
 /// @brief date difference from d1 and d2. return d1-d2
 /// @param d1
@@ -94,7 +96,7 @@ Day DT_date_diff(Date d1, Date d2);
 Date DT_date_plus_day(Date d, Day day);
 
 typedef struct _DT_time_t {
-    Hour hour;
+    Hour   hour;
     Minute minute;
     Second second;
 #if _TIME_PRECISION > 0
@@ -111,6 +113,8 @@ typedef struct _DT_time_t {
 Time DT_zero_time();
 
 Time DT_regularize_time(Time t);
+
+void DT_time_string(Time t, char* string);
 
 TimePrecision DT_time_diff(Time t1, Time t2);
 
@@ -134,6 +138,8 @@ DateTime DT_datetime_plus_precision(DateTime dt, TimePrecision s);
 
 Float DT_datetime2julian(DateTime dt);
 
-DateTime DT_julian2datetime(Float jn);
+DateTime DT_julian2datetime(Float julian_date_time);
+
+void DT_datetime_string(DateTime dt, char* string);
 
 #endif // _CBL_DATETIME_H_

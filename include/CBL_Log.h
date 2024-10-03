@@ -1,25 +1,22 @@
 #ifndef _CBL_LOG_H_
 #define _CBL_LOG_H_
 
-#include <time.h>
-
+#include <stdlib.h>
 #include "CBL_Basic.h"
-#include "CBL_DateTime.h"
-#include "CBL_String.h"
 
-extern Int LOG_output_level;
-extern Bool LOG_terminal_output;
-extern Bool LOG_file_output;
-extern char LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
+extern Int   LOG_output_level;
+extern Bool  LOG_terminal_output;
+extern Bool  LOG_file_output;
+extern char  LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
 extern UInt8 LOG_prefix_format;
 
-#define LOG_LEVEL_NONE 0
-#define LOG_LEVEL_ERROR 100
+#define LOG_LEVEL_NONE    0
+#define LOG_LEVEL_ERROR   100
 #define LOG_LEVEL_WARNING 200
-#define LOG_LEVEL_INFO 300
-#define LOG_LEVEL_DEBUG 400
-#define LOG_LEVEL_TRACE 500
-#define LOG_LEVEL_ALL INT_MAX
+#define LOG_LEVEL_INFO    300
+#define LOG_LEVEL_DEBUG   400
+#define LOG_LEVEL_TRACE   500
+#define LOG_LEVEL_ALL     INT_MAX
 
 #define LOG_PREFIX_DATE      0b00000001
 #define LOG_PREFIX_TIME      0b00000010
@@ -31,6 +28,8 @@ extern UInt8 LOG_prefix_format;
 #define LOG_PREFIX_PART 6
 
 void LOG_init();
+
+void LOG_final();
 
 void LOG_open_log_file();
 

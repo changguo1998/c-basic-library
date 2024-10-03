@@ -3,21 +3,27 @@
 #include "CBL_String.h"
 
 int main() {
-    String r[5], s[3], t[3];
+    String  r[5], s[3], t[3];
     String* sp;
-    Int nslice;
-    char c, buffer[100];
+    Int     nslice;
+    char    c, buffer[100];
     for(c = 'a'; c <= 'e'; c++) {
         sprintf(buffer, "ab%c", c);
         printf("%s\n", buffer);
-        r[c - 'a'] = STR_String(buffer);
+        r[(Int)(c - 'a')] = STR_String(buffer);
     }
     s[0] = STR_join(r, 5, STR_empty_string());
     s[1] = s[0];
     printf("s0: %s\ns1: %s\n", s[0].str, s[1].str);
     printf("s0 == s1 : %d\n", STR_isequal(s[0], s[1]));
+    s[1] = STR_reverse(s[0]);
+    printf("s0: %s\ns1: %s\n", s[0].str, s[1].str);
+    printf("s0 == s1 : %d\n", STR_isequal(s[0], s[1]));
     s[2] = STR_slice(s[0], 0, 1);
     printf("s2: %s\n", s[2].str);
+    printf("s0 startswith s2: %d\n", STR_starts_with(s[0], s[2]));
+    printf("s0 endswith s2: %d\n", STR_ends_with(s[0], s[2]));
+    printf("s0 contains s2: %d\n", STR_contains(s[0], s[2]));
     printf("s0 == s2 : %d\n", STR_isequal(s[0], s[2]));
     t[0] = STR_join(r, 5, STR_String("_"));
     printf("join of r[0-4]: %s\n", t[0].str);

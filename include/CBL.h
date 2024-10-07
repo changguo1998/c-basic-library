@@ -10,6 +10,11 @@
 #include "CBL_Vector.h"
 #include "CBL_Array.h"
 
+/**
+ * @brief get sizeof(type) by typecode
+ * @param type typecode defined in `CBL_Basic.h` header file
+ * @return bytes of type
+ */
 size_t CBL_typecode2size(UInt8 type);
 
 #endif // _CBL_H_

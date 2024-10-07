@@ -5,8 +5,7 @@
 int main() {
     LOG_terminal_output = true;
     LOG_file_output     = true;
-    sprintf(LOG_file_name, "log.txt");
-    LOG_init();
+    LOG_init("log.txt");
     sleep(1);
     printf("===== Default state ======================\n");
     LOG_print_state();

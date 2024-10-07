@@ -7,28 +7,74 @@
 #include "config.h"
 
 // Bool
-
+/**
+ * @brief true/false
+ */
 typedef bool Bool;
 
 // Char
-
+/**
+ * @brief signed char
+ */
 typedef char Char;
 
 // Integer
 
+/**
+ * @brief unsigned 8-bit integer
+ */
 typedef unsigned char          UInt8;
+
+/**
+ * @brief signed 8-bit integer
+ */
 typedef signed char            Int8;
+
+/**
+ * @brief unsigned 32-bit integer
+ */
 typedef unsigned int           UInt32;
+
+/**
+ * @brief signed 32-bit integer
+ */
 typedef int                    Int32;
+
+/**
+ * @brief unsigned 64-bit integer
+ */
 typedef unsigned long int      UInt64;
+
+/**
+ * @brief signed 64-bit integer
+ */
 typedef signed long int        Int64;
+
+/**
+ * @brief unsigned 128-bit integer
+ */
 typedef unsigned long long int UInt128;
+
+/**
+ * @brief signed 128-bit integer
+ */
 typedef signed long long int   Int128;
 
 // Float
 
+/**
+ * @brief 32-bit float
+ */
 typedef float       Float32;
+
+/**
+ * @brief 64-bit float
+ */
 typedef double      Float64;
+
+/**
+ * @brief 128-bit float
+ */
 typedef long double Float128;
 
 // Complex
@@ -49,6 +95,7 @@ typedef void* Address;
 // 2   /
 // 1  /
 // 0 /
+
 
 #define TYPECODE_UNKNOWN    0b00000000
 #define TYPECODE_INT8       0b00000001
@@ -71,19 +118,50 @@ typedef void* Address;
 #define TYPECODE_DATETIME   0b00010010
 #define TYPECODE_SHEET      0b00010011
 
+
 #if USE_64_BIT == 1
+
+/**
+ * @brief 64-bit integer
+ */
 typedef Int64     Int;
+
+/**
+ * @brief 64-bit unsigned integer
+ */
 typedef UInt64    UInt;
+
+/**
+ * @brief 64-bit float
+ */
 typedef Float64   Float;
+
+/**
+ * @brief 64-bit complex
+ */
 typedef Complex64 Complex;
 #define TYPECODE_INT     TYPECODE_INT64
 #define TYPECODE_UINT    TYPECODE_UINT64
 #define TYPECODE_FLOAT   TYPECODE_FLOAT64
 #define TYPECODE_COMPLEX TYPECODE_COMPLEX64
 #else
+/**
+ * @brief 32-bit integer
+ */
 typedef Int32     Int;
+
+/**
+ * @brief 32-bit unsigned integer
+ */
 typedef UInt32    UInt;
+/**
+ * @brief 32-bit float
+ */
 typedef Float32   Float;
+
+/**
+ * @brief 32-bit complex
+ */
 typedef Complex32 Complex;
 #define TYPECODE_INT     TYPECODE_INT32
 #define TYPECODE_UINT    TYPECODE_UINT32

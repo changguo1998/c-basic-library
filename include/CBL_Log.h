@@ -4,10 +4,50 @@
 #include <stdlib.h>
 #include "CBL_Basic.h"
 
+/**
+ * @brief output level, choose from \n
+ * LOG_LEVEL_NONE \n
+ * LOG_LEVEL_ERROR \n
+ * LOG_LEVEL_WARNING \n
+ * LOG_LEVEL_INFO \n
+ * LOG_LEVEL_DEBUG \n
+ * LOG_LEVEL_TRACE \n
+ * LOG_LEVEL_ALL INT_MAX
+ */
 extern Int   LOG_output_level;
+
+/**
+ * @brief switch terminal output, default is true
+ */
 extern Bool  LOG_terminal_output;
+
+/**
+ * @brief switch log file output, default is false
+ */
 extern Bool  LOG_file_output;
-extern char  LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
+
+/**
+ * @brief LOG_file_name
+ */
+extern Char  LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
+
+/**
+ * @brief set prefix format for each line of log \n
+ * if turn on all prefix component, it looks like:\n
+ * \n
+ * [LEVEL_TAG DATE TIME CLOCK]\n
+ * \n
+ * []: turn on using LOG_PREFIX_BRACKET\n\n
+ * LEVEL_TAG: turn on using LOG_PREFIX_LEVEL_TAG\n\n
+ * DATE: local date, turn on using LOG_PREFIX_DATE\n\n
+ * TIME: local time, turn on using LOG_PREFIX_TIME\n\n
+ * CLOCK: time since the program begined, using LOG_PREFIX_SEC to print a float in seconds,
+ * using LOG_PREFIX_HMS to print as hh:mm:ss.SSS format. When both is turned on, the LOG_PREFIX_SEC
+ * will work\n
+ * \n
+ * The flags can be used jointly, for example:\n
+ * LOG_prefix_format = LOG_PREFIX_BRACKET | LOG_PREFIX_TIME | LOG_PREFIX_SEC;
+ */
 extern UInt8 LOG_prefix_format;
 
 #define LOG_LEVEL_NONE    0
@@ -23,20 +63,40 @@ extern UInt8 LOG_prefix_format;
 #define LOG_PREFIX_CLOCK_HMS 0b00000100
 #define LOG_PREFIX_CLOCK_SEC 0b00001000
 #define LOG_PREFIX_LEVEL_TAG 0b00010000
-#define LOG_PREFIX_BRACE     0b10000000
+#define LOG_PREFIX_BRACKET   0b10000000
 
 #define LOG_PREFIX_PART 6
 
-void LOG_init();
+/**
+ * @brief initialize global variables
+ */
+void LOG_init(const char* file_name);
 
+/**
+ * @brief flush file buffer of log file if opened
+ */
+void LOG_flush();
+
+/**
+ * @brief finalize process, including closing log file
+ */
 void LOG_final();
 
+/**
+ * @brief open log file if it is not opened, file name stored in global variable LOG_file_name
+ */
 void LOG_open_log_file();
 
+/**
+ * @brief close log file if it is opened
+ */
 void LOG_close_log_file();
 
 void LOG_print_message(const char* message, Int level);
 
+/**
+ * @brief print current log global variable
+ */
 void LOG_print_state();
 
 void LOG_print_error(const char* message);

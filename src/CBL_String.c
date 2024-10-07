@@ -35,7 +35,7 @@ Bool STR_isequal(const String str1, const String str2) {
     return true;
 }
 
-String STR_join(const String* string_list, Int n, String separator) {
+String STR_join(const String* string_list, Int n, const String separator) {
     String s;
     Int    total_len = 0, istr, i;
     for(istr = 0; istr < n; istr++) total_len += string_list[istr].len;
@@ -93,7 +93,7 @@ String STR_slice(const String str, Int idx1, Int idx2) {
     return s;
 }
 
-String STR_strip(String str) {
+String STR_strip(const String str) {
     String s;
     Int    i, start, stop;
     s = STR_empty_string();
@@ -122,7 +122,7 @@ Int STR_next_match(const String str, const String pattern, Int start) {
     return -1;
 }
 
-String STR_replace(String str, String pattern, String value) {
+String STR_replace(const String str, const String pattern, const String value) {
     String s;
     Int    i, j;
     s = STR_empty_string();
@@ -216,7 +216,7 @@ Int STR_split(String** out, const String str, const String delim) {
     return n_slice;
 }
 
-size_t STR_write(String str, FILE* fp) {
+size_t STR_write(const String str, FILE* fp) {
     size_t bytes_written = 0;
     bytes_written += fwrite(&str.len, sizeof(Int), 1, fp);
     bytes_written += fwrite(str.str, sizeof(Char), str.len, fp);
@@ -294,23 +294,23 @@ void STR_print_lines(const String* str, Int n, FILE* fp) {
     for(i = 0; i < n; i++) STR_print_line(str[i], fp);
 }
 
-Bool STR_starts_with(String str, String pattern) {
+Bool STR_starts_with(const String str, const String pattern) {
     Int i;
     if(str.len < pattern.len) return false;
     for(i = 0; i < pattern.len; i++) if(str.str[i] != pattern.str[i]) return false;
     return true;
 }
 
-Bool STR_ends_with(String str, String pattern) {
+Bool STR_ends_with(const String str, const String pattern) {
     Int i;
     if(str.len < pattern.len) return false;
     for(i = 0; i < pattern.len; i++) if(str.str[str.len - 1 - i] != pattern.str[pattern.len - 1 - i]) return false;
     return true;
 }
 
-Bool STR_contains(String str, String pattern) { return STR_next_match(str, pattern, 0) >= 0; }
+Bool STR_contains(const String str, const String pattern) { return STR_next_match(str, pattern, 0) >= 0; }
 
-String STR_reverse(String str) {
+String STR_reverse(const String str) {
     String s;
     Int    i;
     s     = STR_empty_string();

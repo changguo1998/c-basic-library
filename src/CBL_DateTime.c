@@ -131,7 +131,7 @@ Date DT_regularize_date(Date date) {
     return DT_date_from_mjd(modified_julian_day);
 }
 
-void DT_date_string(Date date, char* string) { sprintf(string, "%04d-%02d-%02d", date.year, date.month, date.day); }
+void DT_date_string(Date date, Char* string) { sprintf(string, "%04d-%02d-%02d", date.year, date.month, date.day); }
 
 Day DT_date_diff(Date d1, Date d2) {
     return _DT_day_diff_year_to_year(d1.year, d2.year) + DT_day_of_year(d1) - DT_day_of_year(d2);
@@ -201,7 +201,7 @@ Time DT_regularize_time(Time t) {
     return t;
 }
 
-void DT_time_string(Time t, char* string) {
+void DT_time_string(Time t, Char* string) {
 #if _TIME_PRECISION == 0
     sprintf(string, "%02d:%02d:%02d", t.hour, t.minute, t.second);
 #elif _TIME_PRECISION == 3
@@ -347,7 +347,7 @@ DateTime DT_julian2datetime(Float julian_date_time) {
     return DT_datetime_plus_precision(datetime, time_residual);
 }
 
-void DT_datetime_string(DateTime dt, char* string) {
+void DT_datetime_string(DateTime dt, Char* string) {
     Char date_str[32] = "", time_str[32] = "";
     DT_date_string(dt.date, date_str);
     DT_time_string(dt.time, time_str);

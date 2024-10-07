@@ -8,14 +8,19 @@
 Int     LOG_output_level    = LOG_LEVEL_INFO;
 Bool    LOG_terminal_output = true;
 Bool    LOG_file_output     = false;
-char    LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
-UInt8   LOG_prefix_format = LOG_PREFIX_BRACE | LOG_PREFIX_TIME | LOG_PREFIX_CLOCK_SEC;
+Char    LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
+UInt8   LOG_prefix_format = LOG_PREFIX_BRACKET | LOG_PREFIX_TIME | LOG_PREFIX_CLOCK_SEC;
 FILE*   LOG_fp            = NULL;
 clock_t LOG_start_clock;
 
-void LOG_init() {
+void LOG_init(const char* file_name) {
+    strcpy(LOG_file_name, file_name);
     LOG_start_clock = clock();
     if(LOG_file_output) LOG_open_log_file();
+}
+
+void LOG_flush() {
+    if(LOG_file_output) fflush(LOG_fp);
 }
 
 void LOG_final() { if(LOG_file_output) LOG_close_log_file(); }
@@ -46,7 +51,7 @@ String LOG_prefix(Int level) {
     Float    rc;
     for(i = 0; i < LOG_PREFIX_PART; i++) info_vector[i] = STR_empty_string();
 
-    if((LOG_prefix_format & LOG_PREFIX_BRACE) > 0) {
+    if((LOG_prefix_format & LOG_PREFIX_BRACKET) > 0) {
         info_vector[0] = STR_String("[");
         info_vector[5] = STR_String("]");
     }
@@ -116,7 +121,7 @@ void LOG_print_state() {
     printf("Write to log file: %s\n", LOG_file_output ? "on" : "off");
     if(LOG_file_output) {
         printf("Log file name: %s\n", LOG_file_name);
-        printf("Log file is %s\n", (LOG_fp != NULL) ? "open" : "closed");
+        printf("Log file is %s\n", LOG_fp ? "open" : "closed");
     }
     prefix = LOG_prefix(LOG_LEVEL_DEBUG);
     printf("prefix format: %s\n", prefix.str);

@@ -182,10 +182,10 @@
     void (*randn)(struct FloatMatrix_##m##_##n *this, Float mean, Float std);\
 };
 
-INT_VECTOR_LEN(3)
+// INT_VECTOR_LEN(3)
 
-FLOAT_VECTOR_LEN(3)
+// FLOAT_VECTOR_LEN(3)
 
-_DEFINE_FLOAT_MATRIX_SIZE_STRUCT(3, 3)
+// _DEFINE_FLOAT_MATRIX_SIZE_STRUCT(3, 3)
 
 #endif // _CBL_TYPE_ARRAY_H_

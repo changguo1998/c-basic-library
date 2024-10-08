@@ -12,7 +12,7 @@
 #include "CBL_IntVector.h"
 #include "CBL_FloatVector.h"
 #include "CBL_FloatMatrix.h"
-#include "CBL_TypeArray.h"
+// #include "CBL_TypeArray.h"
 
 /**
  * @brief get sizeof(type) by typecode

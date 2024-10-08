@@ -7,7 +7,7 @@ int main() {
     Vector   vec_Int, vec_size;
     Int      shift;
 
-    LOG_init();
+    LOG_init("log_test_CBL.txt");
     vec_size                 = VEC_allocate(TYPECODE_INT, sizeof(Int), 3);
     ((Int*)vec_size.data)[0] = 4;
     ((Int*)vec_size.data)[1] = 3;

@@ -1,6 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include "CBL_Basic.h"
-#include "CBL_Log.h"
 #include "CBL_Dict.h"
 
 int main() {
@@ -12,10 +13,9 @@ int main() {
     String k0, k1, bs[2], *kl = NULL;
     Dict   dict               = NULL;
 
-    LOG_init();
     srand(time(NULL));
 
-    LOG_print_info("\n=== Initializing ===\n");
+    printf("\n=== Initializing ===\n");
     sheet  = SHEET_allocate(TYPECODE_FLOAT, sizeof(Float), 4, 5);
     sheet2 = SHEET_allocate(TYPECODE_INT, sizeof(Int), 4, 5);
     fv     = (Float*)sheet.addr;
@@ -35,28 +35,17 @@ int main() {
     for(i = 0; i < sheet.n0 * sheet.n1; i++) {
         fv[i] = (Float)rand() / (Float)RAND_MAX;
         iv[i] = (Int)((Float)rand() * 9 / (Float)RAND_MAX);
-        sprintf(buf, "%d %.3f", i, fv[i]);
-        // LOG_print_info(buf);
+        printf("%d %.3f\n", i, fv[i]);
     }
 
-    LOG_print_info("\n=== Sheet content ===\n");
-    sprintf(buf, "typecode: 0x%02X", sheet.typecode);
-    LOG_print_info(buf);
-    sprintf(buf, "element size: %lld", sheet.element_size);
-    LOG_print_info(buf);
-    sprintf(buf, "size: %d x %d", sheet.n0, sheet.n1);
-    LOG_print_info(buf);
-    LOG_print_info("dim 0 keys:");
-    for(i = 0; i < sheet.n0; i++) {
-        sprintf(buf, "dim 0 key %d: %s", i, sheet.key0[i].str);
-        LOG_print_info(buf);
-    }
-    LOG_print_info("\ndim 1 keys:");
-    for(i = 0; i < sheet.n1; i++) {
-        sprintf(buf, "dim 1 key %d: %s", i, sheet.key1[i].str);
-        LOG_print_info(buf);
-    }
-    LOG_print_info("\nvalues");
+    printf("\n=== Sheet content ===\n");
+    printf("typecode: 0x%02X\n", sheet.typecode);
+    printf("element size: %lld\n", sheet.element_size);
+    printf("size: %d x %d\n", sheet.n0, sheet.n1);
+    printf("dim 0 keys:\n");
+    for(i = 0; i < sheet.n0; i++)  printf("dim 0 key %d: %s\n", i, sheet.key0[i].str);
+    printf("\ndim 1 keys:\n");
+    for(i = 0; i < sheet.n1; i++) printf("dim 1 key %d: %s\n", i, sheet.key1[i].str);
     for(i = 0; i < sheet.n0; i++) {
         bs[0] = STR_empty_string();
         for(j = 0; j < sheet.n1; j++) {
@@ -64,51 +53,44 @@ int main() {
             bs[1] = STR_String(buf);
             bs[0] = STR_join(bs, 2, STR_String(""));
         }
-        LOG_print_info(bs[0].str);
+        printf("%s\n", bs[0].str);
     }
 
-    LOG_print_info("\n=== Sheet key index test ===\n");
+    printf("\n=== Sheet key index test ===\n");
     k0 = STR_String("dim0_c");
     k1 = STR_String("dim1_l");
     i  = SHEET_key_key2shift(sheet, k0, k1);
-    if(i > 0) {
-        sprintf(buf, "%s %s shift: %d, value: %.3f", k0.str, k1.str, i, fv[i]);
-        LOG_print_info(buf);
-    }
+    if(i > 0) printf("%s %s shift: %d, value: %.3f\n", k0.str, k1.str, i, fv[i]);
 
-    LOG_print_info("\n=== Dict test ===\n");
-    sprintf(buf, "Dict: %p", dict);
-    LOG_print_info(buf);
-    LOG_print_info("add sheet 0");
+    printf("\n=== Dict test ===\n");
+    printf("Dict: %p\n", dict);
+    printf("add sheet 0\n");
     DICT_add_element(&dict, STR_String("Sheet 0"), &sheet, TYPECODE_SHEET);
-    sprintf(buf, "Dict: %p", dict);
-    LOG_print_info(buf);
-    LOG_print_info("add sheet 1");
+    printf("Dict: %p\n", dict);
+
+    printf("add sheet 1\n");
     DICT_add_element(&dict, STR_String("Sheet 1"), &sheet2, TYPECODE_SHEET);
-    sprintf(buf, "Dict: %p", dict);
-    LOG_print_info(buf);
-    LOG_print_info("add float");
+    printf("Dict: %p\n", dict);
+
+    printf("add float\n");
     DICT_add_element(&dict, STR_String("Float 0"), &fv, TYPECODE_FLOAT);
-    sprintf(buf, "Dict: %p", dict);
-    LOG_print_info(buf);
+    printf("Dict: %p\n", dict);
 
     i = DICT_keys(dict, &kl);
-    LOG_print_info("dict keys:");
-    for(j = 0; j < i; j++) LOG_print_info(kl[j].str);
+    printf("dict keys:\n");
+    for(j = 0; j < i; j++) printf("%s\n", kl[j].str);
 
     ps1 = (Sheet*)DICT_get_element(dict, STR_String("Sheet 0"), &tc);
-    sprintf(buf, "sheet address: %p, ps1 value: %p, typecode: 0x%02X", &sheet, ps1, tc);
-    LOG_print_info(buf);
+    printf("sheet address: %p, ps1 value: %p, typecode: 0x%02X\n", &sheet, ps1, tc);
 
     ps2 = (Sheet*)DICT_pop_element(&dict, STR_String("Sheet 1"), &tc);
-    sprintf(buf, "sheet address: %p, ps2 value: %p, typecode 0x%02X", &sheet2, ps2, tc);
-    LOG_print_info(buf);
-    LOG_print_info("ps2 content");
-    LOG_print_info("key0:");
-    for(i = 0; i < ps2->n0; i++) LOG_print_info(ps2->key0[i].str);
-    LOG_print_info("key1:");
-    for(i = 0; i < ps2->n1; i++) LOG_print_info(ps2->key1[i].str);
-    LOG_print_info("data:");
+    printf("sheet address: %p, ps2 value: %p, typecode 0x%02X\n", &sheet2, ps2, tc);
+    printf("ps2 content\n");
+    printf("key0:\n");
+    for(i = 0; i < ps2->n0; i++) printf("%s\n", ps2->key0[i].str);
+    printf("key1:\n");
+    for(i = 0; i < ps2->n1; i++) printf("%s\n", ps2->key1[i].str);
+    printf("data:\n");
     iv = (Int*)ps2->addr;
     for(i = 0; i < ps2->n0; i++) {
         bs[0] = STR_empty_string();
@@ -117,13 +99,12 @@ int main() {
             bs[1] = STR_String(buf);
             bs[0] = STR_join(bs, 2, STR_String(""));
         }
-        LOG_print_info(bs[0].str);
+        printf("%s\n", bs[0].str);
     }
 
     while(dict) DICT_pop_element(&dict, dict->key, &tc);
 
     SHEET_free(&sheet);
     SHEET_free(&sheet2);
-    LOG_final();
     return 0;
 }

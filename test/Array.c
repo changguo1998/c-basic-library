@@ -1,4 +1,6 @@
-#include "CBL_Log.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "CBL_Array.h"
 
 int main() {
@@ -6,10 +8,6 @@ int main() {
     Array  array;
     Int *  ivec, n,      i,      ivar1, ivar2, ivar3;
     Float *fv, * fvar1, *fvar2, *fvar3;
-    Char   msg[STR_MAX_STRING_LENGTH] = "";
-
-    LOG_file_output = false;
-    LOG_init();
 
     index   = VEC_allocate(TYPECODE_INT, sizeof(Int), 2);
     ivec    = (Int*)index.data;
@@ -20,9 +18,9 @@ int main() {
     fv      = (Float*)array.data;
     for(i = 0; i < n; i++) fv[i] = (Float)rand() / (Float)RAND_MAX;
 
-    LOG_print_info("float matrix in linear range:");
+    printf("float matrix in linear range:\n");
     for(i = 0; i < n; i++) printf("  %.3f", fv[i]);
-    printf("\n");
+    printf("\n\n");
 
     for(i = 0; i < 4; i++) {
         ivec[0] = i;
@@ -35,9 +33,7 @@ int main() {
         ivec[1] = 2;
         ivar3   = ARR_linear_index(index, array.size);
         fvar3   = (Float*)ARR_address(array, index);
-        sprintf(msg, "  %02d %02d %02d %.3f %.3f %.3f", ivar1, ivar2, ivar3, *fvar1, *fvar2, *fvar3);
-        LOG_print_info(msg);
+        printf("  %02d %02d %02d %.3f %.3f %.3f\n", ivar1, ivar2, ivar3, *fvar1, *fvar2, *fvar3);
     }
-    LOG_final();
     return 0;
 }

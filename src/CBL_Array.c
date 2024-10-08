@@ -40,7 +40,7 @@ void ARR_free(Array* arr) {
 Int ARR_linear_index(const Vector index, const Vector size) {
     Int *s, *c, i, shift;
     if(index.len != size.len) {
-        LOG_print_error("(ARR_linear_index) index length mismatch");
+        printf("(ARR_linear_index) index length mismatch\n");
         return -1;
     }
     c     = (Int*)index.data;

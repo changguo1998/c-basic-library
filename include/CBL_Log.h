@@ -26,6 +26,7 @@
 #ifndef _CBL_LOG_H_
 #define _CBL_LOG_H_
 
+#include <limits.h>
 #include "CBL_Basic.h"
 
 /**
@@ -38,22 +39,22 @@
  * LOG_LEVEL_TRACE \n
  * LOG_LEVEL_ALL INT_MAX
  */
-extern Int   LOG_output_level;
+extern Int LOG_output_level;
 
 /**
  * @brief switch terminal output, default is true
  */
-extern Bool  LOG_terminal_output;
+extern Bool LOG_terminal_output;
 
 /**
  * @brief switch log file output, default is false
  */
-extern Bool  LOG_file_output;
+extern Bool LOG_file_output;
 
 /**
  * @brief LOG_file_name
  */
-extern Char  LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
+extern Char LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
 
 /**
  * @brief set prefix format for each line of log \n
@@ -88,6 +89,8 @@ extern UInt8 LOG_prefix_format;
 #define LOG_PREFIX_CLOCK_SEC 0b00001000
 #define LOG_PREFIX_LEVEL_TAG 0b00010000
 #define LOG_PREFIX_BRACKET   0b10000000
+#define LOG_PREFIX_ALL (LOG_PREFIX_BRACKET | LOG_PREFIX_LEVEL_TAG | \
+LOG_PREFIX_DATE | LOG_PREFIX_TIME | LOG_PREFIX_CLOCK_SEC)
 
 #define LOG_PREFIX_PART 6
 

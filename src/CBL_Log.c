@@ -25,6 +25,7 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "CBL_Log.h"
 #include "CBL_DateTime.h"
@@ -67,13 +68,19 @@ void LOG_close_log_file() {
 }
 
 struct String LOG_prefix(Int level) {
-    struct String info_vector[LOG_PREFIX_PART];
-    clock_t       current_clock;
-    DateTime      dt;
+    struct String   info_vector[LOG_PREFIX_PART], prefix, delimiter;
+    struct DateTime dt;
 
-    Time  t;
-    Int   i;
-    Float rc;
+    clock_t     current_clock;
+    struct Time t;
+    Int         i;
+    Float       rc;
+
+    for(i = 0; i < LOG_PREFIX_PART; i++) String_new_(&info_vector[i]);
+    String_new_(&prefix);
+    String_new_(&delimiter);
+    DateTime_new_(&dt);
+    Time_new_(&t);
 
     for(i = 0; i < LOG_PREFIX_PART; i++) String_new_(&info_vector[i]);
 
@@ -93,49 +100,52 @@ struct String LOG_prefix(Int level) {
         else if(level >= LOG_LEVEL_ERROR)
             info_vector[1].methods->set_(&info_vector[1], "  ERROR");
     }
-    dt = DT_now(1);
-    if((LOG_prefix_format & LOG_PREFIX_DATE) > 0) {
-        DT_date_string(dt.date, info_vector[2].str);
-        info_vector[2].len = (Int)strlen(info_vector[2].str);
-    }
-    if((LOG_prefix_format & LOG_PREFIX_TIME) > 0) {
-        DT_time_string(dt.time, info_vector[3].str);
-        info_vector[3].len = (Int)strlen(info_vector[3].str);
-    }
-    if((LOG_prefix_format & (LOG_PREFIX_CLOCK_HMS | LOG_PREFIX_CLOCK_SEC)) >
-        0) {
+    dt.methods->now_(&dt, 1);
+    if(LOG_prefix_format & LOG_PREFIX_DATE)
+        info_vector[2] = dt.date.methods->string(&(dt.date));
+
+    if(LOG_prefix_format & LOG_PREFIX_TIME)
+        info_vector[3] = dt.time.methods->string(&(dt.time));
+
+    if(LOG_prefix_format & (LOG_PREFIX_CLOCK_HMS | LOG_PREFIX_CLOCK_SEC)) {
         current_clock = clock();
-        t = DT_zero_time();
+        t.methods->zero_(&t);
         rc = (current_clock - LOG_start_clock) / ((Float)CLOCKS_PER_SEC);
-        if((LOG_prefix_format & LOG_PREFIX_CLOCK_SEC) > 0)
-            sprintf(
-                info_vector[4].str, "%.3fs", rc);
-        else if((LOG_prefix_format & LOG_PREFIX_CLOCK_HMS) > 0) {
-            t = DT_time_plus_precision(t, DT_second2precision(rc));
-            DT_time_string(t, info_vector[4].str);
+        if(LOG_prefix_format & LOG_PREFIX_CLOCK_SEC) {
+            sprintf(info_vector[4].str, "%.3fs", rc);
+            info_vector[4].len = (Int)strlen(info_vector[4].str);
         }
-        info_vector[4].len = (Int)strlen(info_vector[4].str);
+        else if(LOG_prefix_format & LOG_PREFIX_CLOCK_HMS) {
+            t.methods->add_second_(&t, rc);
+            info_vector[4] = t.methods->string(&t);
+        }
     }
-    return STR_join(info_vector, 6, STR_String(" "));
+    prefix.methods->set_(&prefix, "");
+    delimiter.methods->set_(&delimiter, " ");
+    prefix.methods->join_(&prefix, info_vector, 6, delimiter);
+    return prefix;
 }
 
 void LOG_print_message(const char* message, Int level) {
-    String s_message, *lines = NULL, prefix;
-    Int    n_lines,    i;
+    struct String s_message, *lines = NULL, prefix;
+    Int           n_lines,    i;
     if(level > LOG_output_level) return;
-    s_message = STR_String(message);
+    String_new_(&s_message);
+    String_new_(&prefix);
+
+    s_message.methods->set_(&s_message, message);
     prefix = LOG_prefix(level);
-    i = STR_next_match(s_message, STR_String("\n"), 0);
+    i = s_message.methods->next_match(&s_message, String_set("\n"), 0);
     if(i < 0) {
         if(LOG_terminal_output) printf("%s %s\n", prefix.str, message);
 
         if(LOG_file_output) {
             if(LOG_fp == NULL) LOG_open_log_file();
-            fprintf(LOG_fp, "%s %s", prefix.str, message);
+            fprintf(LOG_fp, "%s %s\n", prefix.str, message);
         }
         return;
     }
-    n_lines = STR_split(&lines, s_message, STR_String("\n"));
+    s_message.methods->split(&s_message, String_set("\n"), &lines, &n_lines);
     for(i = 0; i < n_lines; i++) {
         if(LOG_terminal_output) printf("%s %s\n", prefix.str, lines[i].str);
 
@@ -148,7 +158,7 @@ void LOG_print_message(const char* message, Int level) {
 }
 
 void LOG_print_state() {
-    String prefix;
+    struct String prefix;
     printf("Logging state:\n");
     printf("Logging level: %d\n", LOG_output_level);
     printf("Terminal output: %s\n", LOG_terminal_output ? "on" : "off");
@@ -161,22 +171,12 @@ void LOG_print_state() {
     printf("prefix format: %s\n", prefix.str);
 }
 
-void LOG_print_error(const char* message) {
-    LOG_print_message(message, LOG_LEVEL_ERROR);
-}
+void LOG_print_error(const char* message) { LOG_print_message(message, LOG_LEVEL_ERROR); }
 
-void LOG_print_warning(const char* message) {
-    LOG_print_message(message, LOG_LEVEL_WARNING);
-}
+void LOG_print_warning(const char* message) { LOG_print_message(message, LOG_LEVEL_WARNING); }
 
-void LOG_print_info(const char* message) {
-    LOG_print_message(message, LOG_LEVEL_INFO);
-}
+void LOG_print_info(const char* message) { LOG_print_message(message, LOG_LEVEL_INFO); }
 
-void LOG_print_debug(const char* message) {
-    LOG_print_message(message, LOG_LEVEL_DEBUG);
-}
+void LOG_print_debug(const char* message) { LOG_print_message(message, LOG_LEVEL_DEBUG); }
 
-void LOG_print_trace(const char* message) {
-    LOG_print_message(message, LOG_LEVEL_TRACE);
-}
+void LOG_print_trace(const char* message) { LOG_print_message(message, LOG_LEVEL_TRACE); }

@@ -3,12 +3,15 @@
 ## CBL c-basic-library
 
 - [ ] CBL.h
-- [x] Array
+- [ ] Array
 - [x] DateTime
-- [x] Dict
-- [x] Log
+- [ ] Dict
+- [ ] FloatMatrix
+- [ ] FloatVector
+- [ ] IntVector
+- [ ] Log
 - [x] String
-- [x] Vector
+- [ ] Vector
 
 ## CML - c-math-library
 

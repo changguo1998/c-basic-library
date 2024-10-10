@@ -1,118 +1,124 @@
+/******************************************************************************
+ * MIT License                                                                *
+ *                                                                            *
+ * Copyright (c) 2024 Chang Guo                                               *
+ *                                                                            *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  *
+ * copies of the Software, and to permit persons to whom the Software is      *
+ * furnished to do so, subject to the following conditions:                   *
+ *                                                                            *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.                            *
+ *                                                                            *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,   *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE*
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER     *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
 #include <stdlib.h>
 #include <string.h>
 #include "CBL_String.h"
 
-String STR_empty_string() {
-    String s;
-    s.len = 0;
-    memset(s.str, '\0', sizeof(Char) * STR_MAX_STRING_LENGTH);
-    return s;
+const struct StringMethods _CBL_STRING_METHODS = {
+    &String_clean_,
+    &String_set_,
+    &String_isequal,
+    &String_append_,
+    &String_join_,
+    &String_next_match,
+    &String_starts_with,
+    &String_ends_with,
+    &String_contains,
+    &String_substring_,
+    &String_split,
+    &String_strip_,
+    &String_replace_,
+    &String_replace_all_,
+    &String_reverse_
+};
+
+struct String String_empty() {
+    struct String str;
+    String_new_(&str);
+    return str;
 }
 
-String STR_String(const char* str) {
-    String s;
-    Int    i;
-    s = STR_empty_string();
-    if(strlen(str) > STR_MAX_STRING_LENGTH) {
-        printf("(STR_String) Warning: string is too long\n");
-        s.len = STR_MAX_STRING_LENGTH;
-        for(i = 0; i < s.len; i++) {
-            if(str[i] == '\0') break;
-            s.str[i] = str[i];
-        }
-    }
+struct String String_clean_(struct String* this) {
+    this->len = 0;
+    memset(this->str, '\0', sizeof(Char) * STR_MAX_STRING_LENGTH);
+    return *this;
+}
+
+struct String String_set_(struct String* this, const char* str) {
+    String_clean_(this);
+    if(strlen(str) > STR_MAX_STRING_LENGTH)
+        error_out_of_memory("(STR_String) Warning: string is too long\n");
     else {
-        s.len = (Int)strlen(str);
-        strcpy(s.str, str);
+        this->len = (Int)strlen(str);
+        strcpy(this->str, str);
     }
-    return s;
+    return *this;
 }
 
-Bool STR_isequal(const String str1, const String str2) {
+Bool String_isequal(const struct String* this, struct String another) {
     Int i;
-    if(str1.len != str2.len) return false;
-    for(i = 0; i < str1.len; i += 1) if(str1.str[i] != str2.str[i]) return false;
+    if(this->len != another.len) return false;
+    for(i = 0; i < this->len; i++)
+        if(this->str[i] != another.str[i])
+            return false;
     return true;
 }
 
-String STR_join(const String* string_list, Int n, const String separator) {
-    String s;
-    Int    total_len = 0, istr, i;
-    for(istr = 0; istr < n; istr++) total_len += string_list[istr].len;
-    total_len += separator.len * (n - 1);
-    if(total_len > STR_MAX_STRING_LENGTH) printf("(STR_join) joined String length exceeded MAX_STRING_LENGTH\n");
-    s = STR_empty_string();
-    if(total_len == 0) return s;
-    for(istr = 0; istr < n; istr++) {
-        if(istr > 0) {
-            for(i = 0; i < separator.len; i++) {
-                if(s.len == STR_MAX_STRING_LENGTH) {
-                    printf("(STR_join) Warning: string is too long after replace\n");
-                    return s;
-                }
-                s.str[s.len] = separator.str[i];
-                s.len++;
-            }
+void _append_string(Char* str1, Int* n1, const Char* str2, Int n2) {
+    Int i;
+    for(i = 0; i < n2; i++)
+        if(*n1 >= STR_MAX_STRING_LENGTH)
+            error_out_of_memory("(_append_string) string is too long\n");
+        else {
+            str1[*n1] = str2[i];
+            *n1 += 1;
         }
-        for(i = 0; i < string_list[istr].len; i++) {
-            if(s.len == STR_MAX_STRING_LENGTH) {
-                printf("(STR_join) Warning: string is too long after replace\n");
-                return s;
-            }
-            s.str[s.len] = string_list[istr].str[i];
-            s.len++;
-        }
-    }
-    return s;
 }
 
-String STR_slice(const String str, Int idx1, Int idx2) {
-    String s;
-    Int    i, from, to, step;
-    s = STR_empty_string();
-    if(str.len == 0) return s;
-    if(idx1 >= str.len) {
-        printf("(STR_slice) index1 exceeded String length\n");
-        from = str.len - 1;
-    }
-    else from = idx1;
-    if(idx2 >= str.len) {
-        printf("(STR_slice) index2 exceeded String length\n");
-        to = str.len - 1;
-    }
-    else to = idx2;
-    if(from > to) {
-        step  = -1;
-        s.len = from - to + 1;
-    }
-    else {
-        step  = 1;
-        s.len = to - from + 1;
-    }
-    for(i = 0; i < s.len; i++) s.str[i] = str.str[from + step * i];
-    return s;
+struct String String_append_(struct String* this, struct String another) {
+    _append_string(this->str, &(this->len), another.str, another.len);
+    return *this;
 }
 
-String STR_strip(const String str) {
-    String s;
-    Int    i, start, stop;
-    s = STR_empty_string();
-    if(str.len == 0) return s;
-    for(start = 0; start < str.len; start++) if(str.str[start] != ' ') break;
-    for(stop = str.len - 1; stop > start; stop--) if(str.str[stop] != ' ') break;
-    s.len = stop - start + 1;
-    if(s.len <= 0) return s;
-    for(i = 0; i < s.len; i++) s.str[i] = str.str[start + i];
-    return s;
+struct String String_join_(struct String*       this,
+                           const struct String* list,
+                           Int                  n,
+                           struct String        delimiter) {
+    Int i_list;
+    String_clean_(this);
+    if(n <= 0) return *this;
+    _append_string(this->str, &(this->len), list[0].str, list[0].len);
+    for(i_list = 1; i_list < n; i_list++) {
+        _append_string(this->str, &(this->len),
+            delimiter.str, delimiter.len);
+        _append_string(this->str, &(this->len),
+            list[i_list].str, list[i_list].len);
+    }
+    return *this;
 }
 
-Int STR_next_match(const String str, const String pattern, Int start) {
+Int String_next_match(const struct String* this,
+                      struct String        pattern,
+                      Int                  start) {
     Int i, j;
-    if(str.len == 0) return -1;
+    if(this->len == 0) return -1;
     if(pattern.len == 0) return -1;
     j = 0;
-    for(i = start; i < str.len; i++) {
-        if(str.str[i] == pattern.str[j]) j++;
+    for(i = start; i < this->len; i++) {
+        if(this->str[i] == pattern.str[j]) j += 1;
         else {
             i -= j;
             j = 0;
@@ -122,100 +128,142 @@ Int STR_next_match(const String str, const String pattern, Int start) {
     return -1;
 }
 
-String STR_replace(const String str, const String pattern, const String value) {
-    String s;
-    Int    i, j;
-    s = STR_empty_string();
-    if(str.len == 0) return s;
-    if(pattern.len == 0) return str;
-    i = STR_next_match(str, pattern, 0);
-    if(i < 0) return str;
-    for(j = 0; j < i; j++) {
-        if(s.len == STR_MAX_STRING_LENGTH) {
-            printf("(STR_replace) Warning: string is too long after replace\n");
-            return s;
-        }
-        s.str[s.len] = str.str[j];
-        s.len++;
-    }
-    for(j = 0; j < value.len; j++) {
-        if(s.len == STR_MAX_STRING_LENGTH) {
-            printf("(STR_replace) Warning: string is too long after replace\n");
-            return s;
-        }
-        s.str[s.len] = value.str[j];
-        s.len++;
-    }
-    for(j = i + pattern.len; j < str.len; j++) {
-        if(s.len == STR_MAX_STRING_LENGTH) {
-            printf("(STR_replace) Warning: string is too long after replace\n");
-            return s;
-        }
-        s.str[s.len] = str.str[j];
-        s.len++;
-    }
-    return s;
+Bool String_starts_with(const struct String* this, struct String pattern) {
+    Int i;
+    if(this->len < pattern.len) return false;
+    for(i = 0; i < pattern.len; i++)
+        if(this->str[i] != pattern.str[i])
+            return false;
+    return true;
 }
 
-String STR_replace_all(const String str, const String pattern, const String value) {
-    String s;
-    Bool   exit_after_copy;
-    Int    i, next_start, search_start;
-    s = STR_empty_string();
-    if(str.len == 0) return s;
-    if(pattern.len == 0) return str;
-    search_start = 0;
-    while(true) {
-        next_start = STR_next_match(str, pattern, search_start);
-        if(next_start < 0) {
-            exit_after_copy = true;
-            next_start      = str.len;
-        }
-        else exit_after_copy = false;
-        for(i = search_start; i < next_start; i++) {
-            if(s.len == STR_MAX_STRING_LENGTH) {
-                printf("(STR_replace) Warning: string is too long after replace\n");
-                return s;
-            }
-            s.str[s.len] = str.str[i];
-            s.len++;
-        }
-        if(exit_after_copy) break;
-        for(i = 0; i < value.len; i++) {
-            if(s.len == STR_MAX_STRING_LENGTH) {
-                printf("(STR_replace) Warning: string is too long after replace\n");
-                return s;
-            }
-            s.str[s.len] = value.str[i];
-            s.len++;
-        }
-        search_start = next_start + pattern.len;
-    }
-    return s;
+Bool String_ends_with(const struct String* this, struct String pattern) {
+    Int i;
+    if(this->len < pattern.len) return false;
+    for(i = 0; i < pattern.len; i++)
+        if(this->str[this->len - 1 - i] != pattern.str[pattern.len - 1 - i])
+            return false;
+    return true;
 }
 
-Int STR_split(String** out, const String str, const String delim) {
-    Int n_slice          = 0, *slice_index = NULL, next_slice, i_slice, i;
-    slice_index          = (Int*)malloc(sizeof(Int) * str.len);
-    slice_index[n_slice] = 0;
-    n_slice++;
-    while(true) {
-        next_slice = STR_next_match(str, delim, slice_index[n_slice - 1]);
+Bool String_contains(const struct String* this, struct String pattern) {
+    return String_next_match(this, pattern, 0) >= 0;
+}
+
+struct String String_substring_(struct String* this, Int start, Int stop) {
+    Int i, n_sub, start0, stop0;
+    if((start < 0 && stop < 0) || (start >= this->len && stop >= this->len))
+        error_index_out_of_bounds(
+            "(String_substring_) index out of bounds\n");
+    if(start > stop) {
+        String_clean_(this);
+        return *this;
+    }
+    start0 = start < 0 ? 0 : start;
+    start0 = start0 < this->len ? start0 : this->len - 1;
+    stop0 = stop < 0 ? 0 : stop;
+    stop0 = stop0 < this->len ? stop0 : this->len - 1;
+    n_sub = stop0 - start0 + 1;
+    for(i = 0; i < n_sub; i++) this->str[i] = this->str[i + start];
+    for(i = n_sub; i < this->len; i++) this->str[i] = '\0';
+    this->len = n_sub;
+    return *this;
+}
+
+void String_split(const struct String* this,
+                  struct String        delimiter,
+                  struct String**      list,
+                  Int*                 n) {
+    Int *slice_index = NULL, next_slice, i_slice, i;
+
+    if(*list != NULL)
+        error_unexpected_allocated_memory(
+            "(String_split) buffer already allocated");
+    *n = 1;
+    i = 0;
+    while(i < this->len) {
+        next_slice = String_next_match(this, delimiter, i);
         if(next_slice < 0) break;
-        slice_index[n_slice] = next_slice + delim.len;
-        n_slice++;
+        *n += 1;
+        i = next_slice + delimiter.len;
     }
-    *out = (String*)malloc(sizeof(String) * n_slice);
-    for(i_slice = 0; i_slice < n_slice; i_slice++) {
-        (*out)[i_slice] = STR_empty_string();
-        if(i_slice < n_slice - 1) (*out)[i_slice].len = slice_index[i_slice + 1] - slice_index[i_slice] - delim.len;
-        else (*out)[i_slice].len                      = str.len - slice_index[i_slice];
-        for(i = 0; i < (*out)[i_slice].len; i++) (*out)[i_slice].str[i] = str.str[slice_index[i_slice] + i];
+    slice_index = (Int*)malloc(sizeof(Int) * (*n));
+    slice_index[0] = 0;
+    next_slice = 0;
+    for(i = 1; i < *n; i++) {
+        slice_index[i] = String_next_match(this, delimiter, next_slice);
+        next_slice = slice_index[i] + delimiter.len;
+    }
+
+    *list = (struct String*)malloc(sizeof(struct String) * (*n));
+
+    for(i_slice = 0; i_slice < *n; i_slice++) {
+        memcpy(&((*list)[i_slice]), this, sizeof(struct String));
+        if(i_slice < *n - 1)
+            String_substring_(&((*list)[i_slice]),
+                slice_index[i_slice] + delimiter.len,
+                slice_index[i_slice + 1] - 1);
+        else
+            String_substring_(&((*list)[i_slice]),
+                slice_index[i_slice] + delimiter.len,
+                this->len - 1);
     }
     free(slice_index);
-    return n_slice;
 }
 
+struct String String_strip_(struct String* this) {
+    Int i, j;
+    for(i = 0; i < this->len; i++) if(this->str[i] != ' ') break;
+    for(j = this->len - 1; j >= 0; j--) if(this->str[j] != ' ') break;
+    if(j > i) return *this;
+    return String_substring_(this, i, j);
+}
+
+struct String String_replace_(struct String* this,
+                              struct String  pattern,
+                              struct String  replacement) {
+    Int           p;
+    struct String buffer[3];
+    p = String_next_match(this, pattern, 0);
+    if(p < 0) return *this;
+    buffer[0] = *this;
+    // printf("(String_replace) this: %s\n", this->str);
+    // printf("(String_replace) pattern: %s\n", pattern.str);
+    // printf("(String_replace) replacement: %s\n", replacement.str);
+    // printf("(String_replace) p: %d\n", p);
+    String_substring_(&(buffer[0]), 0, p - 1);
+    buffer[1] = replacement;
+    buffer[2] = *this;
+    String_substring_(&(buffer[2]), p + pattern.len, this->len - 1);
+    String_join_(this, buffer, 3, String_empty());
+    return *this;
+}
+
+struct String String_replace_all_(struct String* this,
+                                  struct String  pattern,
+                                  struct String  replacement) {
+    struct String* buffer = NULL;
+    Int            n_slice;
+    String_split(this, pattern, &buffer, &n_slice);
+    String_join_(this, buffer, n_slice, replacement);
+    free(buffer);
+    return *this;
+}
+
+struct String String_reverse_(struct String* this) {
+    Int  i, h;
+    Char c;
+    h = this->len / 2;
+    for(i = 0; i < h; i++) {
+        c = this->str[i];
+        this->str[i] = this->str[this->len - 1 - i];
+        this->str[this->len - 1 - i] = c;
+    }
+    return *this;
+}
+
+// ! ==========================================================================
+/*
 size_t STR_write(const String str, FILE* fp) {
     size_t bytes_written = 0;
     bytes_written += fwrite(&str.len, sizeof(Int), 1, fp);
@@ -263,17 +311,18 @@ void STR_read_lines(String** string_list, FILE* fp) {
     if(fp == NULL) return;
     head_addr = &buffer_head;
     while(!feof(fp)) {
-        s                 = STR_read_line(fp);
-        *head_addr        = (struct _simple_link_list*)malloc(sizeof(struct _simple_link_list));
+        s = STR_read_line(fp);
+        *head_addr = (struct _simple_link_list*)malloc(
+            sizeof(struct _simple_link_list));
         (*head_addr)->str = s;
-        head_addr         = &((*head_addr)->next);
+        head_addr = &((*head_addr)->next);
         n_lines++;
     }
     *string_list = (String*)malloc(sizeof(String) * n_lines);
     for(i = 0; i < n_lines; i++) {
         (*string_list)[i] = buffer_head->str;
-        node              = buffer_head;
-        buffer_head       = buffer_head->next;
+        node = buffer_head;
+        buffer_head = buffer_head->next;
         free(node);
     }
 }
@@ -294,27 +343,4 @@ void STR_print_lines(const String* str, Int n, FILE* fp) {
     for(i = 0; i < n; i++) STR_print_line(str[i], fp);
 }
 
-Bool STR_starts_with(const String str, const String pattern) {
-    Int i;
-    if(str.len < pattern.len) return false;
-    for(i = 0; i < pattern.len; i++) if(str.str[i] != pattern.str[i]) return false;
-    return true;
-}
-
-Bool STR_ends_with(const String str, const String pattern) {
-    Int i;
-    if(str.len < pattern.len) return false;
-    for(i = 0; i < pattern.len; i++) if(str.str[str.len - 1 - i] != pattern.str[pattern.len - 1 - i]) return false;
-    return true;
-}
-
-Bool STR_contains(const String str, const String pattern) { return STR_next_match(str, pattern, 0) >= 0; }
-
-String STR_reverse(const String str) {
-    String s;
-    Int    i;
-    s     = STR_empty_string();
-    s.len = str.len;
-    for(i = 0; i < s.len; i++) s.str[i] = str.str[str.len - i - 1];
-    return s;
-}
+*/

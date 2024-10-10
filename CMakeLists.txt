@@ -7,7 +7,7 @@ set(CMAKE_C_STANDARD 99)
 #set(CMAKE_INSTALL_PREFIX ./)
 
 # tests
-set(BASIC_LIB include/config.h include/CBL_Basic.h)
+set(BASIC_LIB include/CBL_Basic.h src/CBL_Basic.c)
 
 function(add_test_target modulename)
 #    message("===========================")
@@ -20,8 +20,8 @@ function(add_test_target modulename)
     install(TARGETS test_${modulename} DESTINATION bin)
 endfunction()
 
-add_test_target(DateTime)
 add_test_target(String)
+add_test_target(DateTime ${String_C})
 add_test_target(Log ${DateTime_C} ${String_C})
 list(APPEND Log_C ${DateTime_C} ${String_C})
 add_test_target(Vector)
@@ -36,16 +36,16 @@ add_test_target(FloatMatrix)
 file(GLOB CBL_H "include/CBL*.h")
 file(GLOB CBL_C "src/CBL*.c")
 
-add_executable(test_CBL ${CBL_C} ${CBL_H} include/config.h test/CBL.c)
+add_executable(test_CBL ${CBL_C} ${CBL_H} test/CBL.c)
 target_include_directories(test_CBL PRIVATE include)
 
-add_library(CBL STATIC ${CBL_C} ${CBL_H} include/config.h)
+add_library(CBL STATIC ${CBL_C} ${CBL_H})
 target_include_directories(CBL PUBLIC include)
 target_sources(CBL PUBLIC
         FILE_SET headerCBL
         TYPE HEADERS
         BASE_DIRS include
-        FILES ${CBL_H} include/config.h)
+        FILES ${CBL_H})
 install(TARGETS CBL
         LIBRARY DESTINATION lib
         FILE_SET headerCBL)

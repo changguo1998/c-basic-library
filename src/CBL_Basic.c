@@ -25,47 +25,35 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "CBL_IntVector.h"
+#include <string.h>
+#include <errno.h>
+#include <time.h>
 
-void print_ivec(const struct IntVector* v) {
-    printf("[");
-    for(Int i = 0; i < v->len; i++) printf("%d,", v->get(v, i));
-    printf("]\n");
+#include "CBL_Basic.h"
+
+static void print_err_msg(const char* usrmsg, int en) {
+    struct tm* ptime;
+    time_t     ftime;
+    char       timestr[64];
+    time(&ftime);
+    ptime = localtime(&ftime);
+    strftime(timestr, 64, "%Y-%m-%d %H:%M:%S", ptime);
+    printf("[ERROR %s] %s\n", timestr, usrmsg);
+    fprintf(stderr, "[ERROR %s] %s\n", timestr, usrmsg);
+    errno = en;
+    exit(en);
 }
 
-int main() {
-    struct IntVector iv, iw;
-    Int i, j;
-    IntVector_init(&iv);
-    IntVector_init(&iw);
+void error_exit() { print_err_msg("", 255); }
 
-    printf("alloc: ");
-    iv.alloc_(&iv, 5);
-    print_ivec(&iv);
+void error_invalid_argument(const char* msg) { print_err_msg(msg, EINVAL); }
 
-    iv.rand_(&iv, 20);
-    printf("rand: ");
-    print_ivec(&iv);
-    i = iv.min(&iv, &j);
-    printf("min: %d at %d\n", i, j);
-    i = iv.max(&iv, &j);
-    printf("max: %d at %d\n", i, j);
+void error_index_out_of_bounds(const char* msg) { print_err_msg(msg, EINVAL); }
 
-    iv.range_(&iv, 3, 1, iv.len+2);
-    printf("range: ");
-    print_ivec(&iv);
+void error_not_initialized(const char* msg) { print_err_msg(msg, EINVAL); }
 
-    printf("sum: %d\n", iv.sum(&iv));
-    printf("prod: %d\n", iv.prod(&iv));
+void error_out_of_memory(const char* msg) { print_err_msg(msg, ENOMEM); }
 
-    iv.rand_(&iv, 20);
-    print_ivec(&iv);
-    iv.sort(&iv, &iw);
-    printf("sort: ");
-    print_ivec(&iv);
-    printf("perm:");
-    print_ivec(&iw);
-
-    iv.free_(&iv);
-    return 0;
+void error_unexpected_allocated_memory(const char* msg) {
+    print_err_msg(msg, EINVAL);
 }

@@ -1,3 +1,28 @@
+/******************************************************************************
+ * MIT License                                                                *
+ *                                                                            *
+ * Copyright (c) 2024 Chang Guo                                               *
+ *                                                                            *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  *
+ * copies of the Software, and to permit persons to whom the Software is      *
+ * furnished to do so, subject to the following conditions:                   *
+ *                                                                            *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.                            *
+ *                                                                            *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,   *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE*
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER     *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
@@ -5,12 +30,13 @@
 #include "CBL_DateTime.h"
 #include "CBL_String.h"
 
-Int     LOG_output_level    = LOG_LEVEL_INFO;
-Bool    LOG_terminal_output = true;
-Bool    LOG_file_output     = false;
-Char    LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
-UInt8   LOG_prefix_format = LOG_PREFIX_BRACKET | LOG_PREFIX_TIME | LOG_PREFIX_CLOCK_SEC;
-FILE*   LOG_fp            = NULL;
+Int   LOG_output_level = LOG_LEVEL_INFO;
+Bool  LOG_terminal_output = true;
+Bool  LOG_file_output = false;
+Char  LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
+UInt8 LOG_prefix_format = LOG_PREFIX_BRACKET | LOG_PREFIX_TIME |
+    LOG_PREFIX_CLOCK_SEC;
+FILE*   LOG_fp = NULL;
 clock_t LOG_start_clock;
 
 void LOG_init(const char* file_name) {
@@ -19,9 +45,7 @@ void LOG_init(const char* file_name) {
     if(LOG_file_output) LOG_open_log_file();
 }
 
-void LOG_flush() {
-    if(LOG_file_output) fflush(LOG_fp);
-}
+void LOG_flush() { if(LOG_file_output) fflush(LOG_fp); }
 
 void LOG_final() { if(LOG_file_output) LOG_close_log_file(); }
 
@@ -42,25 +66,32 @@ void LOG_close_log_file() {
     printf("\n\nLog file '%s' closed\n\n", LOG_file_name);
 }
 
-String LOG_prefix(Int level) {
-    String   info_vector[LOG_PREFIX_PART];
-    DateTime dt;
-    Time     t;
-    clock_t  current_clock;
-    Int      i;
-    Float    rc;
-    for(i = 0; i < LOG_PREFIX_PART; i++) info_vector[i] = STR_empty_string();
+struct String LOG_prefix(Int level) {
+    struct String info_vector[LOG_PREFIX_PART];
+    clock_t       current_clock;
+    DateTime      dt;
+
+    Time  t;
+    Int   i;
+    Float rc;
+
+    for(i = 0; i < LOG_PREFIX_PART; i++) String_new_(&info_vector[i]);
 
     if((LOG_prefix_format & LOG_PREFIX_BRACKET) > 0) {
-        info_vector[0] = STR_String("[");
-        info_vector[5] = STR_String("]");
+        info_vector[0].methods->set_(&info_vector[0], "[");
+        info_vector[0].methods->set_(&info_vector[5], "]");
     }
     if((LOG_prefix_format & LOG_PREFIX_LEVEL_TAG) > 0) {
-        if(level >= LOG_LEVEL_TRACE)        info_vector[1] = STR_String("  TRACE");
-        else if(level >= LOG_LEVEL_DEBUG)   info_vector[1] = STR_String("  DEBUG");
-        else if(level >= LOG_LEVEL_INFO)    info_vector[1] = STR_String("   INFO");
-        else if(level >= LOG_LEVEL_WARNING) info_vector[1] = STR_String("WARNING");
-        else if(level >= LOG_LEVEL_ERROR)   info_vector[1] = STR_String("  ERROR");
+        if(level >= LOG_LEVEL_TRACE)
+            info_vector[1].methods->set_(&info_vector[1], "  TRACE");
+        else if(level >= LOG_LEVEL_DEBUG)
+            info_vector[1].methods->set_(&info_vector[1], "  DEBUG");
+        else if(level >= LOG_LEVEL_INFO)
+            info_vector[1].methods->set_(&info_vector[1], "   INFO");
+        else if(level >= LOG_LEVEL_WARNING)
+            info_vector[1].methods->set_(&info_vector[1], "WARNING");
+        else if(level >= LOG_LEVEL_ERROR)
+            info_vector[1].methods->set_(&info_vector[1], "  ERROR");
     }
     dt = DT_now(1);
     if((LOG_prefix_format & LOG_PREFIX_DATE) > 0) {
@@ -71,11 +102,14 @@ String LOG_prefix(Int level) {
         DT_time_string(dt.time, info_vector[3].str);
         info_vector[3].len = (Int)strlen(info_vector[3].str);
     }
-    if((LOG_prefix_format & (LOG_PREFIX_CLOCK_HMS | LOG_PREFIX_CLOCK_SEC)) > 0) {
+    if((LOG_prefix_format & (LOG_PREFIX_CLOCK_HMS | LOG_PREFIX_CLOCK_SEC)) >
+        0) {
         current_clock = clock();
-        t             = DT_zero_time();
-        rc            = (current_clock - LOG_start_clock) / ((Float)CLOCKS_PER_SEC);
-        if((LOG_prefix_format & LOG_PREFIX_CLOCK_SEC) > 0) sprintf(info_vector[4].str, "%.3fs", rc);
+        t = DT_zero_time();
+        rc = (current_clock - LOG_start_clock) / ((Float)CLOCKS_PER_SEC);
+        if((LOG_prefix_format & LOG_PREFIX_CLOCK_SEC) > 0)
+            sprintf(
+                info_vector[4].str, "%.3fs", rc);
         else if((LOG_prefix_format & LOG_PREFIX_CLOCK_HMS) > 0) {
             t = DT_time_plus_precision(t, DT_second2precision(rc));
             DT_time_string(t, info_vector[4].str);
@@ -90,8 +124,8 @@ void LOG_print_message(const char* message, Int level) {
     Int    n_lines,    i;
     if(level > LOG_output_level) return;
     s_message = STR_String(message);
-    prefix    = LOG_prefix(level);
-    i         = STR_next_match(s_message, STR_String("\n"), 0);
+    prefix = LOG_prefix(level);
+    i = STR_next_match(s_message, STR_String("\n"), 0);
     if(i < 0) {
         if(LOG_terminal_output) printf("%s %s\n", prefix.str, message);
 
@@ -127,12 +161,22 @@ void LOG_print_state() {
     printf("prefix format: %s\n", prefix.str);
 }
 
-void LOG_print_error(const char* message) { LOG_print_message(message, LOG_LEVEL_ERROR); }
+void LOG_print_error(const char* message) {
+    LOG_print_message(message, LOG_LEVEL_ERROR);
+}
 
-void LOG_print_warning(const char* message) { LOG_print_message(message, LOG_LEVEL_WARNING); }
+void LOG_print_warning(const char* message) {
+    LOG_print_message(message, LOG_LEVEL_WARNING);
+}
 
-void LOG_print_info(const char* message) { LOG_print_message(message, LOG_LEVEL_INFO); }
+void LOG_print_info(const char* message) {
+    LOG_print_message(message, LOG_LEVEL_INFO);
+}
 
-void LOG_print_debug(const char* message) { LOG_print_message(message, LOG_LEVEL_DEBUG); }
+void LOG_print_debug(const char* message) {
+    LOG_print_message(message, LOG_LEVEL_DEBUG);
+}
 
-void LOG_print_trace(const char* message) { LOG_print_message(message, LOG_LEVEL_TRACE); }
+void LOG_print_trace(const char* message) {
+    LOG_print_message(message, LOG_LEVEL_TRACE);
+}

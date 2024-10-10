@@ -180,7 +180,7 @@ struct StringMethods {
 extern const struct StringMethods _CBL_STRING_METHODS;
 
 
-struct String String_empty();
+struct String String_set(const char* str);
 struct String String_clean_(struct String* this);
 struct String String_set_(struct String* this, const char* str);
 Bool          String_isequal(const struct String* this, struct String another);

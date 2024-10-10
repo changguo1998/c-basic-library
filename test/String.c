@@ -47,7 +47,7 @@ int main() {
         String_set_(&(r[(Int)(c - 'a')]), buffer);
     }
 
-    s[0].methods->join_(&s[0], r, 5, String_empty());
+    s[0].methods->join_(&s[0], r, 5, String_set(""));
     s[1] = s[0];
     printf("s0: %s\ns1: %s\n", s[0].str, s[1].str);
     printf("s0 == s1 : %d\n", s[0].methods->isequal(&s[0], s[1]));

@@ -45,10 +45,20 @@ const struct StringMethods _CBL_STRING_METHODS = {
     &String_reverse_
 };
 
-struct String String_empty() {
-    struct String str;
-    String_new_(&str);
-    return str;
+struct String String_set(const char* str) {
+    struct String string;
+    String_new_(&string);
+    if(strlen(str)) {
+        if(strlen(str) > STR_MAX_STRING_LENGTH) {
+            strncpy(string.str, str, STR_MAX_STRING_LENGTH * sizeof(Char));
+            string.len = STR_MAX_STRING_LENGTH;
+        }
+        else {
+            strcpy(string.str, str);
+            string.len = (Int)strlen(str);
+        }
+    }
+    return string;
 }
 
 struct String String_clean_(struct String* this) {
@@ -227,15 +237,11 @@ struct String String_replace_(struct String* this,
     p = String_next_match(this, pattern, 0);
     if(p < 0) return *this;
     buffer[0] = *this;
-    // printf("(String_replace) this: %s\n", this->str);
-    // printf("(String_replace) pattern: %s\n", pattern.str);
-    // printf("(String_replace) replacement: %s\n", replacement.str);
-    // printf("(String_replace) p: %d\n", p);
     String_substring_(&(buffer[0]), 0, p - 1);
     buffer[1] = replacement;
     buffer[2] = *this;
     String_substring_(&(buffer[2]), p + pattern.len, this->len - 1);
-    String_join_(this, buffer, 3, String_empty());
+    String_join_(this, buffer, 3, String_set(""));
     return *this;
 }
 

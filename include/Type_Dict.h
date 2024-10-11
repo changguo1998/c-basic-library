@@ -27,7 +27,7 @@
 #define _CBL_DICT_H_
 
 #include "CBL_Basic.h"
-#include "CBL_String.h"
+#include "Type_String.h"
 
 
 // # StaticDict

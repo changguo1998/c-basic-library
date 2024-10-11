@@ -27,7 +27,7 @@
 #define _CBL_DATETIME_H_
 
 #include "CBL_Basic.h"
-#include "CBL_String.h"
+#include "Type_String.h"
 
 
 extern struct DateMethods     _CBL_DATE_METHODS;

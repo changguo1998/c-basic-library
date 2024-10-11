@@ -25,8 +25,8 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "CBL_String.h"
-#include "CBL_DateTime.h"
+#include "Type_String.h"
+#include "Type_DateTime.h"
 
 
 struct DateMethods _CBL_DATE_METHODS = {

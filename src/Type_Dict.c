@@ -25,8 +25,8 @@
 
 #include <stdlib.h>
 #include "CBL_Basic.h"
-#include "CBL_String.h"
-#include "CBL_Dict.h"
+#include "Type_String.h"
+#include "Type_Dict.h"
 
 struct StaticDictMethods _CBL_STATIC_DICT_METHODS = {
     &StaticDict_get,

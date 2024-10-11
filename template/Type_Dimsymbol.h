@@ -23,40 +23,32 @@
  *                                                                                *
  **********************************************************************************/
 
-#ifndef _CBL_FLOAT_MATRIX_H_
-#define _CBL_FLOAT_MATRIX_H_
+#ifndef {{INCLUDE_GUARD}}
+#define {{INCLUDE_GUARD}}
 
 #include "CBL_Basic.h"
 
-void _FLOAT_MATRIX_level0_get_row(Float* v, Float* X, Int m, Int n);
-
-void _FLOAT_MATRIX_level0_get_column(Float* v, Float* X, Int m, Int n);
-
-void _FLOAT_MATRIX_level0_transpose(Float* X, Int m, Int n);
-
-void _FLOAT_MATRIX_level0_diag(Float* v, Float* X, Int m, Int n);
-
-void _FLOAT_MATRIX_level0_diagm(Float* X, Float* v, Int m, Int n);
-
-void _FLOAT_MATRIX_level0_product(Float  Z,
-                                  Float* X,
-                                  Float* Y,
-                                  Int    p,
-                                  Int    q,
-                                  Int    r);
-
-void _FLOAT_MATRIX_level0_inverse(Float* Y, Float* X, Int m, Int n);
-
-/**
- * @brief FloatMatrix
- * @param nrow Int
- * @param ncol Int
- * @param data Float*
- */
-struct FloatMatrix {
-    Int    nrow; /**< number of row */
-    Int    ncol;
-    Float* data;
+struct {{array_type}}{
+    Int {{dimension_variables_list}};
+    {{dimension_weight}}
+    {{element_type}}* data;
+    struct {{array_type}}Methods *methods;
 };
 
-#endif // _CBL_FLOAT_MATRIX_H_
+struct {{array_type}}Methods {
+
+{{methods_function_pointer_list}}
+
+};
+
+{{methods_function_declaration_list}}
+
+extern struct {{array_type}}Methods {{global_method_struct}};
+
+static inline void {{array_type}}_new_(struct {{array_type}} *this){
+    {{dimension_variables_initialization}}
+    this->data = NULL;
+    this->methods = &{{global_method_struct}};
+}
+
+#endif // {{INCLUDE_GUARD}}

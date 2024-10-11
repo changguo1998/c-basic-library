@@ -11,9 +11,9 @@
 | Time                  | DateTime    | &#x2714; | &#x2714; | &#x2714; |
 | DateTime              | DateTime    | &#x2714; | &#x2714; | &#x2714; |
 | Log                   | Log         | &#x2714; | &#x2714; | &#x2714; |
-| StaticDict            | Dict        |          |          |          |
-| DynamicDict           | Dict        |          |          |          |
-| Sheet                 | Dict        |          |          |          |
+| StaticDict            | Dict        | &#x2714; | &#x2714; | &#x2714; |
+| DynamicDict           | Dict        | &#x2714; | &#x2714; | &#x2714; |
+| Sheet                 | Dict        | &#x2714; | &#x2714; | &#x2714; |
 |                       |             |          |          |          |
 | *General Array Type*  |             |          |          |          |
 | Vector                | Vector      |          |          |          |

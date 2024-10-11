@@ -29,107 +29,145 @@
 #include "CBL_Basic.h"
 #include "CBL_Dict.h"
 
+#define NROW 4
+#define NCOL 5
+#define STRSET(str, val) (str).methods->set_(&(str), (val))
+#define FREE(v) (v).methods->free_(&(v))
+
 int main() {
-    Sheet  sheet, sheet2, *ps1, *ps2;
-    Int    i,     j, *     iv;
-    UInt8  tc;
-    Char   buf[STR_MAX_STRING_LENGTH];
-    Float* fv;
-    String k0, k1, bs[2], *kl = NULL;
-    Dict   dict               = NULL;
+    Int    i, j, *pi, esize[NCOL], n_key1, n_key2, tc;
+    Float  float_var;
+    Char   buf[STRING_MAX_LENGTH];
+    Float* pf;
+
+    struct Table       sheet, sheet2, *ptable1, *ptable2;
+    struct String      k0,    k1, bs[2], *key_list1, *key_list2;
+    struct StaticDict  fdict;
+    struct DynamicDict ddict;
+
+    Table_new_(&sheet);
+    Table_new_(&sheet2);
+    String_new_(&k0);
+    String_new_(&k1);
+    String_new_(&bs[0]);
+    String_new_(&bs[1]);
+    StaticDict_new_(&fdict);
+    DynamicDict_new_(&ddict);
 
     srand(time(NULL));
 
     printf("\n=== Initializing ===\n");
-    sheet  = SHEET_allocate(TYPECODE_FLOAT, sizeof(Float), 4, 5);
-    sheet2 = SHEET_allocate(TYPECODE_INT, sizeof(Int), 4, 5);
-    fv     = (Float*)sheet.addr;
-    iv     = (Int*)sheet2.addr;
-    for(i = 0; i < sheet.n0; i++) {
-        sprintf(buf, "dim0_%c", (Char)i + 'a');
-        sheet.key0[i] = STR_String(buf);
-        sprintf(buf, "row%d", i);
-        sheet2.key0[i] = STR_String(buf);
-    }
-    for(i = 0; i < sheet.n1; i++) {
-        sprintf(buf, "dim1_%c", (Char)i + 'i');
-        sheet.key1[i] = STR_String(buf);
-        sprintf(buf, "col%d", i);
-        sheet2.key1[i] = STR_String(buf);
-    }
-    for(i = 0; i < sheet.n0 * sheet.n1; i++) {
-        fv[i] = (Float)rand() / (Float)RAND_MAX;
-        iv[i] = (Int)((Float)rand() * 9 / (Float)RAND_MAX);
-        printf("%d %.3f\n", i, fv[i]);
-    }
+    for(i = 0; i < NCOL; i++) esize[i] = sizeof(Float);
+    sheet.methods->alloc_(&sheet, esize, NROW, NCOL);
+    for(i = 0; i < NCOL; i++) esize[i] = sizeof(Int);
+    sheet.methods->alloc_(&sheet2, esize, NROW, NCOL);
 
-    printf("\n=== Sheet content ===\n");
-    printf("typecode: 0x%02X\n", sheet.typecode);
-    printf("element size: %lld\n", sheet.element_size);
-    printf("size: %d x %d\n", sheet.n0, sheet.n1);
+
+    for(i = 0; i < NROW; i++) {
+        sprintf(buf, "dim0_%c", (Char)i + 'a');
+        STRSET(sheet.row_name[i], buf);
+        sprintf(buf, "row%d", i);
+        STRSET(sheet2.row_name[i], buf);
+    }
+    for(i = 0; i < NCOL; i++) {
+        sprintf(buf, "dim1_%c", (Char)i + 'i');
+        STRSET(sheet.col_name[i], buf);
+        sprintf(buf, "col%d", i);
+        STRSET(sheet2.col_name[i], buf);
+    }
+    sheet.linear_row = false;
+    sheet2.linear_row = false;
+    for(j = 0; j < NCOL; j++)
+        for(i = 0; i < NROW; i++) {
+            pf = (Float*)sheet.methods->get_ii(&sheet, i, j);
+            *pf = (Float)rand() / (Float)RAND_MAX;
+            pi = (Int*)sheet2.methods->get_ii(&sheet2, i, j);
+            *pi = (Int)((Float)rand() * 9 / (Float)RAND_MAX);
+            printf("%d %.3f\n", *pi, *pf);
+        }
+
+    printf("\n=== Table content ===\n");
+    printf("size: %d x %d\n", sheet.nrow, sheet.ncol);
     printf("dim 0 keys:\n");
-    for(i = 0; i < sheet.n0; i++)  printf("dim 0 key %d: %s\n", i, sheet.key0[i].str);
+    for(i = 0; i < NROW; i++) printf("dim 0 key %d: %s\n", i, sheet.row_name[i].str);
     printf("\ndim 1 keys:\n");
-    for(i = 0; i < sheet.n1; i++) printf("dim 1 key %d: %s\n", i, sheet.key1[i].str);
-    for(i = 0; i < sheet.n0; i++) {
-        bs[0] = STR_empty_string();
-        for(j = 0; j < sheet.n1; j++) {
-            sprintf(buf, " %.3f", fv[i + sheet.n0 * j]);
-            bs[1] = STR_String(buf);
-            bs[0] = STR_join(bs, 2, STR_String(""));
+    for(i = 0; i < NCOL; i++) printf("dim 1 key %d: %s\n", i, sheet.col_name[i].str);
+    for(i = 0; i < NROW; i++) {
+        bs[0].methods->clean_(&bs[0]);
+        for(j = 0; j < NCOL; j++) {
+            pf = (Float*)sheet.methods->get_ii(&sheet, i, j);
+            sprintf(buf, " %.3f", *pf);
+            bs[1].methods->set_(&bs[1], buf);
+            k0.methods->join_(&k0, bs, 2, String_set(" "));
+            bs[0] = k0;
         }
         printf("%s\n", bs[0].str);
     }
 
-    printf("\n=== Sheet key index test ===\n");
-    k0 = STR_String("dim0_c");
-    k1 = STR_String("dim1_l");
-    i  = SHEET_key_key2shift(sheet, k0, k1);
-    if(i > 0) printf("%s %s shift: %d, value: %.3f\n", k0.str, k1.str, i, fv[i]);
+    printf("\n=== Table key index test ===\n");
+    STRSET(k0, "dim0_c");
+    STRSET(k1, "dim1_l");
+    pf = (Float*)sheet.methods->get_kk(&sheet, k0, k1);
+    printf("%s %s shift: %d, value: %.3f\n", k0.str, k1.str, i, *pf);
+
 
     printf("\n=== Dict test ===\n");
-    printf("Dict: %p\n", dict);
     printf("add sheet 0\n");
-    DICT_add_element(&dict, STR_String("Sheet 0"), &sheet, TYPECODE_SHEET);
-    printf("Dict: %p\n", dict);
+    printf("Dict: %p\n", ddict.data);
+    ddict.methods->push_(&ddict, String_set("Table 0"), TYPECODE_TABLE, &sheet);
+    fdict.methods->push_(&fdict, String_set("Table 0"), TYPECODE_TABLE, &sheet);
+    printf("Dict: %p\n", ddict.data);
 
     printf("add sheet 1\n");
-    DICT_add_element(&dict, STR_String("Sheet 1"), &sheet2, TYPECODE_SHEET);
-    printf("Dict: %p\n", dict);
+    ddict.methods->push_(&ddict, String_set("Table 1"), TYPECODE_TABLE, &sheet2);
+    fdict.methods->push_(&fdict, String_set("Table 1"), TYPECODE_TABLE, &sheet2);
+    printf("Dict: %p\n", ddict.data);
 
     printf("add float\n");
-    DICT_add_element(&dict, STR_String("Float 0"), &fv, TYPECODE_FLOAT);
-    printf("Dict: %p\n", dict);
+    ddict.methods->push_(&ddict, String_set("Float 0"), TYPECODE_FLOAT, &float_var);
+    fdict.methods->push_(&fdict, String_set("Float 0"), TYPECODE_FLOAT, &float_var);
+    printf("Dict: %p\n", ddict.data);
 
-    i = DICT_keys(dict, &kl);
+    n_key1 = ddict.methods->n_elements(&ddict);
+    n_key2 = fdict.methods->n_elements(&fdict);
+    key_list1 = (struct String*)calloc(n_key1, sizeof(struct String));
+    key_list2 = (struct String*)calloc(n_key2, sizeof(struct String));
+    for(i = 0; i < n_key1; i++) String_new_(&key_list1[i]);
+    for(i = 0; i < n_key2; i++) String_new_(&key_list2[i]);
+    ddict.methods->keys(&ddict, key_list1, n_key1);
+    fdict.methods->keys(&fdict, key_list2, n_key2);
     printf("dict keys:\n");
-    for(j = 0; j < i; j++) printf("%s\n", kl[j].str);
+    for(j = 0; j < n_key1; j++) printf("%s\n", key_list1[j].str);
 
-    ps1 = (Sheet*)DICT_get_element(dict, STR_String("Sheet 0"), &tc);
-    printf("sheet address: %p, ps1 value: %p, typecode: 0x%02X\n", &sheet, ps1, tc);
+    ptable1 = (struct Table*)ddict.methods->get(&ddict, String_set("Table 0"), &tc);
+    ptable2 = (struct Table*)fdict.methods->get(&fdict, String_set("Table 0"), &tc);
+    printf("sheet address: %p, ps1 value: %p, typecode: %d\n", &sheet, ptable1, tc);
 
-    ps2 = (Sheet*)DICT_pop_element(&dict, STR_String("Sheet 1"), &tc);
-    printf("sheet address: %p, ps2 value: %p, typecode 0x%02X\n", &sheet2, ps2, tc);
+    ptable1 = (struct Table*)ddict.methods->pop_(&ddict, String_set("Table 1"), &tc);
+    ptable2 = (struct Table*)fdict.methods->pop_(&fdict, String_set("Table 1"), &tc);
+    printf("sheet address: %p, ps2 value: %p, typecode %d\n", &sheet2, ptable2, tc);
     printf("ps2 content\n");
     printf("key0:\n");
-    for(i = 0; i < ps2->n0; i++) printf("%s\n", ps2->key0[i].str);
+    for(i = 0; i < ptable2->nrow; i++) printf("%s\n", ptable2->row_name[i].str);
     printf("key1:\n");
-    for(i = 0; i < ps2->n1; i++) printf("%s\n", ps2->key1[i].str);
+    for(i = 0; i < ptable2->ncol; i++) printf("%s\n", ptable2->col_name[i].str);
     printf("data:\n");
-    iv = (Int*)ps2->addr;
-    for(i = 0; i < ps2->n0; i++) {
-        bs[0] = STR_empty_string();
-        for(j = 0; j < ps2->n1; j++) {
-            sprintf(buf, " %d", iv[i + sheet.n0 * j]);
-            bs[1] = STR_String(buf);
-            bs[0] = STR_join(bs, 2, STR_String(""));
+
+    for(i = 0; i < NROW; i++) {
+        bs[0].methods->clean_(&bs[0]);
+        for(j = 0; j < NCOL; j++) {
+            pi = (Int*)ptable2->methods->get_ii(ptable2, i, j);
+            sprintf(buf, "%d", *pi);
+            bs[1].methods->set_(&bs[1], buf);
+            k0.methods->join_(&k0, bs, 2, String_set(" "));
+            bs[0] = k0;
         }
         printf("%s\n", bs[0].str);
     }
 
-    while(dict) DICT_pop_element(&dict, dict->key, &tc);
+    while(ddict.data) ddict.methods->pop_(&ddict, ddict.data->key, &tc);
 
-    SHEET_free(&sheet);
-    SHEET_free(&sheet2);
+    FREE(sheet);
+    FREE(sheet2);
     return 0;
 }

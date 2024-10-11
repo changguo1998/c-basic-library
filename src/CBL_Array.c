@@ -35,7 +35,7 @@ Int ARR_prod_Int_vector(const Vector vec) {
     return n;
 }
 
-Array ARR_allocate(size_t element_size, UInt8 typecode, const Vector size) {
+Array ARR_allocate(size_t element_size, Int typecode, const Vector size) {
     Array arr;
     Int   n;
     arr.element_size = element_size;

@@ -27,7 +27,7 @@
 #include <string.h>
 #include "CBL_Vector.h"
 
-Vector VEC_allocate(UInt8 typecode, size_t element_size, Int len) {
+Vector VEC_allocate(Int typecode, size_t element_size, Int len) {
     Vector v;
     v.typecode       = typecode;
     v.element_elsize = element_size;

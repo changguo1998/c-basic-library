@@ -28,6 +28,36 @@
 #include "CBL_String.h"
 #include "CBL_Dict.h"
 
+struct StaticDictMethods _CBL_STATIC_DICT_METHODS = {
+    &StaticDict_get,
+    &StaticDict_pop_,
+    &StaticDict_set_,
+    &StaticDict_push_,
+    &StaticDict_has_key,
+    &StaticDict_n_elements,
+    &StaticDict_keys
+};
+
+struct DynamicDictMethods _CBL_DYNAMIC_DICT_METHODS = {
+    &DynamicDict_get,
+    &DynamicDict_pop_,
+    &DynamicDict_set_,
+    &DynamicDict_push_,
+    &DynamicDict_has_key,
+    &DynamicDict_n_elements,
+    &DynamicDict_keys
+};
+
+struct TableMethods _CBL_TABLE_METHODS = {
+    &Table_alloc_,
+    &Table_free_,
+    &Table_get_kk,
+    &Table_get_ik,
+    &Table_get_ii,
+    &Table_get_col_i,
+    &Table_get_col_k,
+};
+
 /**
  * @brief get linear index from string array keys
  * @param key_list
@@ -35,19 +65,20 @@
  * @param key
  * @return
  */
-Int _DICT_key2index(const String* key_list, Int n, String key) {
+static Int _key2index(const struct String* key_list, Int n, struct String key) {
     Int i;
-    for(i = 0; i < n; i++) if(STR_isequal(key_list[i], key)) return i;
+    for(i = 0; i < n; i++) if(key.methods->isequal(&key, key_list[i])) return i;
     return -1;
 }
 
-Address StaticDict_get(
-    const struct StaticDict* this,
-    String                   key,
-    UInt8*                   typecode) {
+
+// # StaticDict
+
+
+Address StaticDict_get(const struct StaticDict* this, struct String key, Int* typecode) {
 
     Int i;
-    i = _DICT_key2index(this->key, STATIC_DICT_SIZE, key);
+    i = _key2index(this->key, STATIC_DICT_SIZE, key);
     if(i >= 0)
         if(this->flag[i]) {
             *typecode = this->typecode[i];
@@ -56,15 +87,15 @@ Address StaticDict_get(
     return NULL;
 }
 
-Address StaticDict_pop_(struct StaticDict* this, String key, UInt8* typecode) {
+Address StaticDict_pop_(struct StaticDict* this, struct String key, Int* typecode) {
     Int     i;
     Address address = NULL;
-    i = _DICT_key2index(this->key, STATIC_DICT_SIZE, key);
+    i = _key2index(this->key, STATIC_DICT_SIZE, key);
     if(i >= 0)
         if(this->flag[i]) {
             *typecode = this->typecode[i];
             address = this->address[i];
-            this->key[i] = STR_empty_string();
+            this->key[i].methods->clean_(&(this->key[i]));
             this->flag[i] = false;
             this->typecode[i] = 0;
             this->address[i] = NULL;
@@ -72,14 +103,10 @@ Address StaticDict_pop_(struct StaticDict* this, String key, UInt8* typecode) {
     return address;
 }
 
-Address StaticDict_set_(
-    struct StaticDict* this,
-    String             key,
-    UInt8              typecode,
-    Address            address) {
+Address StaticDict_set_(struct StaticDict* this, struct String key, Int typecode, Address address) {
     Int     i;
     Address previous_address = NULL;
-    i = _DICT_key2index(this->key, STATIC_DICT_SIZE, key);
+    i = _key2index(this->key, STATIC_DICT_SIZE, key);
     if(i >= 0)
         if(this->flag[i]) {
             previous_address = this->address[i];
@@ -89,11 +116,7 @@ Address StaticDict_set_(
     return previous_address;
 }
 
-Bool StaticDict_push_(
-    struct StaticDict* this,
-    String             key,
-    UInt8              typecode,
-    Address            address) {
+void StaticDict_push_(struct StaticDict* this, struct String key, Int typecode, Address address) {
     Int i;
     for(i = 0; i < STATIC_DICT_SIZE; i++) if(!this->flag[i]) break;
     if(i < STATIC_DICT_SIZE) {
@@ -101,29 +124,44 @@ Bool StaticDict_push_(
         this->flag[i] = true;
         this->typecode[i] = typecode;
         this->address[i] = address;
-        return true;
     }
-    return false;
+    else
+        error_out_of_memory("(StaticDict_push_) buffer of StaticDict is full");
 }
 
-Address DynamicDict_get(const struct DynamicDict* this,
-                        String                    key,
-                        UInt8*                    typecode) {
-    struct DictNode* p;
-    p = this->head;
-    while(p) {}
+Bool StaticDict_has_key(const struct StaticDict* this, struct String key) {
+    return _key2index(this->key, STATIC_DICT_SIZE, key) >= 0;
 }
 
-// ! ==========================================================================
+Int StaticDict_n_elements(const struct StaticDict* this) {
+    Int i, n = 0;
+    for(i = 0; i < STATIC_DICT_SIZE; i++) if(this->flag[i]) n += 1;
+    return n;
+}
 
-Address DICT_get_element(
-    const struct DictNode* dict,
-    const String           key,
-    UInt8*                 typecode) {
-    struct DictNode* p;
-    p = dict;
+Int StaticDict_keys(const struct StaticDict* this, struct String* key_list, Int len_key_list) {
+    Int i, n_key;
+    n_key = 0;
+    for(i = 0; i < len_key_list; i++) String_new_(&key_list[i]);
+    for(i = 0; i < STATIC_DICT_SIZE; i++)
+        if(this->flag[i]) {
+            if(n_key < len_key_list) {
+                key_list[n_key] = this->key[i];
+                n_key += 1;
+            }
+            else break;
+        }
+    return n_key;
+}
+
+// # DynamicDict
+
+
+Address DynamicDict_get(const struct DynamicDict* this, struct String key, Int* typecode) {
+    struct DynamicDictNode* p;
+    p = this->data;
     while(p) {
-        if(STR_isequal(p->key, key)) {
+        if(key.methods->isequal(&key, p->key)) {
             *typecode = p->typecode;
             return p->address;
         }
@@ -132,39 +170,13 @@ Address DICT_get_element(
     return NULL;
 }
 
-Address DICT_add_element(
-    struct DictNode** dict,
-    const String      key,
-    const Address     address,
-    UInt8             typecode) {
-    struct DictNode* p;
+Address DynamicDict_pop_(struct DynamicDict* this, struct String key, Int* typecode) {
+    struct DynamicDictNode *p, **q;
+    Address                 address = NULL;
     // check key exist
-    p = *dict;
-    while(p) {
-        if(STR_isequal(p->key, key)) return NULL;
-        p = p->next;
-    }
-    // create a node
-    p = (DictNode*)malloc(sizeof(DictNode));
-    p->typecode = typecode;
-    p->key = key;
-    p->address = address;
-    p->next = *dict;
-    *dict = p;
-    return p;
-}
-
-Address DICT_pop_element(
-    struct DictNode** dict,
-    const String      key,
-    UInt8*            typecode) {
-    DictNode*         p;
-    struct DictNode** q;
-    Address           address = NULL;
-    // check key exist
-    q = dict;
+    q = &(this->data);
     while(*q)
-        if(!STR_isequal((*q)->key, key)) q = &((*q)->next);
+        if(!(key.methods->isequal(&key, (*q)->key))) q = &((*q)->next);
         else break;
     // rm node
     if(*q) {
@@ -177,56 +189,136 @@ Address DICT_pop_element(
     return address;
 }
 
-Int DICT_keys(const struct DictNode* dict, String** keys) {
-    DictNode* p;
-    Int       n_node = 0, i;
-    if(dict == NULL) return 0;
-    if(*keys != NULL) return 0;
-    p = dict;
+Address DynamicDict_set_(struct DynamicDict* this, struct String key, Int typecode, Address address) {
+    struct DynamicDictNode* p;
+    Address                 previous_address = NULL;
+    p = this->data;
     while(p) {
+        if(key.methods->isequal(&key, p->key)) break;
         p = p->next;
-        n_node++;
     }
-    *keys = (String*)malloc(sizeof(String) * n_node);
-    for(i = 0, p = dict; i < n_node; i++, p = p->next) (*keys)[i] = p->key;
-    return n_node;
+    if(p == NULL) return NULL;
+    previous_address = p->address;
+    p->typecode = typecode;
+    p->address = address;
+    return previous_address;
 }
 
-Sheet SHEET_allocate(UInt8 typecode, size_t element_size, Int n0, Int n1) {
-    Sheet sheet;
-    sheet.typecode = typecode;
-    sheet.element_size = element_size;
-    sheet.n0 = n0;
-    sheet.n1 = n1;
-    sheet.key0 = (String*)calloc(n0, sizeof(String));
-    sheet.key1 = (String*)calloc(n1, sizeof(String));
-    sheet.addr = (Address)calloc(n0 * n1, element_size);
-    return sheet;
+void DynamicDict_push_(struct DynamicDict* this, struct String key, Int typecode, Address address) {
+    struct DynamicDictNode* p;
+    // check key exist
+    p = this->data;
+    while(p) {
+        if(key.methods->isequal(&key, p->key)) {
+            error_unexpected_allocated_memory("(DynamicDict_push_) Dict already has key");
+        }
+        p = p->next;
+    }
+    // create a node
+    p = (struct DynamicDictNode*)malloc(sizeof(struct DynamicDictNode));
+    String_new_(&(p->key));
+    p->key = key;
+    p->typecode = typecode;
+    p->address = address;
+    p->next = this->data;
+    this->data = p;
 }
 
-void SHEET_free(Sheet* sheet) {
-    if(sheet == NULL) return;
-    sheet->n0 = sheet->n1 = 0;
-    free(sheet->key0);
-    free(sheet->key1);
-    free(sheet->addr);
-    sheet->key0 = sheet->key1 = sheet->addr = NULL;
+Bool DynamicDict_has_key(const struct DynamicDict* this, struct String key) {
+    struct DynamicDictNode* p;
+    p = this->data;
+    while(p) {
+        if(key.methods->isequal(&key, p->key)) return true;
+        p = p->next;
+    }
+    return false;
 }
 
-Int SHEET_key_key2shift(
-    const Sheet  sheet,
-    const String key0,
-    const String key1) {
+Int DynamicDict_n_elements(const struct DynamicDict* this) {
+    Int                     n = 0;
+    struct DynamicDictNode* p;
+    p = this->data;
+    while(p) {
+        n += 1;
+        p = p->next;
+    }
+    return n;
+}
+
+Int DynamicDict_keys(const struct DynamicDict* this, struct String* key_list, Int len_key_list) {
+    Int                     i, n_key;
+    struct DynamicDictNode* p;
+    for(i = 0; i < len_key_list; i++) String_new_(&key_list[i]);
+
+    n_key = 0;
+    p = this->data;
+    while(p) {
+        key_list[n_key] = p->key;
+        n_key += 1;
+        p = p->next;
+    }
+    return n_key;
+}
+
+void Table_alloc_(struct Table* this, Int* elsize, Int nrow, Int ncol) {
+    Int i;
+    // check arguments
+    // set values
+    this->nrow = nrow;
+    this->ncol = ncol;
+    this->linear_row = true;
+    for(i = 0; i < ncol; i++) {
+        this->elsize[i] = elsize[i];
+        this->addr[i] = calloc(nrow, elsize[i]);
+    }
+    this->row_name = (struct String*)malloc(sizeof(struct String) * nrow);
+    for(i=0; i<nrow; i++) String_new_(&(this->row_name[i]));
+}
+
+void Table_free_(struct Table* this) {
+    Int i;
+    for(i = 0; i < TABLE_MAX_COLUMNS; i++)
+        if(this->addr[i]) {
+            free(this->addr[i]);
+            this->addr[i] = NULL;
+        }
+    if(this->row_name) free(this->row_name);
+    this->row_name = NULL;
+}
+
+Address Table_get_kk(const struct Table* this, struct String row, struct String col) {
     Int i, j;
-    i = SHEET_key2index(sheet.key0, sheet.n0, key0);
-    j = SHEET_key2index(sheet.key1, sheet.n1, key1);
-    if((i < 0) || (j < 0)) return -1;
-    return i + sheet.n0 * j;
+    if(this->linear_row) error_invalid_argument("(Table_get_kk) row of Table is linear indexed");
+    i = _key2index(this->row_name, this->nrow, row);
+    j = _key2index(this->col_name, this->ncol, col);
+    if(i < 0) error_index_out_of_bounds("(Table_get_kk) key not exit in row");
+    if(j < 0) error_index_out_of_bounds("(Table_get_kk) key not exit in column");
+    return this->addr[j] + (i * this->elsize[j]);
 }
 
-Int SHEET_index_key2shift(const Sheet sheet, Int index0, const String key1) {
+Address Table_get_ik(const struct Table* this, Int row, struct String col) {
     Int j;
-    j = SHEET_key2index(sheet.key1, sheet.n1, key1);
-    if(j < 0) return -1;
-    return index0 + sheet.n0 * j;
+    j = _key2index(this->col_name, this->ncol, col);
+
+    if(row < 0 || row >= this->nrow) error_index_out_of_bounds("(Table_get_kk) row index out of bound");
+    if(j < 0) error_index_out_of_bounds("(Table_get_kk) key not exit in column");
+    return this->addr[j] + (row * this->elsize[j]);
+}
+
+Address Table_get_ii(const struct Table* this, Int row, Int col) {
+    if(row < 0 || row >= this->nrow) error_index_out_of_bounds("(Table_get_kk) row index out of bound");
+    if(col < 0 || col >= this->ncol) error_index_out_of_bounds("(Table_get_kk) col index out of bound");
+    return this->addr[col] + (row * this->elsize[col]);
+}
+
+Address Table_get_col_i(const struct Table* this, Int col) {
+    if(col < 0 || col >= this->ncol) error_index_out_of_bounds("(Table_get_kk) col index out of bound");
+    return this->addr[col];
+}
+
+Address Table_get_col_k(const struct Table* this, struct String col) {
+    Int j;
+    j = _key2index(this->col_name, this->ncol, col);
+    if(j < 0) error_index_out_of_bounds("(Table_get_kk) key not exit in column");
+    return this->addr[j];
 }

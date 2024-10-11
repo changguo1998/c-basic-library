@@ -49,9 +49,9 @@ struct String String_set(const char* str) {
     struct String string;
     String_new_(&string);
     if(strlen(str)) {
-        if(strlen(str) > STR_MAX_STRING_LENGTH) {
-            strncpy(string.str, str, STR_MAX_STRING_LENGTH * sizeof(Char));
-            string.len = STR_MAX_STRING_LENGTH;
+        if(strlen(str) > STRING_MAX_LENGTH) {
+            strncpy(string.str, str, STRING_MAX_LENGTH * sizeof(Char));
+            string.len = STRING_MAX_LENGTH;
         }
         else {
             strcpy(string.str, str);
@@ -63,13 +63,13 @@ struct String String_set(const char* str) {
 
 struct String String_clean_(struct String* this) {
     this->len = 0;
-    memset(this->str, '\0', sizeof(Char) * STR_MAX_STRING_LENGTH);
+    memset(this->str, '\0', sizeof(Char) * STRING_MAX_LENGTH);
     return *this;
 }
 
 struct String String_set_(struct String* this, const char* str) {
     String_clean_(this);
-    if(strlen(str) > STR_MAX_STRING_LENGTH)
+    if(strlen(str) > STRING_MAX_LENGTH)
         error_out_of_memory("(STR_String) Warning: string is too long\n");
     else {
         this->len = (Int)strlen(str);
@@ -90,7 +90,7 @@ Bool String_isequal(const struct String* this, struct String another) {
 void _append_string(Char* str1, Int* n1, const Char* str2, Int n2) {
     Int i;
     for(i = 0; i < n2; i++)
-        if(*n1 >= STR_MAX_STRING_LENGTH)
+        if(*n1 >= STRING_MAX_LENGTH)
             error_out_of_memory("(_append_string) string is too long\n");
         else {
             str1[*n1] = str2[i];
@@ -293,7 +293,7 @@ String STR_read_line(FILE* fp) {
     while(!feof(fp)) {
         c = (Char)fgetc(fp);
         if(c == '\n') break;
-        if(s.len == STR_MAX_STRING_LENGTH) {
+        if(s.len == STRING_MAX_LENGTH) {
             printf("(STR_read_line) Warning: line is too long\n");
             break;
         }
@@ -334,10 +334,10 @@ void STR_read_lines(String** string_list, FILE* fp) {
 }
 
 void STR_print_line(String str, FILE* fp) {
-    Char buffer[STR_MAX_STRING_LENGTH + 1];
+    Char buffer[STRING_MAX_LENGTH + 1];
     if(fp == NULL) return;
     memcpy(buffer, str.str, str.len * sizeof(Char));
-    buffer[STR_MAX_STRING_LENGTH] = '\0';
+    buffer[STRING_MAX_LENGTH] = '\0';
     fprintf(fp, "%s\n", buffer);
 }
 

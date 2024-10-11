@@ -31,7 +31,7 @@
 #include "CBL_Basic.h"
 
 struct String {
-    Char str[STR_MAX_STRING_LENGTH];
+    Char str[STRING_MAX_LENGTH];
     Int  len;
 
     const struct StringMethods* methods;
@@ -211,7 +211,7 @@ struct String String_reverse_(struct String* this);
 
 static inline void String_new_(struct String* this) {
     this->len = 0;
-    memset(this->str, '\0', STR_MAX_STRING_LENGTH * sizeof(Char));
+    memset(this->str, '\0', STRING_MAX_LENGTH * sizeof(Char));
     this->methods = &_CBL_STRING_METHODS;
 }
 

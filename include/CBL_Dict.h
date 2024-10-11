@@ -26,247 +26,335 @@
 #ifndef _CBL_DICT_H_
 #define _CBL_DICT_H_
 
-#include <string.h>
-
 #include "CBL_Basic.h"
 #include "CBL_String.h"
 
-/* * * * * * * * * * * * * * * * *
- * StaticDict
- * * * * * * * * * * * * * * * * */
+
+// # StaticDict
+
 
 /**
  * @brief struct StaticDict
  * @param key String[]
  * @param flag Bool[]
- * @param typecode UInt8[]
+ * @param typecode Int[]
  * @param address Address[]
+ * @param methods
  */
 struct StaticDict {
-    String  key[STATIC_DICT_SIZE];
+    struct String key[STATIC_DICT_SIZE];
+
     Bool    flag[STATIC_DICT_SIZE];
-    UInt8   typecode[STATIC_DICT_SIZE];
+    Int     typecode[STATIC_DICT_SIZE];
     Address address[STATIC_DICT_SIZE];
+
+    struct StaticDictMethods* methods;
+};
+
+struct StaticDictMethods {
 
     /**
      * @brief get address of saved data by key
      * @param this const struct StaticDict*
      * @param key String
-     * @param typecode UInt8*
+     * @param typecode Int*
      * @return Address
      */
-    Address (*get)(const struct StaticDict* this, String key, UInt8* typecode);
+    Address (*get)(const struct StaticDict* this, struct String key, Int* typecode);
 
     /**
      * @brief get address of saved data by key and delete it from dict
      * @param this const struct StaticDict*
      * @param key String
-     * @param typecode UInt8*
+     * @param typecode Int*
      * @return Address
      */
-    Address (*pop_)(struct StaticDict* this, String key, UInt8* typecode);
+    Address (*pop_)(struct StaticDict* this, struct String key, Int* typecode);
 
     /**
      * @brief set new address to key, and return the address of previous data
      * @param this const struct StaticDict*
      * @param key String
-     * @param typecode UInt8
+     * @param typecode Int
      * @param address Address
      * @return Address of previous data
      */
-    Address (*set_)(
-        struct StaticDict* this,
-        String             key,
-        UInt8              typecode,
-        Address            address);
+    Address (*set_)(struct StaticDict* this, struct String key, Int typecode, Address address);
 
     /**
      * @brief append data if there is empty element, otherwise do nothing
      * @param this struct StaticDict*
      * @param key String
-     * @param typecode UInt8
+     * @param typecode Int
      * @param address Address
      * @return true if success
      */
-    Bool (*push_)(
-        struct StaticDict* this,
-        String             key,
-        UInt8              typecode,
-        Address            address);
+    void (*push_)(struct StaticDict* this, struct String key, Int typecode, Address address);
+
+    /**
+     * @brief check if key showed in dict
+     * @param this
+     * @param key
+     * @return Bool
+     */
+    Bool (*has_key)(const struct StaticDict* this, struct String key);
+
+    /**
+     * @brief count number of elements saved in dict
+     * @param this
+     * @return Int
+     */
+    Int (*n_elements)(const struct StaticDict* this);
+
+    /**
+     * @brief get first len_key_list keys of dict
+     * @param this
+     * @param key_list struct String*
+     * @param len_key_list
+     * @return true if key_list is completed, false if some keys is not saved in key_list
+     */
+    Int (*keys)(const struct StaticDict* this, struct String* key_list, Int len_key_list);
 };
 
-Address StaticDict_get(
-    const struct StaticDict* this,
-    String                   key,
-    UInt8*                   typecode);
+Address StaticDict_get(const struct StaticDict* this, struct String key, Int* typecode);
+Address StaticDict_pop_(struct StaticDict* this, struct String key, Int* typecode);
+Address StaticDict_set_(struct StaticDict* this, struct String key, Int typecode, Address address);
+void    StaticDict_push_(struct StaticDict* this, struct String key, Int typecode, Address address);
+Bool    StaticDict_has_key(const struct StaticDict* this, struct String key);
+Int     StaticDict_n_elements(const struct StaticDict* this);
+Int     StaticDict_keys(const struct StaticDict* this, struct String* key_list, Int len_key_list);
 
-Address StaticDict_pop_(struct StaticDict* this, String key, UInt8* typecode);
 
-Address StaticDict_set_(
-    struct StaticDict* this,
-    String             key,
-    UInt8              typecode,
-    Address            address);
+// # DynamicDict
 
-Bool StaticDict_push_(
-    struct StaticDict* this,
-    String             key,
-    UInt8              typecode,
-    Address            address);
+/**
+ * @brief DynamicDictNode
+ * @param key String
+ * @param typecode Int
+ * @param address Address
+ * @param next DynamicDictNode*
+ */
+struct DynamicDictNode {
+    struct String key;
+
+    Int     typecode;
+    Address address;
+
+    struct DynamicDictNode* next;
+};
+
+/**
+ * @brief struct Dict\n
+ * Address get(Dict* this, String key, Int* typecode);
+ */
+struct DynamicDict {
+    struct DynamicDictNode*    data;
+    struct DynamicDictMethods* methods;
+};
+
+struct DynamicDictMethods {
+    /**
+     * @brief get address of saved data by key
+     * @param this const struct StaticDict*
+     * @param key String
+     * @param typecode Int*
+     * @return Address
+     */
+    Address (*get)(const struct DynamicDict* this, struct String key, Int* typecode);
+
+    /**
+     * @brief get address of saved data by key and delete it from dict
+     * @param this const struct StaticDict*
+     * @param key String
+     * @param typecode Int*
+     * @return Address
+     */
+    Address (*pop_)(struct DynamicDict* this, struct String key, Int* typecode);
+
+
+    /**
+     * @brief set new address to key, and return the address of previous data
+     * @param this const struct StaticDict*
+     * @param key String
+     * @param typecode Int
+     * @param address Address
+     * @return Address of previous data
+     */
+    Address (*set_)(struct DynamicDict* this, struct String key, Int typecode, Address address);
+
+
+    /**
+     * @brief append data if there is empty element, otherwise do nothing
+     * @param this struct StaticDict*
+     * @param key String
+     * @param typecode Int
+     * @param address Address
+     * @return true if success
+     */
+    void (*push_)(struct DynamicDict* this, struct String key, Int typecode, Address address);
+    /**
+     * @brief check if key showed in dict
+     * @param this
+     * @param key
+     * @return Bool
+     */
+    Bool (*has_key)(const struct DynamicDict* this, struct String key);
+
+    /**
+     * @brief count number of elements saved in dict
+     * @param this
+     * @return Int
+     */
+    Int (*n_elements)(const struct DynamicDict* this);
+
+    /**
+     * @brief get first len_key_list keys of dict
+     * @param this
+     * @param key_list struct String*
+     * @param len_key_list
+     * @return true if key_list is completed, false if some keys is not saved in key_list
+     */
+    Int (*keys)(const struct DynamicDict* this, struct String* key_list, Int len_key_list);
+};
+
+Address DynamicDict_get(const struct DynamicDict* this, struct String key, Int* typecode);
+Address DynamicDict_pop_(struct DynamicDict* this, struct String key, Int* typecode);
+Address DynamicDict_set_(struct DynamicDict* this, struct String key, Int typecode, Address address);
+void    DynamicDict_push_(struct DynamicDict* this, struct String key, Int typecode, Address address);
+Bool    DynamicDict_has_key(const struct DynamicDict* this, struct String key);
+Int     DynamicDict_n_elements(const struct DynamicDict* this);
+Int     DynamicDict_keys(const struct DynamicDict* this, struct String* key_list, Int len_key_list);
+
+// # Table
+
+/**
+ * @brief Table struct
+ * @param nrow Int
+ * @param ncol Int
+ * @param linear_row Bool
+ * @param elsize Int[TABLE_MAX_COLUMNS]
+ * @param addr Address[TABLE_MAX_COLUMNS]
+ * @param row_name struct String*
+ * @param col_name struct String[TABLE_MAX_COLUMNS]
+ * @param methods
+ */
+struct Table {
+    Int  nrow, ncol;
+    Bool linear_row;
+    Int  elsize[TABLE_MAX_COLUMNS];
+
+    Address addr[TABLE_MAX_COLUMNS];
+
+    struct String* row_name;
+    struct String  col_name[TABLE_MAX_COLUMNS];
+
+    struct TableMethods* methods;
+};
+
+struct TableMethods {
+    /**
+     * @brief allocate memory for sheet
+     * @param this
+     * @param elsize
+     * @param nrow
+     * @param ncol
+     */
+    void (*alloc_)(struct Table* this, Int* elsize, Int nrow, Int ncol);
+
+    /**
+     * @brief
+     * @param this
+     */
+    void (*free_)(struct Table* this);
+
+    /**
+     * @brief index in sheet with both keys in String
+     * @param this
+     * @param row struct String
+     * @param col struct String
+     * @return Address
+     */
+    Address (*get_kk)(const struct Table* this, struct String row, struct String col);
+
+    /**
+     * @brief index in sheet with both keys in String
+     * @param this
+     * @param row Int
+     * @param col struct String
+     * @return Address
+     */
+    Address (*get_ik)(const struct Table* this, Int row, struct String col);
+
+    /**
+     * @brief index in sheet with both keys in String
+     * @param this
+     * @param row Int
+     * @param col Int
+     * @return Address
+     */
+    Address (*get_ii)(const struct Table* this, Int row, Int col);
+
+    /**
+     * @brief index in sheet with both keys in String
+     * @param this
+     * @param col Int
+     * @return Address
+     */
+    Address (*get_col_i)(const struct Table* this, Int col);
+
+    /**
+     * @brief index in sheet with both keys in String
+     * @param this
+     * @param col struct String
+     * @return Address
+     */
+    Address (*get_col_k)(const struct Table* this, struct String col);
+};
+
+void    Table_alloc_(struct Table* this, Int* elsize, Int nrow, Int ncol);
+void    Table_free_(struct Table* this);
+Address Table_get_kk(const struct Table* this, struct String row, struct String col);
+Address Table_get_ik(const struct Table* this, Int row, struct String col);
+Address Table_get_ii(const struct Table* this, Int row, Int col);
+Address Table_get_col_i(const struct Table* this, Int col);
+Address Table_get_col_k(const struct Table* this, struct String col);
+
+
+extern struct StaticDictMethods  _CBL_STATIC_DICT_METHODS;
+extern struct DynamicDictMethods _CBL_DYNAMIC_DICT_METHODS;
+extern struct TableMethods       _CBL_TABLE_METHODS;
 
 /**
  * @brief bind methods for struct to behave like an object
  * @param dict struct StaticDict*
  */
-static inline void StaticDict_new(struct StaticDict* dict) {
-    memset(dict, 0, sizeof(Bool) * STATIC_DICT_SIZE);
-    dict->get = &StaticDict_get;
-    dict->pop_ = &StaticDict_pop_;
-    dict->set_ = &StaticDict_set_;
-    dict->push_ = &StaticDict_push_;
+static inline void StaticDict_new_(struct StaticDict* dict) {
+    Int i;
+    for(i = 0; i < STATIC_DICT_SIZE; i++) {
+        String_new_(&(dict->key[i]));
+        dict->flag[i] = false;
+        dict->typecode[i] = TYPECODE_UNKNOWN;
+        dict->address[i] = NULL;
+    }
+    dict->methods = &_CBL_STATIC_DICT_METHODS;
 }
 
-/* * * * * * * * * * * * * * * * *
- * DynamicDict
- * * * * * * * * * * * * * * * * */
-
-/**
- * @brief DictNode
- * @param typecode UInt8
- * @param key String
- * @param address Address
- * @param next DictNode*
- */
-struct DictNode {
-    UInt8            typecode;
-    String           key;
-    Address          address;
-    struct DictNode* next;
-};
-
-/**
- * @brief struct Dict\n
- * Address get(Dict* this, String key, UInt8* typecode);
- */
-struct DynamicDict {
-    struct DictNode* head = NULL;
-
-    Address (*get)(const struct DynamicDict* this, String key, UInt8* typecode);
-
-    Address (*pop_)(struct DynamicDict* this, String key, UInt8* typecode);
-
-    Address (*set_)(
-        struct DynamicDict* this,
-        String              key,
-        UInt8               typecode,
-        Address             address);
-
-    void (*push_)(
-        struct DynamicDict* this,
-        String              key,
-        UInt8               typecode,
-        Address             address);
-};
-
-Address DynamicDict_get(const struct DynamicDict* this,
-                        String                    key,
-                        UInt8*                    typecode);
-
-Address DynamicDict_pop_(struct DynamicDict* this, String key, UInt8* typecode);
-
-Address DynamicDict_set_(struct DynamicDict* this,
-                         String              key,
-                         UInt8               typecode,
-                         Address             address);
-
-void DynamicDict_push_(struct DynamicDict* this,
-                       String              key,
-                       UInt8               typecode,
-                       Address             address);
-
-static inline void DynamicDict_new(struct DynamicDict* this) {
-    this->head = NULL;
-    this->get = &DynamicDict_get;
-    this->pop_ = &DynamicDict_pop_;
-    this->set_ = &DynamicDict_set_;
-    this->push_ = &DynamicDict_push_;
+static inline void DynamicDict_new_(struct DynamicDict* this) {
+    this->data = NULL;
+    this->methods = &_CBL_DYNAMIC_DICT_METHODS;
 }
 
-Address DICT_get_element(struct DictNode* dict, String key, UInt8* typecode);
-
-Address DICT_add_element(
-    struct DictNode** dict,
-    String            key,
-    Address           address,
-    UInt8             typecode);
-
-Address DICT_pop_element(struct DictNode** dict, String key, UInt8* typecode);
-
-Int DICT_keys(struct DictNode* dict, String** keys);
-
-/* * * * * * * * * * * * * * * * *
- * DynamicDict
- * * * * * * * * * * * * * * * * */
-
-/**
- * @brief Sheet struct
- * @param typecode UInt8
- * @param element_size size_t
- * @param n0 Int, size in dimension 0
- * @param n1 Int, size in dimension 1
- * @param key0 String*
- * @param key1 String*
- * @param addr Address
- */
-struct Sheet {
-    UInt8   typecode;
-    size_t  element_size;
-    Int     n0, n1;
-    String* key0;
-    String* key1;
-    Address addr;
-};
-
-/**
- * @brief allocate memory for sheet
- * @param typecode
- * @param element_size
- * @param n0
- * @param n1
- * @return
- */
-void SHEET_allocate(
-    struct Sheet* sheet,
-    UInt8         typecode,
-    size_t        element_size,
-    Int           n0,
-    Int           n1);
-
-/**
- * @brief free memory allocated for sheet
- * @param sheet
- */
-void SHEET_free(struct Sheet* sheet);
-
-/**
- * @brief index in sheet with both keys in String
- * @param sheet
- * @param key0
- * @param key1
- * @return
- */
-Int SHEET_key_key2shift(
-    struct Sheet sheet,
-    const String key0,
-    const String key1);
-
-/**
- * @brief index in sheet with linear index number in dimension 0 and String key in dimension 1
- * @param sheet
- * @param index0
- * @param key1
- * @return
- */
-Int SHEET_index_key2shift(struct Sheet sheet, Int index0, const String key1);
+static inline void Table_new_(struct Table* this) {
+    Int i;
+    this->nrow = this->ncol = 0;
+    this->linear_row = true;
+    for(i = 0; i < TABLE_MAX_COLUMNS; i++) {
+        this->elsize[i] = 0;
+        this->addr[i] = NULL;
+        String_new_(&(this->col_name[i]));
+    }
+    this->row_name = NULL;
+    this->methods = &_CBL_TABLE_METHODS;
+}
 
 #endif // _CBL_DICT_H_

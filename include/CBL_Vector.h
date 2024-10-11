@@ -30,13 +30,13 @@
 #include "CBL_Basic.h"
 
 typedef struct _VEC_vector_t {
-    UInt8   typecode;
+    Int   typecode;
     size_t  element_elsize;
     Int     len;
     Address data;
 } Vector;
 
-Vector VEC_allocate(UInt8 typecode, size_t element_size, Int len);
+Vector VEC_allocate(Int typecode, size_t element_size, Int len);
 
 Vector VEC_empty_vector();
 

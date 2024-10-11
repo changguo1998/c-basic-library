@@ -257,7 +257,7 @@ void IntVector_sort(struct IntVector* this, struct IntVector* perm) {
     INT_VECTOR_level0_sort(this->data, perm->data, this->len);
 }
 
-// ===================================================================================================================
+// ============================================================================
 
 void IntVector_free_(struct IntVector* this) {
     if(this == NULL) return;

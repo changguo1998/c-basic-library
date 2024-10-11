@@ -32,13 +32,13 @@
 
 /**
  * @brief multi-dimension array
- * @param typecode UInt8
+ * @param typecode Int
  * @param element_size size_t
  * @param size Vector
  * @param data Address
  */
 typedef struct _ARR_array_t {
-    UInt8   typecode; /**< typecode */
+    Int   typecode; /**< typecode */
     size_t  element_size; /**< element_size */
     Vector  size; /**< size */
     Address data; /**< data */
@@ -58,7 +58,7 @@ Int ARR_prod_Int_vector(const Vector vec);
  * @param size vector defines the size of array
  * @return array with allocated memory
  */
-Array ARR_allocate(size_t element_size, UInt8 typecode, const Vector size);
+Array ARR_allocate(size_t element_size, Int typecode, const Vector size);
 
 /**
  * @brief make a copy of Array, allocate memory and copy for pointers

@@ -27,8 +27,8 @@
 #define _CBL_ARRAY_H_
 
 #include <stdio.h>
-#include "CBL_Basic.h"
-#include "CBL_Vector.h"
+#include "Module_Basic.h"
+#include "Template_Vector.h"
 
 /**
  * @brief multi-dimension array

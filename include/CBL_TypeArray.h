@@ -26,7 +26,7 @@
 #ifndef _CBL_TYPE_ARRAY_H_
 #define _CBL_TYPE_ARRAY_H_
 
-#include "CBL_Basic.h"
+#include "Module_Basic.h"
 
 #define _DEFINE_INT_VECTOR_LEN_STRUCT(n) struct IntVector##n{\
     Int data[n];\

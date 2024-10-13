@@ -228,4 +228,8 @@ void error_out_of_memory(const char* msg);
 
 void error_unexpected_allocated_memory(const char* msg);
 
+// # Flags
+
+#define VECTOR_INDEX_END (INT_MAX)
+
 #endif // _CBL_BASIC_H_

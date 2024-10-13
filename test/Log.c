@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include "CBL_Log.h"
+#include "Module_Log.h"
 
 int main() {
     LOG_terminal_output = true;

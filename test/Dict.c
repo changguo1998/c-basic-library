@@ -26,8 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "CBL_Basic.h"
-#include "CBL_Dict.h"
+#include "Module_Basic.h"
+#include "Type_Dict.h"
 
 #define NROW 4
 #define NCOL 5

@@ -27,7 +27,7 @@
 #define _CBL_LOG_H_
 
 #include <limits.h>
-#include "CBL_Basic.h"
+#include "Module_Basic.h"
 
 /**
  * @brief output level, choose from \n

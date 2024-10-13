@@ -26,7 +26,7 @@
 #ifndef _CBL_DICT_H_
 #define _CBL_DICT_H_
 
-#include "CBL_Basic.h"
+#include "Module_Basic.h"
 #include "Type_String.h"
 
 

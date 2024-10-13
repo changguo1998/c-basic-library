@@ -25,14 +25,14 @@
 #ifndef _CBL_H_
 #define _CBL_H_
 
-#include "CBL_Basic.h"
-#include "CBL_String.h"
-#include "CBL_DateTime.h"
-#include "CBL_Log.h"
-#include "CBL_Vector.h"
+#include "Module_Basic.h"
+#include "Type_String.h"
+#include "Type_DateTime.h"
+#include "Module_Log.h"
+#include "Template_Vector.h"
 #include "CBL_Array.h"
-#include "CBL_Dict.h"
-#include "CBL_IntVector.h"
+#include "Type_Dict.h"
+#include "Type_IntVector.h"
 #include "CBL_FloatVector.h"
 #include "CBL_FloatMatrix.h"
 // #include "CBL_TypeArray.h"

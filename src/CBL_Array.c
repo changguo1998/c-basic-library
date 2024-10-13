@@ -25,7 +25,7 @@
 
 #include <string.h>
 #include "CBL_Array.h"
-#include "CBL_Log.h"
+#include "Module_Log.h"
 
 Int ARR_prod_Int_vector(const Vector vec) {
     Int n, i, *v;

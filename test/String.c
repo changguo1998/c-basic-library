@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "CBL_String.h"
+#include "Type_String.h"
 
 int main() {
     struct String  r[5], s[3], t[3], Sbuffer;

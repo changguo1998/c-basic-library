@@ -365,7 +365,7 @@ Int Time_diff(const struct Time* this, struct Time time) {
 }
 
 Float Time_diff_second(const struct Time* this, struct Time time) {
-    Float buf = 0.0;
+    Float buf;
     buf = (Float)this->hour - time.hour;
     buf = buf * 60.0 + this->minute - time.minute;
     buf = buf * 60.0 + this->second - time.second;

@@ -54,6 +54,8 @@ void error_not_initialized(const char* msg) { print_err_msg(msg, EINVAL); }
 
 void error_out_of_memory(const char* msg) { print_err_msg(msg, ENOMEM); }
 
-void error_unexpected_allocated_memory(const char* msg) {
-    print_err_msg(msg, EINVAL);
-}
+void error_unexpected_allocated_memory(const char* msg) { print_err_msg(msg, EINVAL); }
+
+void error_file_not_exists(const char* msg) { print_err_msg(msg, ENFILE); }
+
+void error_failed_open_file(const char* msg) { print_err_msg(msg, EIO); }

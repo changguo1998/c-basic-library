@@ -49,6 +49,14 @@
 
 #define TABLE_MAX_COLUMNS 64
 
+// # test system
+
+#ifdef __unix__
+#define UNIX 1
+#elif defined(_WIN32) || defined(_WIN64)
+#define WINDOWS 1
+#endif
+
 // # Type define
 
 // Bool
@@ -227,6 +235,10 @@ void error_not_initialized(const char* msg);
 void error_out_of_memory(const char* msg);
 
 void error_unexpected_allocated_memory(const char* msg);
+
+void error_file_not_exists(const char* msg);
+
+void error_failed_open_file(const char* msg);
 
 // # Flags
 

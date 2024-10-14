@@ -26,31 +26,7 @@
 #ifndef _CBL_INTVECTOR_H_
 #define _CBL_INTVECTOR_H_
 
-#include "CBL_Basic.h"
-
-void INT_VECTOR_level0_get_by_vec(Int* b, const Int* a, Int len_a, const Int* index, Int len_index);
-
-void INT_VECTOR_level0_set_by_vec(Int* a, Int len_a, const Int* index, const Int* values, Int len_index);
-
-void INT_VECTOR_level0_set_by_flags(Int* a, Int len_a, const Bool* flags, Int value);
-
-void INT_VECTOR_level0_find_trues(Int* a, Int len_a, const Int* flags, Int len_flags);
-
-void INT_VECTOR_level0_fill(Int* a, Int n, Int val);
-
-void INT_VECTOR_level0_rand(Int* a, Int n, Int max);
-
-Int INT_VECTOR_level0_sum(const Int* a, Int n);
-
-Int INT_VECTOR_level0_prod(const Int* a, Int n);
-
-void INT_VECTOR_level0_cumsum(Int* a, Int n, Int init);
-
-void INT_VECTOR_level0_cumprod(Int* a, Int n, Int init);
-
-void INT_VECTOR_level0_min_max(const Int* a, Int n, Int* min_value, Int* min_index, Int* max_value, Int* max_index);
-
-void INT_VECTOR_level0_sort(Int* a, Int* perm, Int n);
+#include "Module_Basic.h"
 
 /**
  * @brief IntVector
@@ -58,9 +34,12 @@ void INT_VECTOR_level0_sort(Int* a, Int* perm, Int n);
  * @param data Int*
  */
 struct IntVector {
-    Int  len;
-    Int* data;
+    Int                      len;
+    Int*                     data;
+    struct IntVectorMethods* methods;
+};
 
+struct IntVectorMethods {
     // # memory management
     /* may change the length of the vector */
 
@@ -85,6 +64,7 @@ struct IntVector {
     // # index
     /**
      * @brief get value at index, throw error when index is over bound
+     * @param this
      * @param index Int
      */
     Int (*get)(const struct IntVector* this, Int index);
@@ -108,7 +88,7 @@ struct IntVector {
 
     void (*range_)(struct IntVector* this, Int start, Int step, Int stop);
 
-    void (*copy_from_)(struct IntVector* this, const struct IntVector* src);
+    void (*copy_from_)(struct IntVector* this, struct IntVector src);
 
     void (*find_trues_)(struct IntVector* this, struct IntVector flags);
 
@@ -128,37 +108,20 @@ struct IntVector {
     Int (*argmax)(struct IntVector* this);
 
     // # methods changing values in vector
-    void (*cumsum_)(struct IntVector* this, Int initial_value);
+    void (*cumsum_)(struct IntVector* this, Int initial);
 
-    void (*cumprod_)(struct IntVector* this, Int initial_value);
+    void (*cumprod_)(struct IntVector* this, Int initial);
 
     void (*sort_)(struct IntVector* this);
 
-    void (*sortperm_)(struct IntVector* this, struct IntVector reference);
+    void (*sortperm_)(struct IntVector* this, struct IntVector* perm);
 };
 
-/**
- * @brief free allocated memory
- * @param this struct IntVector*
- */
+
 void IntVector_free_(struct IntVector* this);
 
-/**
-* @brief allocate memory with specified length.\n
-     * If the memory is not allocated, it will allocate memory with given length;\n
-     * If the memory is allocated and the current length is equal to the given length,
-     * nothing will be changed;\n
-     * If the memory is allocated but the current length is not equal to the given length,
-     * it will allocate a new memory with given length, and try to keep the values same to previous memory.\n
- * @param this
- * @param len
- */
 void IntVector_alloc_(struct IntVector* this, Int len);
 
-/**
- * @brief get value at index, throw error when index is over bound
- * @param index Int
- */
 Int IntVector_get(const struct IntVector* this, Int index);
 
 void IntVector_index_(struct IntVector* this, struct IntVector src, struct IntVector indexs);
@@ -177,7 +140,7 @@ void IntVector_fill_(struct IntVector* this, Int value);
 
 void IntVector_range_(struct IntVector* this, Int start, Int step, Int stop);
 
-void IntVector_copy_from_(struct IntVector* this, const struct IntVector* src);
+void IntVector_copy_from_(struct IntVector* this, struct IntVector src);
 
 void IntVector_find_trues_(struct IntVector* this, struct IntVector flags);
 
@@ -195,49 +158,21 @@ Int IntVector_argmin(struct IntVector* this);
 
 Int IntVector_argmax(struct IntVector* this);
 
-void IntVector_cumsum_(struct IntVector* this, Int initial_value);
+void IntVector_cumsum_(struct IntVector* this, Int initial);
 
-void IntVector_cumprod_(struct IntVector* this, Int initial_value);
+void IntVector_cumprod_(struct IntVector* this, Int initial);
 
 void IntVector_sort_(struct IntVector* this);
 
-void IntVector_sortperm_(struct IntVector* this, struct IntVector reference);
+void IntVector_sortperm_(struct IntVector* this, struct IntVector* perm);
+
+extern struct IntVectorMethods _CBL_INT_VECTOR_METHODS;
 
 inline static void IntVector_new_(struct IntVector* this) {
-    if(this == NULL) return;
-    this->len  = 0;
+    this->len = 0;
     this->data = NULL;
+    this->methods = &_CBL_INT_VECTOR_METHODS;
 
-    this->free_  = &IntVector_free_;
-    this->alloc_ = &IntVector_alloc_;
-
-    this->get = &IntVector_get;
-
-
-    this->index_      = &IntVector_index_;
-    this->slice_      = &IntVector_slice_;
-    this->index_flag_ = &IntVector_index_flag_;
-    this->set_        = &IntVector_set_;
-
-    this->rand_       = &IntVector_rand_;
-    this->rand_from_  = &IntVector_rand_from_;
-    this->fill_       = &IntVector_fill_;
-    this->range_      = &IntVector_range_;
-    this->copy_from_  = &IntVector_copy_from_;
-    this->find_trues_ = &IntVector_find_trues_;
-
-    this->count  = &IntVector_count;
-    this->sum    = &IntVector_sum;
-    this->prod   = &IntVector_prod;
-    this->min    = &IntVector_min;
-    this->max    = &IntVector_max;
-    this->argmin = &IntVector_argmin;
-    this->argmax = &IntVector_argmax;
-
-    this->cumsum_   = &IntVector_cumsum_;
-    this->cumprod_  = &IntVector_cumprod_;
-    this->sort_     = &IntVector_sort_;
-    this->sortperm_ = &IntVector_sortperm_;
 }
 
 #endif // _CBL_INTVECTOR_H_

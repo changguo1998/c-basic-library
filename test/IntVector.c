@@ -25,47 +25,67 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "CBL_IntVector.h"
+#include <time.h>
+
+#include "Type_IntVector.h"
+
+#define CALLV(obj, mth) ((obj).methods->mth(&(obj)))
+#define CALL(obj, mth, ...) ((obj).methods->mth(&(obj), __VA_ARGS__))
 
 void print_ivec(const struct IntVector* v) {
     printf("[");
-    for(Int i = 0; i < v->len; i++) printf("%d,", v->get(v, i));
+    for(Int i = 0; i < v->len; i++) printf("%d,", v->methods->get(v, i));
     printf("]\n");
 }
 
 int main() {
     struct IntVector iv, iw;
-    Int i, j;
-    IntVector_init(&iv);
-    IntVector_init(&iw);
+    Int              i,  j;
+
+    srand(time(NULL));
+    printf("IntVector methods collection: %p\n", &_CBL_INT_VECTOR_METHODS);
+    printf("before new:\n");
+    printf("iv.len=%d\n", iv.len);
+    printf("iv.data=%p\n", iv.data);
+    printf("iv.methods=%p\n", iv.methods);
+    IntVector_new_(&iv);
+    IntVector_new_(&iw);
+    printf("after new:\n");
+    printf("iv.len=%d\n", iv.len);
+    printf("iv.data=%p\n", iv.data);
+    printf("iv.methods=%p\n", iv.methods);
 
     printf("alloc: ");
-    iv.alloc_(&iv, 5);
+    CALL(iv, alloc_, 10);
     print_ivec(&iv);
 
-    iv.rand_(&iv, 20);
+    CALL(iv, rand_, 0, 20);
     printf("rand: ");
     print_ivec(&iv);
-    i = iv.min(&iv, &j);
+    i = CALLV(iv, min);
+    j = CALLV(iv, argmin);
     printf("min: %d at %d\n", i, j);
-    i = iv.max(&iv, &j);
+
+    i = CALLV(iv, max);
+    j = CALLV(iv, argmax);
     printf("max: %d at %d\n", i, j);
 
-    iv.range_(&iv, 3, 1, iv.len+2);
+    CALL(iv, range_, 3, 1, iv.len + 2);
     printf("range: ");
     print_ivec(&iv);
 
-    printf("sum: %d\n", iv.sum(&iv));
-    printf("prod: %d\n", iv.prod(&iv));
+    printf("sum: %d\n", CALLV(iv, sum));
+    printf("prod: %d\n", CALLV(iv, prod));
 
-    iv.rand_(&iv, 20);
+    CALL(iv, rand_, 0, 20);
     print_ivec(&iv);
-    iv.sort(&iv, &iw);
+    CALL(iv, sortperm_, &iw);
     printf("sort: ");
     print_ivec(&iv);
     printf("perm:");
     print_ivec(&iw);
 
-    iv.free_(&iv);
+    CALLV(iv, free_);
+    CALLV(iw, free_);
     return 0;
 }

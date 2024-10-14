@@ -118,54 +118,6 @@ struct IntVectorMethods {
 };
 
 
-void IntVector_free_(struct IntVector* this);
-
-void IntVector_alloc_(struct IntVector* this, Int len);
-
-Int IntVector_get(const struct IntVector* this, Int index);
-
-void IntVector_index_(struct IntVector* this, struct IntVector src, struct IntVector indexs);
-
-void IntVector_slice_(struct IntVector* this, struct IntVector src, Int start, Int step, Int stop);
-
-void IntVector_index_flag_(struct IntVector* this, struct IntVector src, struct IntVector flags);
-
-void IntVector_set_(struct IntVector* this, Int index, Int value);
-
-void IntVector_rand_(struct IntVector* this, Int min, Int max);
-
-void IntVector_rand_from_(struct IntVector* this, struct IntVector value_set);
-
-void IntVector_fill_(struct IntVector* this, Int value);
-
-void IntVector_range_(struct IntVector* this, Int start, Int step, Int stop);
-
-void IntVector_copy_from_(struct IntVector* this, struct IntVector src);
-
-void IntVector_find_trues_(struct IntVector* this, struct IntVector flags);
-
-Int IntVector_count(struct IntVector* this);
-
-Int IntVector_sum(struct IntVector* this);
-
-Int IntVector_prod(struct IntVector* this);
-
-Int IntVector_min(struct IntVector* this);
-
-Int IntVector_max(struct IntVector* this);
-
-Int IntVector_argmin(struct IntVector* this);
-
-Int IntVector_argmax(struct IntVector* this);
-
-void IntVector_cumsum_(struct IntVector* this, Int initial);
-
-void IntVector_cumprod_(struct IntVector* this, Int initial);
-
-void IntVector_sort_(struct IntVector* this);
-
-void IntVector_sortperm_(struct IntVector* this, struct IntVector* perm);
-
 extern struct IntVectorMethods _CBL_INT_VECTOR_METHODS;
 
 inline static void IntVector_new_(struct IntVector* this) {
@@ -174,5 +126,30 @@ inline static void IntVector_new_(struct IntVector* this) {
     this->methods = &_CBL_INT_VECTOR_METHODS;
 
 }
+
+void IntVector_free_(struct IntVector* this);
+void IntVector_alloc_(struct IntVector* this, Int len);
+Int  IntVector_get(const struct IntVector* this, Int index);
+void IntVector_index_(struct IntVector* this, struct IntVector src, struct IntVector indexs);
+void IntVector_slice_(struct IntVector* this, struct IntVector src, Int start, Int step, Int stop);
+void IntVector_index_flag_(struct IntVector* this, struct IntVector src, struct IntVector flags);
+void IntVector_set_(struct IntVector* this, Int index, Int value);
+void IntVector_rand_(struct IntVector* this, Int min, Int max);
+void IntVector_rand_from_(struct IntVector* this, struct IntVector value_set);
+void IntVector_fill_(struct IntVector* this, Int value);
+void IntVector_range_(struct IntVector* this, Int start, Int step, Int stop);
+void IntVector_copy_from_(struct IntVector* this, struct IntVector src);
+void IntVector_find_trues_(struct IntVector* this, struct IntVector flags);
+Int  IntVector_count(struct IntVector* this);
+Int  IntVector_sum(struct IntVector* this);
+Int  IntVector_prod(struct IntVector* this);
+Int  IntVector_min(struct IntVector* this);
+Int  IntVector_max(struct IntVector* this);
+Int  IntVector_argmin(struct IntVector* this);
+Int  IntVector_argmax(struct IntVector* this);
+void IntVector_cumsum_(struct IntVector* this, Int initial);
+void IntVector_cumprod_(struct IntVector* this, Int initial);
+void IntVector_sort_(struct IntVector* this);
+void IntVector_sortperm_(struct IntVector* this, struct IntVector* perm);
 
 #endif // _CBL_INTVECTOR_H_

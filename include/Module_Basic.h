@@ -28,9 +28,10 @@
 
 #include <complex.h>
 #include <stdbool.h>
+#include <float.h>
 
 
-#define USE_64_BIT 1
+#define USE_64_BIT 0
 
 // #define STRING_MAX_LENGTH 256
 // #define STRING_MAX_LENGTH 512
@@ -197,6 +198,13 @@ typedef Complex64 Complex;
 #define TYPECODE_UINT    TYPECODE_UINT64
 #define TYPECODE_FLOAT   TYPECODE_FLOAT64
 #define TYPECODE_COMPLEX TYPECODE_COMPLEX64
+
+// limits
+#define CBL_INT_MIN LONG_MIN
+#define CBL_INT_MAX LONG_MAX
+#define CBL_FLOAT_MIN DBL_MIN
+#define CBL_FLOAT_MAX DBL_MAX
+
 #else
 /**
  * @brief 32-bit integer
@@ -220,6 +228,13 @@ typedef Complex32 Complex;
 #define TYPECODE_UINT    TYPECODE_UINT32
 #define TYPECODE_FLOAT   TYPECODE_FLOAT32
 #define TYPECODE_COMPLEX TYPECODE_COMPLEX64
+
+// limits
+#define CBL_INT_MIN INT_MIN
+#define CBL_INT_MAX INT_MAX
+#define CBL_FLOAT_MIN FLT_MIN
+#define CBL_FLOAT_MAX FLT_MAX
+
 #endif
 
 // # Error handling

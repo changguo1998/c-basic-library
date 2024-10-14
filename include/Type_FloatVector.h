@@ -26,7 +26,6 @@
 #ifndef _CBL_FLOATVECTOR_H_
 #define _CBL_FLOATVECTOR_H_
 
-#include <stdlib.h>
 #include "Module_Basic.h"
 #include "Type_IntVector.h"
 
@@ -89,7 +88,7 @@ struct FloatVectorMethods {
 
     void (*fill_)(struct FloatVector* this, Float value);
 
-    void (*range_)(struct FloatVector* this, Float start, Float step, Float stop);
+    void (*range_)(struct FloatVector* this, Float start, Float stop);
 
     void (*copy_from_)(struct FloatVector* this, struct FloatVector src);
 
@@ -116,50 +115,6 @@ struct FloatVectorMethods {
     void (*sortperm_)(struct FloatVector* this, struct IntVector* perm);
 };
 
-void FloatVector_free_(struct FloatVector* this);
-
-void FloatVector_alloc_(struct FloatVector* this, Int len);
-
-Float FloatVector_get(const struct FloatVector* this, Int index);
-
-void FloatVector_index_(struct FloatVector* this, struct FloatVector src, struct IntVector indexs);
-
-void FloatVector_slice_(struct FloatVector* this, struct FloatVector src, Int start, Int step, Int stop);
-
-void FloatVector_index_flag_(struct FloatVector* this, struct FloatVector src, struct IntVector flags);
-
-void FloatVector_set_(struct FloatVector* this, Int index, Float value);
-
-void FloatVector_rand_(struct FloatVector* this, Float min, Float max);
-
-void FloatVector_rand_from_(struct FloatVector* this, struct FloatVector value_set);
-
-void FloatVector_fill_(struct FloatVector* this, Float value);
-
-void FloatVector_range_(struct FloatVector* this, Float start, Float step, Float stop);
-
-void FloatVector_copy_from_(struct FloatVector* this, struct FloatVector src);
-
-Float FloatVector_sum(struct FloatVector* this);
-
-Float FloatVector_prod(struct FloatVector* this);
-
-Float FloatVector_min(struct FloatVector* this);
-
-Float FloatVector_max(struct FloatVector* this);
-
-Int FloatVector_argmin(struct FloatVector* this);
-
-Int FloatVector_argmax(struct FloatVector* this);
-
-void FloatVector_cumsum_(struct FloatVector* this, Float initial);
-
-void FloatVector_cumprod_(struct FloatVector* this, Float initial);
-
-void FloatVector_sort_(struct FloatVector* this);
-
-void FloatVector_sortperm_(struct FloatVector* this, struct IntVector* perm);
-
 extern struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS;
 
 inline static void FloatVector_new_(struct FloatVector* this) {
@@ -167,5 +122,28 @@ inline static void FloatVector_new_(struct FloatVector* this) {
     this->data = NULL;
     this->methods = &_CBL_FLOAT_VECTOR_METHODS;
 }
+
+void  FloatVector_free_(struct FloatVector* this);
+void  FloatVector_alloc_(struct FloatVector* this, Int len);
+Float FloatVector_get(const struct FloatVector* this, Int index);
+void  FloatVector_index_(struct FloatVector* this, struct FloatVector src, struct IntVector indexs);
+void  FloatVector_slice_(struct FloatVector* this, struct FloatVector src, Int start, Int step, Int stop);
+void  FloatVector_index_flag_(struct FloatVector* this, struct FloatVector src, struct IntVector flags);
+void  FloatVector_set_(struct FloatVector* this, Int index, Float value);
+void  FloatVector_rand_(struct FloatVector* this, Float min, Float max);
+void  FloatVector_rand_from_(struct FloatVector* this, struct FloatVector value_set);
+void  FloatVector_fill_(struct FloatVector* this, Float value);
+void  FloatVector_range_(struct FloatVector* this, Float start, Float stop);
+void  FloatVector_copy_from_(struct FloatVector* this, struct FloatVector src);
+Float FloatVector_sum(struct FloatVector* this);
+Float FloatVector_prod(struct FloatVector* this);
+Float FloatVector_min(struct FloatVector* this);
+Float FloatVector_max(struct FloatVector* this);
+Int   FloatVector_argmin(struct FloatVector* this);
+Int   FloatVector_argmax(struct FloatVector* this);
+void  FloatVector_cumsum_(struct FloatVector* this, Float initial);
+void  FloatVector_cumprod_(struct FloatVector* this, Float initial);
+void  FloatVector_sort_(struct FloatVector* this);
+void  FloatVector_sortperm_(struct FloatVector* this, struct IntVector* perm);
 
 #endif // _CBL_FLOATVECTOR_H_

@@ -36,7 +36,7 @@ list(APPEND Log_C ${DateTime_C} ${String_C})
 #add_test_target(Array ${Vector_C})
 add_test_target(Dict ${String_C})
 add_test_target(IntVector)
-add_test_target(FloatVector)
+add_test_target(FloatVector ${IntVector_C})
 #add_test_target(FloatMatrix)
 # add_test_target(TypeArray)
 

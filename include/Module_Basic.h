@@ -32,7 +32,7 @@
 #include <float.h>
 
 
-#define USE_64_BIT 0
+#define USE_64_BIT 1
 
 // #define STRING_MAX_LENGTH 256
 // #define STRING_MAX_LENGTH 512

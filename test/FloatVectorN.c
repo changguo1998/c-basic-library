@@ -1,3 +1,4 @@
+
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -26,59 +27,68 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Module_Basic.h"
-#include "Type_IntVectorN.h"
+#include "Type_FloatVectorN.h"
 
 #define VectorLen 5
 
-IntVectorN(VectorLen)
+FloatVectorN(VectorLen)
 
-void print_fvec(const struct IntVector_5* v) {
+void print_ivec(const struct IntVector_5* v) {
     printf("[");
     for(Int i = 0; i < VectorLen; i++) printf("%d,", v->methods->get(v, i));
     printf("]\n");
 }
 
+void print_fvec(const struct FloatVector_5* v) {
+    printf("[");
+    for(Int i = 0; i < VectorLen; i++) printf("%.3f,", v->methods->get(v, i));
+    printf("]\n");
+}
+
 int main() {
     Int i, j;
+    Float x, y;
 
-    CBL_DECLARE_VARS(IntVector_5, 2, iv, iw);
+    CBL_DECLARE_VARS(IntVector_5, 1, iv);
+    CBL_DECLARE_VARS(FloatVector_5, 1, fv);
 
+    printf("methods address: %p\n", &_CBL_FLOAT_VECTOR_5_METHODS);
     printf("after new:\n");
-    printf("iv.data=%p\n", iv.data);
-    printf("iv.methods=%p\n", iv.methods);
+    printf("iv.data=%p\n", fv.data);
+    printf("iv.methods=%p\n", fv.methods);
 
     printf("before initial: ");
-    print_fvec(&iv);
+    print_fvec(&fv);
 
-    CBL_CALL(iv, rand_, 0, 20);
+    CBL_CALL(fv, rand_, 0, 10);
     printf("rand: ");
-    print_fvec(&iv);
-    i = CBL_CALL(iv, min);
-    j = CBL_CALL(iv, argmin);
-    printf("min: %d at %d\n", i, j);
+    print_fvec(&fv);
+    x = CBL_CALL(fv, min);
+    i = CBL_CALL(fv, argmin);
+    printf("min: %.3f at %d\n", x, i);
 
-    i = CBL_CALL(iv, max);
-    j = CBL_CALL(iv, argmax);
-    printf("max: %d at %d\n", i, j);
+    y = CBL_CALL(fv, max);
+    j = CBL_CALL(fv, argmax);
+    printf("max: %.3f at %d\n", y, j);
 
-    CBL_CALL(iv, range_, 3, 1);
+    CBL_CALL(fv, range_, 3, 1);
     printf("range: ");
-    print_fvec(&iv);
+    print_fvec(&fv);
 
-    CBL_CALL(iv, set_all_, 8, 7, 6, 5, 4);
+    CBL_CALL(fv, set_all_, 8.0, 7.0, 6.0, 5.0, 4.0);
     printf("set all: ");
-    print_fvec(&iv);
+    print_fvec(&fv);
 
-    printf("sum: %d\n", CBL_CALL(iv, sum));
-    printf("prod: %d\n", CBL_CALL(iv, prod));
+    printf("sum: %.3f\n", CBL_CALL(fv, sum));
+    printf("prod: %.3f\n", CBL_CALL(fv, prod));
 
-    CBL_CALL(iv, rand_, 0, 20);
-    print_fvec(&iv);
-    iw = CBL_CALL(iv, sortperm_);
+    CBL_CALL(fv, rand_, 0, 10);
+    print_fvec(&fv);
+    iv = CBL_CALL(fv, sortperm_);
     printf("sort: ");
-    print_fvec(&iv);
+    print_fvec(&fv);
     printf("perm:");
-    print_fvec(&iw);
+    print_ivec(&iv);
 
     return 0;
 }

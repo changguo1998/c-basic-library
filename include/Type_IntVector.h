@@ -79,6 +79,8 @@ struct IntVectorMethods {
 
     void (*set_)(struct IntVector* this, Int index, Int value);
 
+    void (*vcat_)(struct IntVector* this, struct IntVector v1, struct IntVector v2);
+
     // # all
     void (*rand_)(struct IntVector* this, Int min, Int max);
 
@@ -134,6 +136,7 @@ void IntVector_index_(struct IntVector* this, struct IntVector src, struct IntVe
 void IntVector_slice_(struct IntVector* this, struct IntVector src, Int start, Int step, Int stop);
 void IntVector_index_flag_(struct IntVector* this, struct IntVector src, struct IntVector flags);
 void IntVector_set_(struct IntVector* this, Int index, Int value);
+void IntVector_vcat_(struct IntVector* this, struct IntVector v1, struct IntVector v2);
 void IntVector_rand_(struct IntVector* this, Int min, Int max);
 void IntVector_rand_from_(struct IntVector* this, struct IntVector value_set);
 void IntVector_fill_(struct IntVector* this, Int value);

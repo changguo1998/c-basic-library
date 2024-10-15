@@ -81,6 +81,8 @@ struct FloatVectorMethods {
 
     void (*set_)(struct FloatVector* this, Int index, Float value);
 
+    void (*vcat_)(struct FloatVector* this, struct FloatVector v1, struct FloatVector v2);
+
     // # all
     void (*rand_)(struct FloatVector* this, Float min, Float max);
 
@@ -130,6 +132,7 @@ void  FloatVector_index_(struct FloatVector* this, struct FloatVector src, struc
 void  FloatVector_slice_(struct FloatVector* this, struct FloatVector src, Int start, Int step, Int stop);
 void  FloatVector_index_flag_(struct FloatVector* this, struct FloatVector src, struct IntVector flags);
 void  FloatVector_set_(struct FloatVector* this, Int index, Float value);
+void  FloatVector_vcat_(struct FloatVector* this, struct FloatVector v1, struct FloatVector v2);
 void  FloatVector_rand_(struct FloatVector* this, Float min, Float max);
 void  FloatVector_rand_from_(struct FloatVector* this, struct FloatVector value_set);
 void  FloatVector_fill_(struct FloatVector* this, Float value);

@@ -10,6 +10,7 @@ set(DEBUG False)
 
 # tests
 set(BASIC_LIB include/Module_Basic.h src/Module_Basic.c)
+set(MATH_BASIC include/Type_Part_math_basic.h src/Type_Part_math_basic.c)
 
 function(add_test_target modulename)
     if (DEBUG)
@@ -56,10 +57,10 @@ list(APPEND Log_C ${DateTime_C} ${String_C})
 #add_test_target(Array ${Vector_C})
 add_test_target(Dict ${String_C})
 add_test_target(IntVector)
-add_test_target(FloatVector ${IntVector_C})
+add_test_target(FloatVector ${MATH_BASIC} ${IntVector_C})
 add_test_target(IntVectorN ${IntVector_C})
 add_test_target(FloatVectorN ${IntVector_C} ${FloatVector_C} ${IntVectorN_C})
-#add_test_target(FloatMatrix)
+add_test_target(FloatMatrix ${MATH_BASIC} ${IntVector_C})
 # add_test_target(TypeArray)
 
 #message("${FloatVector_C}")

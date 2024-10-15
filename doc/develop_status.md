@@ -26,7 +26,7 @@
 |                       |              |          |          |          |
 | *Float Arrays*        |              |          |          |          |
 | FloatVector           | FloatVector  | &#x2714; | &#x2714; | &#x2714; |
-| FloatMatrix           |              |          |          |          |
+| FloatMatrix           | FloatMatrix  | &#x2714; | &#x2714; | &#x2714; |
 | FloatTensor           |              |          |          |          |
 | FloatArray            |              |          |          |          |
 |                       |              |          |          |          |

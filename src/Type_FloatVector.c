@@ -22,19 +22,13 @@
  * SOFTWARE.                                                                      *
  *                                                                                *
  **********************************************************************************/
-#include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 #include <float.h>
 #include "Module_Basic.h"
-
-#ifdef WINDOWS
-#define _CRT_RAND_S
-#include <windows.h>
-#include <wincrypt.h>
-#endif
-
+#include "Type_Part_math_basic.h"
 #include "Type_FloatVector.h"
 
 struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
@@ -45,6 +39,7 @@ struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
     &FloatVector_slice_,
     &FloatVector_index_flag_,
     &FloatVector_set_,
+    &FloatVector_vcat_,
     &FloatVector_rand_,
     &FloatVector_rand_from_,
     &FloatVector_fill_,
@@ -141,28 +136,30 @@ void FloatVector_set_(struct FloatVector* this, Int index, Float value) {
     this->data[index] = value;
 }
 
+void FloatVector_vcat_(struct FloatVector* this, struct FloatVector v1, struct FloatVector v2) {
+    Int i, n;
+    if(this->len != (v1.len + v2.len)) FloatVector_alloc_(this, v1.len + v2.len);
+    n = 0;
+    for(i = 0; i < v1.len; i++) {
+        this->data[n] = v1.data[i];
+        n += 1;
+    }
+    for(i = 0; i < v2.len; i++) {
+        this->data[n] = v2.data[i];
+        n += 1;
+    }
+}
+
 void FloatVector_rand_(struct FloatVector* this, Float min, Float max) {
     Int i;
     if(this->len <= 0) return;
-    if(max <= min) return;
+    if(max <= min) error_invalid_argument("(FloatVector_rand_) max <= min");
     unsigned long long* pf;
 
     pf = (unsigned long long*)malloc(this->len * sizeof(unsigned long long));
-#ifdef UNIX
-    FILE* fp;
-    fp = fopen("/dev/urandom", "r");
-    if(fp == NULL) error_file_not_exists("/dev/urandom");
-    fread(pf, sizeof(unsigend long long), this->len, fp);
-    fclose(fp);
-#endif
-#ifdef WINDOWS
-    HCRYPTPROV hProv;
-    CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-    CryptGenRandom(hProv, this->len * sizeof(unsigned long long), (BYTE*)pf);
-    CryptReleaseContext(hProv, 0);
-#endif
+    _bm_rand_ull_(&pf, this->len);
     for(i = 0; i < this->len; i++) {
-        this->data[i] = (Float)(
+        this->data[i] = (
             (double)pf[i] /
             ((double)ULONG_LONG_MAX) *
             (max - min) + min

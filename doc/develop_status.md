@@ -33,8 +33,8 @@
 | FloatArray            |             |          |          |          |
 |                       |             |          |          |          |
 | *Macro Template*      |             |          |          |          |
-| IntVector_n macro     | IntVectorF  |          |          |          |
-| IntMatrix_m_n macro   | IntMatrixF  |          |          |          |
+| IntVector_n macro     | IntVectorN  | &#x2714; | &#x2714; | &#x2714; |
+| IntMatrix_m_n macro   | IntMatrixN  |          |          |          |
 | IntTensor_p_q_r macro |             |          |          |          |
 
 # Depencency

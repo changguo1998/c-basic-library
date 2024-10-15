@@ -27,26 +27,32 @@
 #include "CBL.h"
 
 int main() {
-    DateTime dt;
-    String   str1,    str2;
-    Vector   vec_Int, vec_size;
-    Int      shift;
+    CBL_DECLARE_VARS(DateTime, 1, dt);
+    CBL_DECLARE_VARS(String, 2, str1, str2);
+    CBL_DECLARE_VARS(IntVector, 2, vec_Int, vec_size);
+
+    Int shift, i;
 
     LOG_init("log_test_CBL.txt");
-    vec_size                 = VEC_allocate(TYPECODE_INT, sizeof(Int), 3);
-    ((Int*)vec_size.data)[0] = 4;
-    ((Int*)vec_size.data)[1] = 3;
-    ((Int*)vec_size.data)[2] = 2;
-    vec_Int                  = VEC_allocate(TYPECODE_INT, CBL_typecode2size(TYPECODE_INT), 3);
-    ((Int*)vec_Int.data)[0]  = 2;
-    ((Int*)vec_Int.data)[0]  = 1;
-    ((Int*)vec_Int.data)[0]  = 0;
-    shift                    = ARR_linear_index(vec_Int, vec_size);
+
+    CBL_CALL(vec_size, alloc_, 3);
+    CBL_CALL(vec_Int, alloc_, 3);
+    vec_size.data[0] = 4;
+    vec_size.data[1] = 3;
+    vec_size.data[2] = 2;
+    vec_Int.data[0] = 2;
+    vec_Int.data[1] = 1;
+    vec_Int.data[2] = 0;
+    shift = vec_Int.data[2];
+    for (i = 1; i >=0 ; i--) {
+        shift *= vec_size.data[i];
+        shift += vec_Int.data[i];
+    }
     sprintf(str1.str, "shift: %d", shift);
-    str1.len = strlen(str1.str);
+    str1.len = (Int)strlen(str1.str);
     LOG_print_info(str1.str);
-    dt = DT_now(1);
-    DT_datetime_string(dt, str2.str);
+    CBL_CALL(dt, now_, 1);
+    str2 = CBL_CALL(dt, string);
     LOG_print_info(str2.str);
 
     LOG_final();

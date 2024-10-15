@@ -56,18 +56,18 @@ list(APPEND Log_C ${DateTime_C} ${String_C})
 #add_test_target(Vector)
 #add_test_target(Array ${Vector_C})
 add_test_target(Dict ${String_C})
-add_test_target(IntVector)
+add_test_target(IntVector ${MATH_BASIC})
 add_test_target(FloatVector ${MATH_BASIC} ${IntVector_C})
-add_test_target(IntVectorN ${IntVector_C})
-add_test_target(FloatVectorN ${IntVector_C} ${FloatVector_C} ${IntVectorN_C})
+add_test_target(IntVectorN ${MATH_BASIC} ${IntVector_C})
+add_test_target(FloatVectorN ${MATH_BASIC} ${IntVector_C} ${FloatVector_C} ${IntVectorN_C})
 add_test_target(FloatMatrix ${MATH_BASIC} ${IntVector_C})
 # add_test_target(TypeArray)
 
 #message("${FloatVector_C}")
 
 # CBL
-file(GLOB CBL_H "include/CBL*.h")
-file(GLOB CBL_C "src/CBL*.c")
+file(GLOB CBL_H "include/*.h")
+file(GLOB CBL_C "src/*.c")
 
 add_executable(test_CBL ${CBL_C} ${CBL_H} test/CBL.c)
 target_include_directories(test_CBL PRIVATE include)

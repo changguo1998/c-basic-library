@@ -26,6 +26,7 @@
 #ifndef _CBL_BASIC_H_
 #define _CBL_BASIC_H_
 
+#include <stdlib.h>
 #include <complex.h>
 #include <stdbool.h>
 #include <float.h>
@@ -258,5 +259,11 @@ void error_failed_open_file(const char* msg);
 // # Flags
 
 #define VECTOR_INDEX_END (INT_MAX)
+
+// # type define macros
+
+#include "Module_Part_Macro_Loop_Basic.h"
+
+#define CBL_CALL(obj, mth, ...) ((obj).methods->mth(&(obj), ##__VA_ARGS__))
 
 #endif // _CBL_BASIC_H_

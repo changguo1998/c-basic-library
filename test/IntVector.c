@@ -27,10 +27,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "Module_Basic.h"
 #include "Type_IntVector.h"
-
-#define CALLV(obj, mth) ((obj).methods->mth(&(obj)))
-#define CALL(obj, mth, ...) ((obj).methods->mth(&(obj), __VA_ARGS__))
 
 void print_ivec(const struct IntVector* v) {
     printf("[");
@@ -39,53 +37,45 @@ void print_ivec(const struct IntVector* v) {
 }
 
 int main() {
-    struct IntVector iv, iw;
-    Int              i,  j;
+    Int i, j;
 
-    srand(time(NULL));
-    printf("IntVector methods collection: %p\n", &_CBL_INT_VECTOR_METHODS);
-    printf("before new:\n");
-    printf("iv.len=%d\n", iv.len);
-    printf("iv.data=%p\n", iv.data);
-    printf("iv.methods=%p\n", iv.methods);
-    IntVector_new_(&iv);
-    IntVector_new_(&iw);
+    CBL_DECLARE_VARS(IntVector, 2, iv, iw);
+
     printf("after new:\n");
     printf("iv.len=%d\n", iv.len);
     printf("iv.data=%p\n", iv.data);
     printf("iv.methods=%p\n", iv.methods);
 
     printf("alloc: ");
-    CALL(iv, alloc_, 10);
+    CBL_CALL(iv, alloc_, 10);
     print_ivec(&iv);
 
-    CALL(iv, rand_, 0, 20);
+    CBL_CALL(iv, rand_, 0, 20);
     printf("rand: ");
     print_ivec(&iv);
-    i = CALLV(iv, min);
-    j = CALLV(iv, argmin);
+    i = CBL_CALL(iv, min);
+    j = CBL_CALL(iv, argmin);
     printf("min: %d at %d\n", i, j);
 
-    i = CALLV(iv, max);
-    j = CALLV(iv, argmax);
+    i = CBL_CALL(iv, max);
+    j = CBL_CALL(iv, argmax);
     printf("max: %d at %d\n", i, j);
 
-    CALL(iv, range_, 3, 1, iv.len + 2);
+    CBL_CALL(iv, range_, 3, 1, iv.len + 2);
     printf("range: ");
     print_ivec(&iv);
 
-    printf("sum: %d\n", CALLV(iv, sum));
-    printf("prod: %d\n", CALLV(iv, prod));
+    printf("sum: %d\n", CBL_CALL(iv, sum));
+    printf("prod: %d\n", CBL_CALL(iv, prod));
 
-    CALL(iv, rand_, 0, 20);
+    CBL_CALL(iv, rand_, 0, 20);
     print_ivec(&iv);
-    CALL(iv, sortperm_, &iw);
+    CBL_CALL(iv, sortperm_, &iw);
     printf("sort: ");
     print_ivec(&iv);
     printf("perm:");
     print_ivec(&iw);
 
-    CALLV(iv, free_);
-    CALLV(iw, free_);
+    CBL_FREE_VARS(IntVector, 2, iv, iw);
     return 0;
 }

@@ -29,9 +29,6 @@
 
 #include "Type_FloatVector.h"
 
-#define CALLV(obj, mth) ((obj).methods->mth(&(obj)))
-#define CALL(obj, mth, ...) ((obj).methods->mth(&(obj), __VA_ARGS__))
-
 void print_ivec(const struct IntVector* v) {
     printf("[");
     for(Int i = 0; i < v->len; i++) printf("%d,", v->methods->get(v, i));
@@ -45,56 +42,47 @@ void print_fvec(const struct FloatVector* v) {
 }
 
 int main() {
-    struct IntVector   iv;
-    struct FloatVector fv;
+    CBL_DECLARE_VARS(IntVector, 1, iv);
+    CBL_DECLARE_VARS(FloatVector, 1, fv);
 
     Int   i, j;
     Float x, y;
 
-    srand(time(NULL));
-    printf("IntVector methods collection: %p\n", &_CBL_INT_VECTOR_METHODS);
-    printf("before new:\n");
-    printf("iv.len=%d\n", fv.len);
-    printf("iv.data=%p\n", fv.data);
-    printf("iv.methods=%p\n", fv.methods);
-    IntVector_new_(&iv);
-    FloatVector_new_(&fv);
     printf("after new:\n");
     printf("iv.len=%d\n", fv.len);
     printf("iv.data=%p\n", fv.data);
     printf("iv.methods=%p\n", fv.methods);
 
     printf("alloc: ");
-    CALL(fv, alloc_, 10);
+    CBL_CALL(fv, alloc_, 10);
     print_fvec(&fv);
 
-    CALL(fv, rand_, 0.0, 20.0);
+    CBL_CALL(fv, rand_, 0.0, 20.0);
     printf("rand: ");
     print_fvec(&fv);
-    x = CALLV(fv, min);
-    i = CALLV(fv, argmin);
+    x = CBL_CALL(fv, min);
+    i = CBL_CALL(fv, argmin);
     printf("min: %.3f at %d\n", x, i);
 
-    y = CALLV(fv, max);
-    j = CALLV(fv, argmax);
+    y = CBL_CALL(fv, max);
+    j = CBL_CALL(fv, argmax);
     printf("max: %.3f at %d\n", y, j);
 
-    CALL(fv, range_, 1.0, 2.0);
+    CBL_CALL(fv, range_, 1.0, 2.0);
     printf("range: ");
     print_fvec(&fv);
 
-    printf("sum: %.3f\n", CALLV(fv, sum));
-    printf("prod: %.3f\n", CALLV(fv, prod));
+    printf("sum: %.3f\n", CBL_CALL(fv, sum));
+    printf("prod: %.3f\n", CBL_CALL(fv, prod));
 
-    CALL(fv, rand_, 0.0, 20.0);
+    CBL_CALL(fv, rand_, 0.0, 10.0);
     print_fvec(&fv);
-    CALL(fv, sortperm_, &iv);
+    CBL_CALL(fv, sortperm_, &iv);
     printf("sort: ");
     print_fvec(&fv);
     printf("perm:");
     print_ivec(&iv);
 
-    CALLV(iv, free_);
-    CALLV(fv, free_);
+    CBL_FREE_VARS(FloatVector, 1, fv);
     return 0;
 }

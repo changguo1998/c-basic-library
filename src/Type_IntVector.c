@@ -149,28 +149,23 @@ void IntVector_rand_(struct IntVector* this, Int min, Int max) {
     if(this->len <= 0) return;
     if(max <= min) return;
 
-    UInt *pf, maxuint;
-#if USE_64_BIT == 1
-    maxuint = (UInt)ULONG_MAX;
-#else
-    maxuint = (UInt)UINT_MAX;
-#endif
+    unsigned long long *pf;
 
-    pf = (UInt*)malloc(this->len * sizeof(Float));
+    pf = (unsigned long long*)malloc(this->len * sizeof(unsigned long long));
 #ifdef UNIX
     FILE* fp;
     fp = fopen("/dev/urandom", "r");
     if(fp == NULL) error_file_not_exists("/dev/urandom");
-    fread(pf, sizeof(Float), this->len, fp);
+    fread(pf, sizeof(unsigend long long), this->len, fp);
     fclose(fp);
 #endif
 #ifdef WINDOWS
     HCRYPTPROV hProv;
     CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-    CryptGenRandom(hProv, this->len * sizeof(Float), (BYTE*)pf);
+    CryptGenRandom(hProv, this->len * sizeof(unsigned long long), (BYTE*)pf);
     CryptReleaseContext(hProv, 0);
 #endif
-    for(i = 0; i < this->len; i++) this->data[i] = (Int)((Int128)pf[i] % (max - min + 1) + min);
+    for(i = 0; i < this->len; i++) this->data[i] = (Int)(pf[i] % (max - min + 1) + min);
     free(pf);
 }
 

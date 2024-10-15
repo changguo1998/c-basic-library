@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  *                                                                                *
  **********************************************************************************/
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
@@ -145,29 +145,29 @@ void FloatVector_rand_(struct FloatVector* this, Float min, Float max) {
     Int i;
     if(this->len <= 0) return;
     if(max <= min) return;
+    unsigned long long* pf;
 
-    UInt *pf, maxuint;
-#if USE_64_BIT == 1
-    maxuint = ULONG_MAX;
-#else
-    maxuint = UINT_MAX;
-#endif
-
-    pf = (UInt*)malloc(this->len * sizeof(Float));
+    pf = (unsigned long long*)malloc(this->len * sizeof(unsigned long long));
 #ifdef UNIX
     FILE* fp;
     fp = fopen("/dev/urandom", "r");
     if(fp == NULL) error_file_not_exists("/dev/urandom");
-    fread(pf, sizeof(Float), this->len, fp);
+    fread(pf, sizeof(unsigend long long), this->len, fp);
     fclose(fp);
 #endif
 #ifdef WINDOWS
     HCRYPTPROV hProv;
     CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-    CryptGenRandom(hProv, this->len * sizeof(Float), (BYTE*)pf);
+    CryptGenRandom(hProv, this->len * sizeof(unsigned long long), (BYTE*)pf);
     CryptReleaseContext(hProv, 0);
 #endif
-    for(i = 0; i < this->len; i++) this->data[i] = (Float)((Float128)pf[i] / (Float128)maxuint * (max - min) + min);
+    for(i = 0; i < this->len; i++) {
+        this->data[i] = (Float)(
+            (double)pf[i] /
+            ((double)ULONG_LONG_MAX) *
+            (max - min) + min
+        );
+    }
     free(pf);
 }
 

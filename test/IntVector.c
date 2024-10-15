@@ -30,7 +30,7 @@
 #include "Module_Basic.h"
 #include "Type_IntVector.h"
 
-void print_ivec(const struct IntVector* v) {
+void print_fvec(const struct IntVector* v) {
     printf("[");
     for(Int i = 0; i < v->len; i++) printf("%d,", v->methods->get(v, i));
     printf("]\n");
@@ -48,11 +48,11 @@ int main() {
 
     printf("alloc: ");
     CBL_CALL(iv, alloc_, 10);
-    print_ivec(&iv);
+    print_fvec(&iv);
 
-    CBL_CALL(iv, rand_, 0, 20);
+    CBL_CALL(iv, rand_, -5, 20);
     printf("rand: ");
-    print_ivec(&iv);
+    print_fvec(&iv);
     i = CBL_CALL(iv, min);
     j = CBL_CALL(iv, argmin);
     printf("min: %d at %d\n", i, j);
@@ -63,18 +63,18 @@ int main() {
 
     CBL_CALL(iv, range_, 3, 1, iv.len + 2);
     printf("range: ");
-    print_ivec(&iv);
+    print_fvec(&iv);
 
     printf("sum: %d\n", CBL_CALL(iv, sum));
     printf("prod: %d\n", CBL_CALL(iv, prod));
 
     CBL_CALL(iv, rand_, 0, 20);
-    print_ivec(&iv);
+    print_fvec(&iv);
     CBL_CALL(iv, sortperm_, &iw);
     printf("sort: ");
-    print_ivec(&iv);
+    print_fvec(&iv);
     printf("perm:");
-    print_ivec(&iw);
+    print_fvec(&iw);
 
     CBL_FREE_VARS(IntVector, 2, iv, iw);
     return 0;

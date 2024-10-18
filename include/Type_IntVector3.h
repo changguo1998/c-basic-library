@@ -23,66 +23,31 @@
  *                                                                                *
  **********************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#ifndef _TYPE_INTVECTOR3_H_
+#define _TYPE_INTVECTOR3_H_
 
-#include "Type_FloatVector.h"
+#ifdef IntVector3_external_methods_on
+#define IntVector3_external_methods_flag
+#else
+#define IntVector3_external_methods_on
+#define IntVector3_external_methods_flag FLAG,
+#endif
 
-void print_ivec(const struct IntVector* v) {
-    printf("[");
-    for(Int i = 0; i < v->len; i++) printf("%d,", v->methods->get(v, i));
-    printf("]\n");
+#define IntVector3_external_methods_declaration \
+IntVector3_external_methods_declaration \
+IntVector3_external_methods_flag \
+Int (*dot)(struct IntVector3* this, struct IntVector b);
+
+#define IntVector3_external_methods_defination \
+IntVector3_external_methods_defination \
+IntVector3_external_methods_flag \
+static inline Int IntVector3_dot(struct IntVector3* this, struct IntVector b){\
+    return this->data[0]*b.data[0] + this->data[1]*b.data[1] +this->data[2]*b.data[2];\
 }
 
-void print_fvec(const struct FloatVector* v) {
-    printf("[");
-    for(Int i = 0; i < v->len; i++) printf("%.3f,", v->methods->get(v, i));
-    printf("]\n");
-}
+#define IntVector3_external_methods_address \
+IntVector3_external_methods_address \
+IntVector3_external_methods_flag \
+,&IntVector3_dot
 
-int main() {
-    CBL_DECLARE_VARS(IntVector, 1, iv);
-    CBL_DECLARE_VARS(FloatVector, 1, fv);
-
-    Int   i, j;
-    Float x, y;
-
-    printf("after new:\n");
-    printf("iv.len=%d\n", fv.len);
-    printf("iv.data=%p\n", fv.data);
-    printf("iv.methods=%p\n", fv.methods);
-
-    printf("alloc: ");
-    CBL_CALL(fv, alloc_, 10);
-    print_fvec(&fv);
-
-    CBL_CALL(fv, rand_, 0.0, 20.0);
-    printf("rand: ");
-    print_fvec(&fv);
-    x = CBL_CALL(fv, min);
-    i = CBL_CALL(fv, argmin);
-    printf("min: %.3f at %d\n", x, i);
-
-    y = CBL_CALL(fv, max);
-    j = CBL_CALL(fv, argmax);
-    printf("max: %.3f at %d\n", y, j);
-
-    CBL_CALL(fv, range_, 1.0, 0.0, 2.0);
-    printf("range: ");
-    print_fvec(&fv);
-
-    printf("sum: %.3f\n", CBL_CALL(fv, sum));
-    printf("prod: %.3f\n", CBL_CALL(fv, prod));
-
-    CBL_CALL(fv, rand_, 0.0, 10.0);
-    print_fvec(&fv);
-    CBL_CALL(fv, sortperm_, &iv);
-    printf("sort: ");
-    print_fvec(&fv);
-    printf("perm:");
-    print_ivec(&iv);
-
-    CBL_FREE_VARS(FloatVector, 1, fv);
-    return 0;
-}
+#endif // _TYPE_INTVECTOR3_H_

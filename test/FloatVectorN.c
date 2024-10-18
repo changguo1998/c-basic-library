@@ -27,19 +27,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Module_Basic.h"
-#include "Type_FloatVectorN.h"
+#include "Type_FloatVector3.h"
+#include "Template_VectorN.h"
 
-#define VectorLen 5
+#define VectorLen 3
 
-FloatVectorN(VectorLen)
+VectorN(Int, VectorLen)
+VectorN(Float, VectorLen)
 
-void print_ivec(const struct IntVector_5* v) {
+void print_ivec(const struct IntVector3* v) {
     printf("[");
     for(Int i = 0; i < VectorLen; i++) printf("%d,", v->methods->get(v, i));
     printf("]\n");
 }
 
-void print_fvec(const struct FloatVector_5* v) {
+void print_fvec(const struct FloatVector3* v) {
     printf("[");
     for(Int i = 0; i < VectorLen; i++) printf("%.3f,", v->methods->get(v, i));
     printf("]\n");
@@ -49,10 +51,10 @@ int main() {
     Int i, j;
     Float x, y;
 
-    CBL_DECLARE_VARS(IntVector_5, 1, iv);
-    CBL_DECLARE_VARS(FloatVector_5, 1, fv);
+    CBL_DECLARE_VARS(IntVector3, 1, iv);
+    CBL_DECLARE_VARS(FloatVector3, 3, fu, fv, fw);
 
-    printf("methods address: %p\n", &_CBL_FLOAT_VECTOR_5_METHODS);
+    printf("methods address: %p\n", &_CBL_Float_VECTOR_3_METHODS);
     printf("after new:\n");
     printf("iv.data=%p\n", fv.data);
     printf("iv.methods=%p\n", fv.methods);
@@ -75,15 +77,26 @@ int main() {
     printf("range: ");
     print_fvec(&fv);
 
-    CBL_CALL(fv, set_all_, 8.0, 7.0, 6.0, 5.0, 4.0);
+    CBL_CALL(fv, set_all_, 8.0, 7.0, 6.0);
     printf("set all: ");
     print_fvec(&fv);
 
     printf("sum: %.3f\n", CBL_CALL(fv, sum));
     printf("prod: %.3f\n", CBL_CALL(fv, prod));
 
-    CBL_CALL(fv, rand_, 0, 10);
+    CBL_CALL(fv, rand_, -1.0, 1.0);
+    CBL_CALL(fv, normalize_, 2);
+    CBL_CALL(fw, rand_, -1.0, 1.0);
+    CBL_CALL(fw, normalize_, 2);
+    fu = CBL_CALL(fv, cross, fw);
+    printf("fv:\n");
     print_fvec(&fv);
+    printf("fw:\n");
+    print_fvec(&fw);
+    printf("fu:\n");
+    print_fvec(&fu);
+    printf("dot(fu, fv) = %.3f\n", CBL_CALL(fu, dot, fv));
+    printf("dot(fu, fw) = %.3f\n", CBL_CALL(fu, dot, fw));
     iv = CBL_CALL(fv, sortperm_);
     printf("sort: ");
     print_fvec(&fv);

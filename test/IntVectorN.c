@@ -26,13 +26,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Module_Basic.h"
-#include "Type_IntVectorN.h"
+#include "Template_VectorN.h"
 
 #define VectorLen 5
 
-IntVectorN(VectorLen)
+VectorN(Int, VectorLen)
 
-void print_fvec(const struct IntVector_5* v) {
+void print_fvec(const struct IntVector5* v) {
     printf("[");
     for(Int i = 0; i < VectorLen; i++) printf("%d,", v->methods->get(v, i));
     printf("]\n");
@@ -41,7 +41,7 @@ void print_fvec(const struct IntVector_5* v) {
 int main() {
     Int i, j;
 
-    CBL_DECLARE_VARS(IntVector_5, 2, iv, iw);
+    CBL_DECLARE_VARS(IntVector5, 2, iv, iw);
 
     printf("after new:\n");
     printf("iv.data=%p\n", iv.data);

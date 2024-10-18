@@ -6,7 +6,10 @@ set(CMAKE_C_STANDARD 99)
 
 set(DEBUG False)
 
-#set(CMAKE_INSTALL_PREFIX ./)
+#set(CMAKE_INSTALL_PREFIX ./install)
+
+# experiment codes
+#add_executable(exp_Macro_template experiment/macro_template.c)
 
 # tests
 set(BASIC_LIB include/Module_Basic.h src/Module_Basic.c)
@@ -30,7 +33,7 @@ function(add_test_target modulename)
     if (DEBUG)
         message("SRC: ${${modulename}_C_src}")
     endif ()
-    set(${modulename}_C "" PARENT_SCOPE)
+
     set(${modulename}_C "${${modulename}_C_inc}" "${${modulename}_C_src}" PARENT_SCOPE)
     list(APPEND ${modulename}_C "${${modulename}_C_inc}" "${${modulename}_C_src}")
 
@@ -53,17 +56,13 @@ add_test_target(String)
 add_test_target(DateTime ${String_C})
 add_test_target(Log ${DateTime_C} ${String_C})
 list(APPEND Log_C ${DateTime_C} ${String_C})
-#add_test_target(Vector)
-#add_test_target(Array ${Vector_C})
 add_test_target(Dict ${String_C})
-add_test_target(IntVector ${MATH_BASIC})
-add_test_target(FloatVector ${MATH_BASIC} ${IntVector_C})
-add_test_target(IntVectorN ${MATH_BASIC} ${IntVector_C})
-add_test_target(FloatVectorN ${MATH_BASIC} ${IntVector_C} ${FloatVector_C} ${IntVectorN_C})
-add_test_target(FloatMatrix ${MATH_BASIC} ${IntVector_C})
+add_test_target(IntVector ${MATH_BASIC} include/Template_Vector.h)
+add_test_target(FloatVector ${MATH_BASIC} include/Template_Vector.h ${IntVector_C})
+#add_test_target(FloatMatrix ${MATH_BASIC} ${IntVector_C})
+add_test_target(IntVectorN ${MATH_BASIC} include/Template_VectorN.h)
+add_test_target(FloatVectorN ${MATH_BASIC} include/Template_VectorN.h)
 # add_test_target(TypeArray)
-
-#message("${FloatVector_C}")
 
 # CBL
 file(GLOB CBL_H "include/*.h")

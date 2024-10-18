@@ -26,40 +26,39 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <float.h>
 #include "Module_Basic.h"
 #include "Type_Part_math_basic.h"
-#include "Type_IntVector.h"
+#include "Type_FloatVector.h"
 
-struct IntVectorMethods _CBL_INT_VECTOR_METHODS = {
-    &IntVector_free_,
-    &IntVector_alloc_,
-    &IntVector_get,
-    &IntVector_index_,
-    &IntVector_slice_,
-    &IntVector_index_flag_,
-    &IntVector_set_,
-    &IntVector_vcat_,
-    &IntVector_rand_,
-    &IntVector_rand_from_,
-    &IntVector_fill_,
-    &IntVector_range_,
-    &IntVector_copy_from_,
-    &IntVector_find_trues_,
-    &IntVector_count,
-    &IntVector_sum,
-    &IntVector_prod,
-    &IntVector_min,
-    &IntVector_max,
-    &IntVector_argmin,
-    &IntVector_argmax,
-    &IntVector_cumsum_,
-    &IntVector_cumprod_,
-    &IntVector_sort_,
-    &IntVector_sortperm_
+struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
+    &FloatVector_free_,
+    &FloatVector_alloc_,
+    &FloatVector_get,
+    &FloatVector_index_,
+    &FloatVector_slice_,
+    &FloatVector_index_flag_,
+    &FloatVector_set_,
+    &FloatVector_vcat_,
+    &FloatVector_rand_,
+    &FloatVector_rand_from_,
+    &FloatVector_fill_,
+    &FloatVector_range_,
+    &FloatVector_copy_from_,
+    &FloatVector_sum,
+    &FloatVector_prod,
+    &FloatVector_min,
+    &FloatVector_max,
+    &FloatVector_argmin,
+    &FloatVector_argmax,
+    &FloatVector_cumsum_,
+    &FloatVector_cumprod_,
+    &FloatVector_sort_,
+    &FloatVector_sortperm_,
+    &FloatVector_dot
 };
 
-
-void IntVector_free_(struct IntVector* this) {
+void FloatVector_free_(struct FloatVector* this) {
     if(this == NULL) return;
     if(this->data) {
         free(this->data);
@@ -68,61 +67,62 @@ void IntVector_free_(struct IntVector* this) {
     }
 }
 
-void IntVector_alloc_(struct IntVector* this, Int len) {
-    Int *p = NULL, n;
+void FloatVector_alloc_(struct FloatVector* this, Int len) {
+    Int    n;
+    Float* p = NULL;
     // check parameter
     if(this == NULL) return;
     // new length is equal to current length, keep it not changed
     if(this->len == len) return;
-    if(len <= 0) error_invalid_argument("(IntVector_alloc) len <= 0");
+    if(len <= 0) error_invalid_argument("(FloatVector_alloc) len <= 0");
     // this vector is not allocated before, allocate new memory
     if(this->len <= 0) {
-        this->data = (Int*)malloc(len * sizeof(Int));
+        this->data = (Float*)malloc(len * sizeof(Float));
         this->len = len;
         return;
     }
     // new length is not equal to current length
-    p = (Int*)calloc(len, sizeof(Int));
+    p = (Float*)calloc(len, sizeof(Float));
     n = this->len < len ? this->len : len;
-    memcpy(p, this->data, n * sizeof(Int));
+    memcpy(p, this->data, n * sizeof(Float));
     free(this->data);
     this->data = p;
     this->len = len;
 }
 
-Int IntVector_get(const struct IntVector* this, Int index) {
-    if((index >= this->len) || (index < 0)) error_index_out_of_bounds("(IntVector_get) index out of bounds");
+Float FloatVector_get(const struct FloatVector* this, Int index) {
+    if((index >= this->len) || (index < 0)) error_index_out_of_bounds("(FloatVector_get) index out of bounds");
     return this->data[index];
 }
 
-void IntVector_index_(struct IntVector* this, struct IntVector src, struct IntVector indexs) {
+void FloatVector_index_(struct FloatVector* this, struct FloatVector src, struct IntVector indexs) {
     Int i;
     if(src.len <= 0) return;
     if(indexs.len <= 0) return;
-    if(this->len != indexs.len) IntVector_alloc_(this, indexs.len);
+    if(this->len != indexs.len) FloatVector_alloc_(this, indexs.len);
     for(i = 0; i < indexs.len; i++) {
-        if(indexs.data[i] < 0 || indexs.data[i] >= src.len) error_index_out_of_bounds("(IntVector_index_)");
+        if(indexs.data[i] < 0 || indexs.data[i] >= src.len) error_index_out_of_bounds("(FloatVector_index_)");
         this->data[i] = src.data[indexs.data[i]];
     }
 }
 
-void IntVector_slice_(struct IntVector* this, struct IntVector src, Int start, Int step, Int stop) {
+void FloatVector_slice_(struct FloatVector* this, struct FloatVector src, Int start, Int step, Int stop) {
     Int i, n;
     if(stop == VECTOR_INDEX_END) stop = src.len - 1;
-    if(step == 0) error_invalid_argument("(IntVector_slice_) step is zero");
-    if(start < 0) error_invalid_argument("(IntVector_slice_) start < 0");
-    if(stop >= src.len) error_invalid_argument("(IntVector_slice_) stop >= src.len");
+    if(step == 0) error_invalid_argument("(FloatVector_slice_) step is zero");
+    if(start < 0) error_invalid_argument("(FloatVector_slice_) start < 0");
+    if(stop >= src.len) error_invalid_argument("(FloatVector_slice_) stop >= src.len");
     n = labs(stop - start) / labs(step) + 1;
-    if(n != this->len) IntVector_alloc_(this, n);
+    if(n != this->len) FloatVector_alloc_(this, n);
     for(i = 0; i < n; i++) this->data[i] = src.data[start + i * step];
 }
 
-void IntVector_index_flag_(struct IntVector* this, struct IntVector src, struct IntVector flags) {
+void FloatVector_index_flag_(struct FloatVector* this, struct FloatVector src, struct IntVector flags) {
     Int i, n;
-    if(src.len <= 0) error_invalid_argument("(IntVector_index_)src is empty");
-    if(src.len != flags.len) error_invalid_argument("(IntVector_index_flag_) src.len != flags.len");
+    if(src.len <= 0) error_invalid_argument("(FloatVector_index_)src is empty");
+    if(src.len != flags.len) error_invalid_argument("(FloatVector_index_flag_) src.len != flags.len");
     n = IntVector_count(&flags);
-    if(n != this->len) IntVector_alloc_(this, n);
+    if(n != this->len) FloatVector_alloc_(this, n);
     n = 0;
     for(i = 0; i < src.len; i++)
         if(flags.data[i]) {
@@ -131,15 +131,15 @@ void IntVector_index_flag_(struct IntVector* this, struct IntVector src, struct 
         }
 }
 
-void IntVector_set_(struct IntVector* this, Int index, Int value) {
+void FloatVector_set_(struct FloatVector* this, Int index, Float value) {
     if(this->len <= 0) return;
-    if(index < 0 || index >= this->len) error_index_out_of_bounds("(IntVector_set_) index out of bounds");
+    if(index < 0 || index >= this->len) error_index_out_of_bounds("(FloatVector_set_) index out of bounds");
     this->data[index] = value;
 }
 
-void IntVector_vcat_(struct IntVector* this, struct IntVector v1, struct IntVector v2) {
+void FloatVector_vcat_(struct FloatVector* this, struct FloatVector v1, struct FloatVector v2) {
     Int i, n;
-    if(this->len != (v1.len + v2.len)) IntVector_alloc_(this, v1.len + v2.len);
+    if(this->len != (v1.len + v2.len)) FloatVector_alloc_(this, v1.len + v2.len);
     n = 0;
     for(i = 0; i < v1.len; i++) {
         this->data[n] = v1.data[i];
@@ -151,20 +151,27 @@ void IntVector_vcat_(struct IntVector* this, struct IntVector v1, struct IntVect
     }
 }
 
-void IntVector_rand_(struct IntVector* this, Int min, Int max) {
+void FloatVector_rand_(struct FloatVector* this, Float min, Float max) {
     Int i;
     if(this->len <= 0) return;
-    if(max <= min) return;
+    if(max <= min) error_invalid_argument("(FloatVector_rand_) max <= min");
+    unsigned long long* pf;
 
-    unsigned long long* pf = NULL;
     pf = (unsigned long long*)malloc(this->len * sizeof(unsigned long long));
-    _bm_rand_ull_(&pf, this->len);
-    for(i = 0; i < this->len; i++) this->data[i] = (Int)(pf[i] % (max - min + 1) + min);
+    _bm_rand_ull_(pf, this->len);
+    for(i = 0; i < this->len; i++) {
+        this->data[i] = (
+            (double)pf[i] /
+            ((double)ULONG_LONG_MAX) *
+            (max - min) + min
+        );
+    }
     free(pf);
 }
 
-void IntVector_rand_from_(struct IntVector* this, struct IntVector value_set) {
-    Int              i;
+void FloatVector_rand_from_(struct FloatVector* this, struct FloatVector value_set) {
+    Int i;
+
     struct IntVector idxs;
 
     if(value_set.len <= 0) return;
@@ -176,83 +183,69 @@ void IntVector_rand_from_(struct IntVector* this, struct IntVector value_set) {
     IntVector_free_(&idxs);
 }
 
-void IntVector_fill_(struct IntVector* this, Int value) {
+void FloatVector_fill_(struct FloatVector* this, Float value) {
     Int i;
     if(this->len <= 0) return;
     for(i = 0; i < this->len; i++) this->data[i] = value;
 }
 
-void IntVector_range_(struct IntVector* this, Int start, Int step, Int stop) {
-    Int i;
-    if(step == 0)
-        if(start > stop) step = -1;
-        else if(start < stop) step = 1;
+void FloatVector_range_(struct FloatVector* this, Float start, Float stop) {
+    Int   i;
+    Float step;
+    if(this->len <= 0) return;
+    if(this->len == 1) {
+        this->data[0] = start;
+        return;
+    }
+    step = (stop - start) / (this->len - 1);
 
     for(i = 0; i < this->len; i++) this->data[i] = start + i * step;
 }
 
-void IntVector_copy_from_(struct IntVector* this, struct IntVector src) {
+void FloatVector_copy_from_(struct FloatVector* this, struct FloatVector src) {
     if(src.len <= 0) {
-        IntVector_free_(this);
+        FloatVector_free_(this);
         return;
     }
-    if(src.len != this->len) IntVector_alloc_(this, src.len);
-    memcpy(this->data, src.data, src.len * sizeof(Int));
+    if(src.len != this->len) FloatVector_alloc_(this, src.len);
+    memcpy(this->data, src.data, src.len * sizeof(Float));
 }
 
-void IntVector_find_trues_(struct IntVector* this, struct IntVector flags) {
-    Int i, n;
-    if(flags.len <= 0) {
-        IntVector_free_(this);
-        return;
-    }
-    n = IntVector_count(&flags);
-    if(n != this->len) IntVector_alloc_(this, n);
-    n = 0;
-    for(i = 0; i < flags.len; i++)
-        if(flags.data[i]) {
-            this->data[n] = i;
-            n += 1;
-        }
-}
-
-Int IntVector_count(struct IntVector* this) {
-    Int i = 0, n = 0;
-    if(this->len <= 0) return 0;
-    for(; i < this->len; i++) if(this->data[i]) n += 1;
-    return n;
-}
-
-Int IntVector_sum(struct IntVector* this) {
-    Int sum = 0, i;
+Float FloatVector_sum(struct FloatVector* this) {
+    Int   i;
+    Float sum = 0;
     if(this->len <= 0) return 0;
     for(i = 0; i < this->len; i++) sum += this->data[i];
     return sum;
 }
 
-Int IntVector_prod(struct IntVector* this) {
-    Int prod = 1, i = 0;
+Float FloatVector_prod(struct FloatVector* this) {
+    Int   i = 0;
+    Float prod = 1.0;
     if(this->len <= 0) return 0;
     for(i = 0; i < this->len; i++) prod *= this->data[i];
     return prod;
 }
 
-Int IntVector_min(struct IntVector* this) {
-    Int min = CBL_INT_MAX, i;
+Float FloatVector_min(struct FloatVector* this) {
+    Int   i;
+    Float min = CBL_FLOAT_MAX;
     if(this->len <= 0) return min;
     for(i = 0; i < this->len; i++) if(this->data[i] < min) min = this->data[i];
     return min;
 }
 
-Int IntVector_max(struct IntVector* this) {
-    Int max = CBL_INT_MIN, i;
+Float FloatVector_max(struct FloatVector* this) {
+    Int   i;
+    Float max = CBL_FLOAT_MIN;
     if(this->len <= 0) return max;
     for(i = 0; i < this->len; i++) if(this->data[i] > max) max = this->data[i];
     return max;
 }
 
-Int IntVector_argmin(struct IntVector* this) {
-    Int i, minv = CBL_INT_MAX, mini = -1;
+Int FloatVector_argmin(struct FloatVector* this) {
+    Int   i, mini = -1;
+    Float minv = CBL_FLOAT_MAX;
     if(this->len <= 0) return -1;
     for(i = 0; i < this->len; i++)
         if(this->data[i] < minv) {
@@ -262,8 +255,9 @@ Int IntVector_argmin(struct IntVector* this) {
     return mini;
 }
 
-Int IntVector_argmax(struct IntVector* this) {
-    Int i, maxv = CBL_INT_MIN, maxi = -1;
+Int FloatVector_argmax(struct FloatVector* this) {
+    Int   i, maxi = -1;
+    Float maxv = CBL_FLOAT_MIN;
     if(this->len <= 0) return -1;
     for(i = 0; i < this->len; i++)
         if(this->data[i] > maxv) {
@@ -273,8 +267,9 @@ Int IntVector_argmax(struct IntVector* this) {
     return maxi;
 }
 
-void IntVector_cumsum_(struct IntVector* this, Int initial) {
-    Int i, sum;
+void FloatVector_cumsum_(struct FloatVector* this, Float initial) {
+    Int   i;
+    Float sum;
     if(this->len <= 0) return;
     sum = initial;
     for(i = 0; i < this->len; i++) {
@@ -283,8 +278,9 @@ void IntVector_cumsum_(struct IntVector* this, Int initial) {
     }
 }
 
-void IntVector_cumprod_(struct IntVector* this, Int initial) {
-    Int i, prod;
+void FloatVector_cumprod_(struct FloatVector* this, Float initial) {
+    Int   i;
+    Float prod;
     if(this->len <= 0) return;
     prod = initial;
     for(i = 0; i < this->len; i++) {
@@ -293,20 +289,22 @@ void IntVector_cumprod_(struct IntVector* this, Int initial) {
     }
 }
 
-void IntVector_sort_(struct IntVector* this) {
-    Int i, j, t;
+void FloatVector_sort_(struct FloatVector* this) {
+    Int   i, j;
+    Float tf;
     if(this->len <= 0) return;
     for(i = 0; i < this->len; i++)
         for(j = i + 1; j < this->len; j++)
             if(this->data[i] > this->data[j]) {
-                t = this->data[i];
+                tf = this->data[i];
                 this->data[i] = this->data[j];
-                this->data[j] = t;
+                this->data[j] = tf;
             }
 }
 
-void IntVector_sortperm_(struct IntVector* this, struct IntVector* perm) {
-    Int i, j, t;
+void FloatVector_sortperm_(struct FloatVector* this, struct IntVector* perm) {
+    Int   i, j, ti;
+    Float tf;
     if(this->len <= 0) {
         IntVector_free_(perm);
         return;
@@ -316,11 +314,21 @@ void IntVector_sortperm_(struct IntVector* this, struct IntVector* perm) {
     for(i = 0; i < this->len; i++)
         for(j = i + 1; j < this->len; j++)
             if(this->data[i] > this->data[j]) {
-                t = this->data[i];
+                tf = this->data[i];
                 this->data[i] = this->data[j];
-                this->data[j] = t;
-                t = perm->data[i];
+                this->data[j] = tf;
+                ti = perm->data[i];
                 perm->data[i] = perm->data[j];
-                perm->data[j] = t;
+                perm->data[j] = ti;
             }
+}
+
+Float FloatVector_dot(const struct FloatVector* this, struct FloatVector b) {
+    Int i;
+    Float sum;
+    if(this->len <= 0) return 0;
+    if(this->len != b.len) error_invalid_argument("(FloatVector_dot) length mismatch");
+    sum = 0.0;
+    for(i = 0; i < this->len; i++) sum += this->data[i] * b.data[i];
+    return sum;
 }

@@ -133,7 +133,7 @@ void FloatMatrix_rand_(struct FloatMatrix* this, Float min, Float max) {
 
     n = this->nrow * this->ncol;
     pf = (unsigned long long*)malloc(n * sizeof(unsigned long long));
-    _bm_rand_ull_(&pf, n);
+    _bm_rand_ull_(pf, n);
     for(i = 0; i < n; i++) {
         this->data[i] = (
             (double)pf[i] /

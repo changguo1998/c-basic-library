@@ -28,7 +28,6 @@
 
 #include "Module_Basic.h"
 #include "Template_Vector.h"
-#include "Type_IntVector.h"
 
 #ifndef _CBL_INT_VECTOR_BASIC_
 #define _CBL_INT_VECTOR_BASIC_

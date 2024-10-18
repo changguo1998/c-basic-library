@@ -32,6 +32,7 @@
 
 void _bm_rand_ull_(unsigned long long* buffer, long len);
 Int _bm_convert_ull_to_Int(unsigned long long ull, Int min, Int max);
+Int _bm_round_zero_to_Int(Int x, Int m, Int* c);
 
 // # float
 
@@ -40,6 +41,8 @@ Float _bm_float_mean(Float* v, Int n);
 Float _bm_float_var(Float* v, Int n);
 Float _bm_float_std(Float* v, Int n, Int correct);
 Float _bm_convert_ull_to_Float(unsigned long long ull, Float min, Float max);
+
+Float _bm_round_zero_to_Float(Float x, Float m, Float *c);
 
 Float _bm_n_root(Float x, Int n);
 

@@ -58,6 +58,14 @@ void _bm_rand_ull_(unsigned long long* buffer, long len) {
 
 inline Int _bm_convert_ull_to_Int(unsigned long long ull, Int min, Int max) { return (Int)(ull % (max - min + 1)) + min; }
 
+Int _bm_round_zero_to_Int(Int x, Int m, Int *c) {
+    *c = x/m;
+    x %= m;
+    while(x < 0)  {x += m; *c -= 1;}
+    while(x >= m) {x -= m; *c += 1;}
+    return x;
+}
+
 Float _bm_float_sum(Float* v, Int n) {
     Float sum = 0;
     Int   i;
@@ -85,6 +93,14 @@ Float _bm_float_std(Float* v, Int n, Int correct) {
 
 inline Float _bm_convert_ull_to_Float(unsigned long long ull, Float min, Float max) {
     return ((double)ull) / ((double)ULONG_LONG_MAX) * (max - min) + min;
+}
+
+Float _bm_round_zero_to_Float(Float x, Float m, Float* c) {
+    modf(x / m, c);
+    x -= (*c) * m;
+    while(x < 0)  {x += m; *c -= 1;}
+    while(x >= m) {x -= m; *c += 1;}
+    return x;
 }
 
 Float _bm_n_root(Float x, Int n) {

@@ -30,7 +30,8 @@
 
 // # int
 
-void _bm_rand_ull_(unsigned long long** buffer, long len);
+void _bm_rand_ull_(unsigned long long* buffer, long len);
+Int _bm_convert_ull_to_Int(unsigned long long ull, Int min, Int max);
 
 // # float
 
@@ -38,6 +39,8 @@ Float _bm_float_sum(Float* v, Int n);
 Float _bm_float_mean(Float* v, Int n);
 Float _bm_float_var(Float* v, Int n);
 Float _bm_float_std(Float* v, Int n, Int correct);
+Float _bm_convert_ull_to_Float(unsigned long long ull, Float min, Float max);
 
+Float _bm_n_root(Float x, Int n);
 
 #endif // _TYPE_PART_MATH_BASIC_H_

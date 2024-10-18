@@ -90,11 +90,10 @@ struct DateMethods {
     /**
      * @brief set date and regularize
      * @param this struct Date*
-     * @param year Int
-     * @param month Int
-     * @param day Int
+     * @param n Int
+     * @param ...
      */
-    struct Date (*set_)(struct Date* this, Int year, Int month, Int day);
+    struct Date (*set_)(struct Date* this, Int n, ...);
 
     /**
      * @brief set date based on modified julian day
@@ -161,7 +160,7 @@ struct DateMethods {
 };
 
 struct Date   Date_today_(struct Date* this, Int type);
-struct Date   Date_set_(struct Date* this, Int year, Int month, Int day);
+struct Date   Date_set_(struct Date* this, Int n, ...);
 struct Date   Date_set_julian_(struct Date* this, Int mjday);
 Bool          Date_less_than(const struct Date* this, struct Date another);
 Bool          Date_isequal(const struct Date* this, struct Date another);
@@ -176,23 +175,7 @@ struct String Date_string(const struct Date* this);
 struct TimeMethods {
     struct Time (*now_)(struct Time* this, Int type);
 
-    struct Time (*set_)(struct Time* this,
-                        Int          hour,
-                        Int          minute,
-                        Int          second
-#if TIME_PRECISION > 0
-                       ,
-                        Int millisecond
-#endif
-#if TIME_PRECISION > 3
-                       ,
-                        Int macrosecond
-#endif
-#if TIME_PRECISION > 6
-                           ,
-                            Int nanosecond
-#endif
-    );
+    struct Time (*set_)(struct Time* this, Int n, ...);
 
     /**
      * @brief set all component to zero
@@ -240,23 +223,7 @@ struct TimeMethods {
 };
 
 struct Time Time_now_(struct Time* this, Int type);
-struct Time Time_set_(struct Time* this,
-                      Int          hour,
-                      Int          minute,
-                      Int          second
-#if TIME_PRECISION > 0
-                     ,
-                      Int millisecond
-#endif
-#if TIME_PRECISION > 3
-                     ,
-                      Int macrosecond
-#endif
-#if TIME_PRECISION > 6
-                             ,
-                              Int nanosecond
-#endif
-);
+struct Time Time_set_(struct Time* this, Int n, ...);
 struct Time   Time_zero_(struct Time* this);
 struct Time   Time_regularize_(struct Time* this);
 struct String Time_string(const struct Time* this);
@@ -279,27 +246,7 @@ struct DateTimeMethods {
       */
     struct DateTime (*now_)(struct DateTime* this, Int tz);
 
-    struct DateTime (*set_)(struct DateTime* this,
-                            Int              year,
-                            Int              month,
-                            Int              day,
-                            Int              hour,
-                            Int              minute,
-                            Int              second
-#if TIME_PRECISION > 0
-                           ,
-                            Int millisecond
-#endif
-#if TIME_PRECISION > 3
-                           ,
-                            Int macrosecond
-#endif
-#if TIME_PRECISION > 6
-                                 ,
-                                  Int nanosecond
-#endif
-    );
-
+    struct DateTime (*set_)(struct DateTime* this, Int n, ...);
 
     struct DateTime (*set_julian_)(struct DateTime* this, Float mjdatetime);
 
@@ -335,26 +282,7 @@ struct DateTimeMethods {
 };
 
 struct DateTime DateTime_now_(struct DateTime* this, Int tz);
-struct DateTime DateTime_set_(struct DateTime* this,
-                              Int              year,
-                              Int              month,
-                              Int              day,
-                              Int              hour,
-                              Int              minute,
-                              Int              second
-#if TIME_PRECISION > 0
-                             ,
-                              Int millisecond
-#endif
-#if TIME_PRECISION > 3
-                             ,
-                              Int macrosecond
-#endif
-#if TIME_PRECISION > 6
-                             ,
-                              Int nanosecond
-#endif
-);
+struct DateTime DateTime_set_(struct DateTime* this, Int n, ...);
 struct DateTime DateTime_set_julian_(struct DateTime* this, Float mjdatetime);
 struct DateTime DateTime_regularize_(struct DateTime* this);
 Int             DateTime_diff(const struct DateTime* this, struct DateTime datetime);

@@ -24,7 +24,9 @@
  **********************************************************************************/
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <time.h>
+#include <math.h>
 #include "Type_String.h"
 #include "Type_DateTime.h"
 
@@ -69,13 +71,13 @@ struct DateTimeMethods _CBL_DATETIME_METHODS = {
 };
 
 #if TIME_PRECISION == 0
-const Float _DT_SECOND_PRECISION_RATIO = 1.0;
+const long double _DT_SECOND_PRECISION_RATIO = 1.0;
 #elif TIME_PRECISION == 3
-const Float _DT_SECOND_PRECISION_RATIO = 1e3;
+const long double _DT_SECOND_PRECISION_RATIO = 1e3;
 #elif TIME_PRECISION == 6
-const Float _DT_SECOND_PRECISION_RATIO = 1e6;
+const long double _DT_SECOND_PRECISION_RATIO = 1e6;
 #elif TIME_PRECISION == 9
-const Float _DT_SECOND_PRECISION_RATIO = 1e9;
+const long double _DT_SECOND_PRECISION_RATIO = 1e9;
 #endif
 
 const Int _DT_DAYS_PER_MONTH[12] = {
@@ -85,7 +87,7 @@ const Int _DT_DAYS_PER_MONTH[12] = {
 Int _second2precision(Float s) { return (Int)(s * _DT_SECOND_PRECISION_RATIO); }
 
 Float _precision2second(Int tp) {
-    return (Float)tp / _DT_SECOND_PRECISION_RATIO;
+    return (Float)(tp / _DT_SECOND_PRECISION_RATIO);
 }
 
 // # ========================================================================
@@ -99,10 +101,13 @@ struct Date Date_today_(struct Date* this, Int type) {
     return *this;
 }
 
-struct Date Date_set_(struct Date* this, Int year, Int month, Int day) {
-    this->year = year;
-    this->month = month;
-    this->day = day;
+struct Date Date_set_(struct Date* this, Int n, ...) {
+    va_list ap;
+    va_start(ap, n);
+    this->year  = (n > 0) ? va_arg(ap, long) : 0;
+    this->month = (n > 1) ? va_arg(ap, long) : 0;
+    this->day   = (n > 2) ? va_arg(ap, long) : 0;
+    va_end(ap);
     return *this;
 }
 
@@ -206,7 +211,7 @@ Int Date_diff(const struct Date* this, struct Date date) {
 Int Date_julian(const struct Date* this) {
     struct Date td;
     Date_new_(&td);
-    td.methods->set_(&td, 1858, 11, 16);
+    Date_set_(&td, 3, 1858L, 11L, 16L);
     return Date_diff(this, td);
 }
 
@@ -248,35 +253,22 @@ struct Time Time_now_(struct Time* this, Int type) {
     return *this;
 }
 
-struct Time Time_set_(struct Time* this,
-                      Int          hour,
-                      Int          minute,
-                      Int          second
+struct Time Time_set_(struct Time* this, Int n, ...) {
+    va_list args;
+    va_start(args, n);
+    this->hour   = (n > 0) ? va_arg(args, int) : 0;
+    this->minute = (n > 1) ? va_arg(args, int) : 0;
+    this->second = (n > 2) ? va_arg(args, int) : 0;
 #if TIME_PRECISION > 0
-                     ,
-                      Int millisecond
+    this->millisecond = (n > 3) ? va_arg(args, int) : 0;
 #endif
 #if TIME_PRECISION > 3
-                     ,
-                      Int microsecond
+    this->macrosecond = (n > 4) ? va_arg(args, int) : 0;
 #endif
 #if TIME_PRECISION > 6
-                     ,
-                      Int nanosecond
+    this->nanosecond = (n > 5) ? va_arg(args, int) : 0;
 #endif
-) {
-    this->hour = hour;
-    this->minute = minute;
-    this->second = second;
-#if TIME_PRECISION > 0
-    this->millisecond = millisecond;
-#endif
-#if TIME_PRECISION > 3
-    this->macrosecond = microsecond;
-#endif
-#if TIME_PRECISION > 6
-    this->nanosecond = nanosecond;
-#endif
+    va_end(args);
     return *this;
 }
 
@@ -296,52 +288,104 @@ struct Time Time_zero_(struct Time* this) {
     return *this;
 }
 
+static inline void _time_round_same_sign(long long *large, long long *small, long long base) {
+    *large = *small / base;
+    *small -= *large * base;
+    while(*small >= base) {
+        *small -= base;
+        *large += 1;
+    }
+    while(*small < 0) {
+        *small += base;
+        *large -= 1;
+    }
+    if(*large < 0 && *small > 0) {
+        *small -= base;
+        *large += 1;
+    }
+}
+
 struct Time Time_regularize_(struct Time* this) {
-    this->minute += this->hour * 60;
-    this->second += this->minute * 60;
+    long long t1, t2 = 0;
+    t1 = this->hour;             // t1: hour
+    // printf("hour: %d, t1: %lld\n", this->hour, t1);
+    t1 = this->minute + t1 * 60; // t1: minute
+    // printf("minute: %d, t1: %lld\n", this->minute, t1);
+    t1 = this->second + t1 * 60; // t1: second
+    // printf("second: %d, t1: %lld\n", this->second, t1);
 #if TIME_PRECISION > 0
-    this->millisecond += this->second * 1000;
+    t1 = this->millisecond + t1 * 1000; // t1: millisecond
+    // printf("millisecond: %d, t1: %lld\n", this->millisecond, t1);
 #endif
 #if TIME_PRECISION > 3
-    this->macrosecond += this->millisecond * 1000;
+    t1 = this->macrosecond + t1 * 1000; // t1: macrosecond
+    // printf("macrosecond: %d, t1: %lld\n", this->macrosecond, t1);
 #endif
 #if TIME_PRECISION > 6
-    this->nanosecond += this->macrosecond * 1000;
-    this->macrosecond = this->nanosecond / 1000;
-    this->nanosecond %= 1000;
+    t1 = this->nanosecond + t1 * 1000; // t1: nanosecond
+
+    _time_round_same_sign(&t2, &t1, 1000);
+    this->nanosecond = (Int)t1;
+    t1 = t2; // macrosecond
 #endif
 #if TIME_PRECISION > 3
-    this->millisecond = this->macrosecond / 1000;
-    this->macrosecond %= 1000;
+    _time_round_same_sign(&t2, &t1, 1000);
+    this->macrosecond = (Int)t1;
+    t1 = t2; // millisecond
+    // printf("macrosecond: %d, t1: %lld\n", this->macrosecond, t1);
 #endif
 #if TIME_PRECISION > 0
-    this->second = this->millisecond / 1000;
-    this->millisecond %= 1000;
+    _time_round_same_sign(&t2, &t1, 1000);
+    this->millisecond = (Int)t1;
+    t1 = t2; // second
+    // printf("millisecond: %d, t1: %lld\n", this->millisecond, t1);
 #endif
-    this->minute = this->second / 60;
-    this->second %= 60;
-    this->hour = this->minute / 60;
-    this->minute %= 60;
+    _time_round_same_sign(&t2, &t1, 60);
+    this->second = (Int)t1;
+    t1 = t2; // minute
+    // printf("second: %d, t1: %lld\n", this->second, t1);
+    _time_round_same_sign(&t2, &t1, 60);
+    this->minute = (Int)t1;
+    this->hour = (Int)t2;
+    // printf("minute: %d, t1: %lld\n", this->minute, t1);
+    // printf("hour: %d, t2: %lld\n", this->hour, t2);
     return *this;
 }
 
 struct String Time_string(const struct Time* this) {
     struct String buffer;
+    Int h, m, s, ms, us, ns;
+    Char sign = ' ';
     String_new_(&buffer);
+    h = labs(this->hour);
+    if(this->hour < 0) sign = '-';
+    m = labs(this->minute);
+    if(this->minute < 0) sign = '-';
+    s = labs(this->second);
+    if(this->second < 0) sign = '-';
+
+#if TIME_PRECISION > 0
+    ms = labs(this->millisecond);
+    if(this->millisecond < 0) sign = '-';
+#endif
+#if TIME_PRECISION > 3
+    us = labs(this->macrosecond);
+    if(this->macrosecond < 0) sign = '-';
+#endif
+#if TIME_PRECISION > 6
+    ns = labs(this->nanosecond);
+    if(this->nanosecond < 0) sign = '-';
+#endif
+
+
 #if TIME_PRECISION == 0
-    sprintf(buffer.str, "%02d:%02d:%02d", this->hour, this->minute,
-        this->second);
+    sprintf(buffer.str, "%c%02d:%02d:%02d", sign, h, m, s);
 #elif TIME_PRECISION == 3
-    sprintf(buffer.str, "%02d:%02d:%02d.%03d", this->hour, this->minute,
-        this->second, this->millisecond);
+    sprintf(buffer.str, "%c%02d:%02d:%02d.%03d", sign, h, m, s, ms);
 #elif TIME_PRECISION == 6
-    sprintf(buffer.str, "%02d:%02d:%02d.%03d%03d",
-        this->hour, this->minute, this->second, this->millisecond,
-        this->macrosecond);
+    sprintf(buffer.str, "%c%02d:%02d:%02d.%03d%03d", sign, h, m, s, ms, us);
 #elif TIME_PRECISION == 9
-    sprintf(buffer.str, "%02d:%02d:%02d.%03d%03d%03d",
-        this->hour, this->minute, this->second, this->millisecond,
-        this->macrosecond, this->nanosecond);
+    sprintf(buffer.str, "%c%02d:%02d:%02d.%03d%03d%03d", sign, h, m, s, ms, us, ns);
 #endif
     buffer.len = (Int)strlen(buffer.str);
     return buffer;
@@ -426,70 +470,47 @@ struct DateTime DateTime_now_(struct DateTime* this, Int tz) {
 #if TIME_PRECISION > 6
     this->time.nanosecond = 0;
 #endif
-
+    DateTime_regularize_(this);
     return *this;
 }
 
-struct DateTime DateTime_set_(struct DateTime* this,
-                              Int              year,
-                              Int              month,
-                              Int              day,
-                              Int              hour,
-                              Int              minute,
-                              Int              second
+struct DateTime DateTime_set_(struct DateTime* this, Int n, ...) {
+    va_list ap;
+    va_start(ap, n);
+    this->date.year   = (n > 0) ? va_arg(ap, long) : 0;
+    this->date.month  = (n > 1) ? va_arg(ap, long) : 0;
+    this->date.day    = (n > 2) ? va_arg(ap, long) : 0;
+    this->time.hour   = (n > 3) ? va_arg(ap, long) : 0;
+    this->time.minute = (n > 4) ? va_arg(ap, long) : 0;
+    this->time.second = (n > 5) ? va_arg(ap, long) : 0;
 #if TIME_PRECISION > 0
-                             ,
-                              Int millisecond
+    this->time.millisecond = (n > 6) ? va_arg(ap, long) : 0;
 #endif
 #if TIME_PRECISION > 3
-                             ,
-                              Int macrosecond
+    this->time.macrosecond = (n > 7) ? va_arg(ap, long) : 0;
 #endif
 #if TIME_PRECISION > 6
-                             ,
-                              Int nanosecond
+    this->time.nanosecond = (n > 8) ? va_arg(ap, long) : 0;
 #endif
-) {
-    this->date.year = year;
-    this->date.month = month;
-    this->date.day = day;
-    this->time.hour = hour;
-    this->time.minute = minute;
-    this->time.second = second;
-#if TIME_PRECISION > 0
-    this->time.millisecond = millisecond;
-#endif
-#if TIME_PRECISION > 3
-    this->time.macrosecond = macrosecond;
-#endif
-#if TIME_PRECISION > 6
-    this->time.nanosecond = nanosecond;
-#endif
+    va_end(ap);
     return *this;
 }
 
 struct DateTime DateTime_set_julian_(struct DateTime* this, Float mjdatetime) {
     Int   julian_day_number;
     Int   time_residual;
-    Float temporary_julian_date_time;
+    Float jdatetime_f, jtime_res_f, mjdate_f;
 
-    temporary_julian_date_time = mjdatetime + 0.5 - 2400000;
-    julian_day_number = (Int)temporary_julian_date_time;
-    time_residual = _second2precision(
-        (temporary_julian_date_time - (Float)julian_day_number) * 24 * 60 * 60);
+    jdatetime_f = mjdatetime + 0.5;
+    jtime_res_f = modf(jdatetime_f, &mjdate_f);
+    if(jtime_res_f < 0.0) {
+        mjdate_f    -= 1.0;
+        jtime_res_f += 1.0;
+    }
+    julian_day_number = (Int)mjdate_f;
+    time_residual = _second2precision(jtime_res_f * 86400.0);
     Date_set_julian_(&(this->date), julian_day_number);
-    this->time.hour = 0;
-    this->time.minute = 0;
-    this->time.second = 0;
-#if TIME_PRECISION > 0
-    this->time.millisecond = 0;
-#endif
-#if TIME_PRECISION > 3
-    this->time.macrosecond = 0;
-#endif
-#if TIME_PRECISION > 6
-    this->time.nanosecond = 0;
-#endif
+    Time_zero_(&(this->time));
     return DateTime_add_(this, time_residual);
 }
 
@@ -545,7 +566,7 @@ Float DateTime_julian(const struct DateTime* this) {
     Time_zero_(&tt);
     second_residual = _precision2second(Time_diff(&(this->time), tt)) /
         (24.0 * 60.0 * 60.0);
-    return (Float)Date_julian(&(this->date)) + 2400000 - 0.5 + second_residual;
+    return (Float)Date_julian(&(this->date)) - 0.5 + second_residual;
 }
 
 struct String DateTime_string(const struct DateTime* this) {

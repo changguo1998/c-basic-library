@@ -29,88 +29,341 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "Module_Basic.h"
+#include "Type_Part_math_basic.h"
 
-#define DEFINE_STRUCT_TYPE_VECTOR(T) struct T##Vector{\
+#define _Vector_type_struct(T) struct T##Vector{\
     Int len;\
     T *data;\
-    struct T##VectorMethods *methods;\
-};
-
-#define DEFINE_STRUCT_TYPE_VECTOR_METHODS(T) struct T##VectorMethods{\
-    void (*free_)(     struct T##Vector* this);\
-    void (*alloc_)(    struct T##Vector* this, Int len);\
-       T (*get)( const struct T##Vector* this, Int index);\
-    void (*fill_)(     struct T##Vector* this, T value);\
-    void (*rand_)(     struct T##Vector* this, T min, T max);\
-    void (*rand_from_)(struct T##Vector* this, const struct T##Vector seed);\
-    void (*set_)(      struct T##Vector* this, Int index, T value);\
-    void (*range_)(    struct T##Vector* this, T start, T step, T stop);\
-    void (*index_)(    struct T##Vector* this, const struct T##Vector src, struct IntVector indexs);\
-    void (*index_f_)(  struct T##Vector* this, const struct T##Vector src, struct IntVector flags);\
-    void (*slice_)(    struct T##Vector* this, const struct T##Vector src, Int start, Int step, Int stop);\
-       T (*sum)( const struct T##Vector* this);\
-       T (*prod)(const struct T##Vector* this);\
-       T (*min)( const struct T##Vector* this);\
-       T (*max)( const struct T##Vector* this);\
-    Int (*argmin)(const struct T##Vector* this);\
-    Int (*argmax)(const struct T##Vector* this);\
-    void (*cumsum_)(   struct T##Vector* this, T initial_value);\
-    void (*cumprod_)(  struct T##Vector* this, T initial_value);\
-    void (*sort_)(     struct T##Vector* this);\
+    struct T##VectorMethods* methods;\
 };
 
 
-#define DECLARE_TYPE_VECTOR_METHODS(T)\
-void T##Vector_free_(     struct T##Vector* this);\
-void T##Vector_alloc_(    struct T##Vector* this, Int len);\
-   T T##Vector_get( const struct T##Vector* this, Int index);\
-void T##Vector_fill_(     struct T##Vector* this, T value);\
-void T##Vector_rand_(     struct T##Vector* this, T min, T max);\
-void T##Vector_rand_from_(struct T##Vector* this, const struct T##Vector seed);\
-void T##Vector_set_(      struct T##Vector* this, Int index, T value);\
-void T##Vector_range_(    struct T##Vector* this, T start, T step, T stop);\
-void T##Vector_index_(    struct T##Vector* this, const struct T##Vector src, struct IntVector indexs);\
-void T##Vector_index_f_(  struct T##Vector* this, const struct T##Vector src, struct IntVector flags);\
-void T##Vector_slice_(    struct T##Vector* this, const struct T##Vector src, Int start, Int step, Int stop);\
-   T T##Vector_sum( const struct T##Vector* this);\
-   T T##Vector_prod(const struct T##Vector* this);\
-   T T##Vector_min( const struct T##Vector* this);\
-   T T##Vector_max( const struct T##Vector* this);\
- Int T##Vector_argmin(const struct T##Vector* this);\
- Int T##Vector_argmax(const struct T##Vector* this);\
-void T##Vector_cumsum_(   struct T##Vector* this, T initial_value);\
-void T##Vector_cumprod_(  struct T##Vector* this, T initial_value);\
-void T##Vector_sort_(     struct T##Vector* this);
+#define _Vector_internal_methods_declaration(T) \
+    void (*free_)(       struct T##Vector* this);\
+    void (*alloc_)(      struct T##Vector* this, Int len);\
+    T    (*get)(   const struct T##Vector* this, Int index);\
+    void (*index_)(      struct T##Vector* this, struct T##Vector src, struct IntVector indexs);\
+    void (*slice_)(      struct T##Vector* this, struct T##Vector src, Int start, Int step, Int stop);\
+    Int  (*count)( const struct T##Vector* this);\
+    void (*index_flag_)( struct T##Vector* this, struct T##Vector src, struct IntVector flags);\
+    void (*set_)(        struct T##Vector* this, Int index, T value);\
+    void (*setas_)(      struct T##Vector* this, Int n, ...);\
+    void (*vcat_)(       struct T##Vector* this, Int n, ...);\
+    void (*rand_)(       struct T##Vector* this, T min, T max);\
+    void (*rand_from_)(  struct T##Vector* this, struct T##Vector value_set);\
+    void (*fill_)(       struct T##Vector* this, T value);\
+    void (*range_)(      struct T##Vector* this, T start, T step, T stop);\
+    void (*copy_from_)(  struct T##Vector* this, struct T##Vector src);\
+    void (*find_trues_)( struct T##Vector* this, struct T##Vector flags);\
+    T    (*sum)(   const struct T##Vector* this);\
+    T    (*prod)(  const struct T##Vector* this);\
+    T    (*min)(   const struct T##Vector* this);\
+    T    (*max)(   const struct T##Vector* this);\
+    Int  (*argmin)(const struct T##Vector* this);\
+    Int  (*argmax)(const struct T##Vector* this);\
+    void (*cumsum_)(     struct T##Vector* this, T initial);\
+    void (*cumprod_)(    struct T##Vector* this, T initial);\
+    void (*sort_)(       struct T##Vector* this);\
+    void (*sortperm_)(   struct T##Vector* this, struct IntVector* perm);\
+    T    (*dot)(   const struct T##Vector* this, struct T##Vector b);
 
-#define GLOBAL_METHODS_STRUCT_VAR_NAME(T) _TYPE_##T##_VECTOR_METHODS
-
-#define DEFINE_TYPE_ARRAY_NEW_FUNCTION(T) void T##Vector_new_(struct T##Vector* this){\
+#define _Vector_internal_methods_defination(T)\
+static inline void T##Vector_new_(struct T##Vector *this);\
+static inline void T##Vector_free_(struct T##Vector* this){\
+    if(this == NULL) return;\
+    if(this->data) {\
+        free(this->data);\
+        this->data = NULL;\
+    }\
     this->len = 0;\
-    this->data = NULL;\
-    this->methods = &GLOBAL_METHODS_STRUCT_VAR_NAME(T);\
+}\
+static inline void T##Vector_alloc_(struct T##Vector* this, Int len){\
+    T *p = NULL;\
+    Int n;\
+    if(this == NULL) return;\
+    if(this->len == len) return;\
+    if(len <= 0){\
+        T##Vector_free_(this);\
+        return;\
+    }\
+    if(this->len <= 0) {\
+        this->data = (T*)calloc(len, sizeof(T));\
+        this->len = len;\
+        return;\
+    }\
+    p = (T*)calloc(len, sizeof(T));\
+    n = this->len < len ? this->len : len;\
+    memcpy(p, this->data, n * sizeof(T));\
+    free(this->data);\
+    this->data = p;\
+    this->len = len;\
+}\
+static inline T T##Vector_get(const struct T##Vector* this, Int index){\
+    if((index >= this->len) || (index < 0))\
+        error_index_out_of_bounds("(Vector_get) index out of bounds");\
+    return this->data[index];\
+}\
+static inline void T##Vector_index_(struct T##Vector* this, struct T##Vector src, struct IntVector indexs){\
+    Int i;\
+    if(indexs.len <= 0) return;\
+    T##Vector_alloc_(this, indexs.len);\
+    if(src.len <= 0) return;\
+    for(i = 0; i < indexs.len; i++) {\
+        if(indexs.data[i] < 0 || indexs.data[i] >= src.len)\
+            error_index_out_of_bounds("(Vector_index_) index out of bounds");\
+        this->data[i] = src.data[indexs.data[i]];\
+    }\
+}\
+static inline void T##Vector_slice_(struct T##Vector* this, struct T##Vector src, Int start, Int step, Int stop){\
+    Int i, n;\
+    if(stop == VECTOR_INDEX_END) stop = src.len - 1;\
+    if(step == 0) error_invalid_argument("(Vector_slice_) step is 0");\
+    if(start < 0) error_invalid_argument("(Vector_slice_) start < 0");\
+    if(start >= src.len) error_invalid_argument("(Vector_slice_) start >= this->len");\
+    if(stop < 0) error_invalid_argument("(Vector_slice_) stop < 0");\
+    if(stop >= src.len) error_invalid_argument("(IntVector_slice_) stop >= src.len");\
+    n = labs(stop - start) / labs(step) + 1;\
+    T##Vector_alloc_(this, n);\
+    for(i = 0; i < n; i++) this->data[i] = src.data[start + i * step];\
+}\
+static inline Int T##Vector_count(const struct T##Vector* this){\
+    Int i = 0, n = 0;\
+    if(this->len <= 0) return 0;\
+    for(; i < this->len; i++) if(this->data[i]) n += 1;\
+    return n;\
+}\
+static inline void T##Vector_index_flag_(struct T##Vector* this, struct T##Vector src, struct IntVector flags){\
+    Int i, n;\
+    if(src.len != flags.len) error_invalid_argument("(Vector_index_flag_) src.len != flags.len");\
+    if(src.len <= 0) {\
+        T##Vector_free_(this);\
+        return;\
+    }\
+    n = IntVector_count(&flags);\
+    T##Vector_alloc_(this, n);\
+    n = 0;\
+    for(i = 0; i < src.len; i++)\
+        if(flags.data[i]) {\
+            this->data[n] = src.data[i];\
+            n += 1;\
+        }\
+}\
+static inline void T##Vector_set_(struct T##Vector* this, Int index, T value){\
+    if(this->len <= 0) return;\
+    if(index < 0 || index >= this->len) error_index_out_of_bounds("(Vector_set_) index out of bounds");\
+    this->data[index] = value;\
+}\
+static inline void T##Vector_setas_(struct T##Vector* this, Int n, ...){\
+    va_list ap;\
+    Int i;\
+    va_start(ap, n);\
+    T##Vector_alloc_(this, n);\
+    for(i=0; i < n; i++) this->data[i] = va_arg(ap, _VECTOR_N_VA_ARG_TYPE_##T);\
+    va_end(ap);\
+}\
+static inline void T##Vector_vcat_(struct T##Vector* this, Int n, ...){\
+    Int i, j, row;\
+    va_list ap;\
+    struct T##Vector *pvec = NULL;\
+    va_start(ap, n);\
+    pvec = (struct T##Vector *)malloc(n*sizeof(struct T##Vector));\
+    row = 0;\
+    for(i=0; i < n; i++){\
+        pvec[i] = va_arg(ap, struct T##Vector);\
+        row += pvec[i].len;\
+    }\
+    T##Vector_alloc_(this, row);\
+    row = 0;\
+    for(i=0; i < n; i++){\
+        for(j=0; j < pvec[i].len; j++){\
+            this->data[row] = pvec[i].data[j];\
+            row += 1;\
+        }\
+    }\
+    va_end(ap);\
+}\
+static inline void T##Vector_rand_(struct T##Vector* this, T min, T max){\
+    Int i;\
+    if(this->len <= 0) return;\
+    if(max <= min) error_invalid_argument("(Vector_rand_) min >= max");\
+    unsigned long long* pf = NULL;\
+    pf = (unsigned long long*)malloc(this->len * sizeof(unsigned long long));\
+    _bm_rand_ull_(pf, this->len);\
+    for(i = 0; i < this->len; i++) this->data[i] = _bm_convert_ull_to_##T(pf[i], min, max);\
+    free(pf);\
+}\
+static inline void T##Vector_rand_from_(struct T##Vector* this, struct T##Vector value_set){\
+    Int i;\
+    CBL_DECLARE_VARS(IntVector, 1, idxs);\
+    if(value_set.len <= 0) return;\
+    if(this->len <= 0) return;\
+    IntVector_alloc_(&idxs, this->len);\
+    IntVector_rand_(&idxs, 0, value_set.len - 1);\
+    for(i = 0; i < this->len; i++) this->data[i] = value_set.data[idxs.data[i]];\
+    IntVector_free_(&idxs);\
+}\
+static inline void T##Vector_fill_(struct T##Vector* this, T value){\
+    Int i;\
+    if(this->len <= 0) return;\
+    for(i = 0; i < this->len; i++) this->data[i] = value;\
+}\
+static inline void T##Vector_range_(struct T##Vector* this, T start, T step, T stop){\
+    Int i;\
+    if(this->len <= 0) return;\
+    if(this->len == 1) {\
+        this->data[0] = start;\
+        return;\
+    }\
+    if(step == 0)\
+        if(start != stop) step = (stop - start) / (this->len-1);\
+    for(i = 0; i < this->len; i++) this->data[i] = start + i * step;\
+}\
+static inline void T##Vector_copy_from_(struct T##Vector* this, struct T##Vector src){\
+    if(src.len <= 0) {\
+        T##Vector_free_(this);\
+        return;\
+    }\
+    if(src.len != this->len) T##Vector_alloc_(this, src.len);\
+    memcpy(this->data, src.data, src.len * sizeof(T));\
+}\
+static inline void T##Vector_find_trues_(struct T##Vector* this, struct T##Vector flags){\
+    Int i, n;\
+    if(flags.len <= 0) {\
+        T##Vector_free_(this);\
+        return;\
+    }\
+    n = T##Vector_count(&flags);\
+    if(n != this->len) T##Vector_alloc_(this, n);\
+    n = 0;\
+    for(i = 0; i < flags.len; i++)\
+        if(flags.data[i]) {\
+            this->data[n] = i;\
+            n += 1;\
+        }\
+}\
+static inline T T##Vector_sum(const struct T##Vector* this){\
+    Int i;\
+    T sum = 0;\
+    if(this->len <= 0) return sum;\
+    for(i = 0; i < this->len; i++) sum += this->data[i];\
+    return sum;\
+}\
+static inline T T##Vector_prod(const struct T##Vector* this){\
+    Int i = 0;\
+    T prod = 1;\
+    if(this->len <= 0) return 0;\
+    for(i = 0; i < this->len; i++) prod *= this->data[i];\
+    return prod;\
+}\
+static inline T T##Vector_min(const struct T##Vector* this){\
+    Int i;\
+    T min = _VECTOR_N_VA_ARG_MAX_##T;\
+    if(this->len <= 0) return min;\
+    for(i=0; i<this->len; i++) min = (this->data[i] < min) ? this->data[i] : min;\
+    return min;\
+}\
+static inline T T##Vector_max(const struct T##Vector* this){\
+    Int i;\
+    T max = _VECTOR_N_VA_ARG_MIN_##T;\
+    if(this->len <= 0) return max;\
+    for(i=0; i<this->len; i++) max = (max < this->data[i]) ? this->data[i] : max;\
+    return max;\
+}\
+static inline Int  T##Vector_argmin(const struct T##Vector* this){\
+    Int i, mini = -1;\
+    T minv = _VECTOR_N_VA_ARG_MAX_##T;\
+    if(this->len <= 0) return -1;\
+    for(i = 0; i < this->len; i++)\
+        if(this->data[i] < minv) {\
+            minv = this->data[i];\
+            mini = i;\
+        }\
+    return mini;\
+}\
+static inline Int  T##Vector_argmax(const struct T##Vector* this){\
+    Int i, maxi;\
+    T maxv = _VECTOR_N_VA_ARG_MIN_##T;\
+    maxi = -1;\
+    if(this->len <= 0) return -1;\
+    for(i=0; i < this->len; i++)\
+        if(this->data[i] > maxv) {\
+            maxv = this->data[i];\
+            maxi = i;\
+        }\
+    return maxi;\
+}\
+static inline void T##Vector_cumsum_(struct T##Vector* this, T initial){\
+    Int i;\
+    T sum = initial;\
+    for(i=0; i < this->len; i++){\
+        sum += this->data[i];\
+        this->data[i] = sum;\
+    }\
+}\
+static inline void T##Vector_cumprod_(struct T##Vector* this, T initial){\
+    Int i;\
+    T prod = initial;\
+    for(i=0; i < this->len; i++){\
+        prod *= this->data[i];\
+        this->data[i] = prod;\
+    }\
+}\
+static inline void T##Vector_sort_(struct T##Vector* this){\
+    Int i, j;\
+    T   tv;\
+    for(i = 0; i < this->len; i++)\
+        for(j = i + 1; j < this->len; j++)\
+            if(this->data[i] > this->data[j]){\
+                tv = this->data[i];\
+                this->data[i] = this->data[j];\
+                this->data[j] = tv;\
+            }\
+}\
+static inline void T##Vector_sortperm_(struct T##Vector* this, struct IntVector* perm){\
+    Int i, j, ti;\
+    T   tv;\
+    if(this->len <= 0) return;\
+    IntVector_alloc_(perm, this->len);\
+    IntVector_range_(perm, 0, 1, this->len-1);\
+    for(i = 0; i < this->len; i++)\
+        for(j = i + 1; j < this->len; j++)\
+            if(this->data[i] > this->data[j]){\
+                tv = this->data[i];\
+                this->data[i] = this->data[j];\
+                this->data[j] = tv;\
+                ti = perm->data[i];\
+                perm->data[i] = perm->data[j];\
+                perm->data[j] = ti;\
+            }\
+}\
+static inline T T##Vector_dot(const struct T##Vector* this, struct T##Vector b){\
+    Int i;\
+    T sum = 0;\
+    if(this->len != b.len) error_invalid_argument("(Vector_dot) length mismatch");\
+    for(i=0; i < this->len; i++) sum += this->data[i]*b.data[i];\
+    return sum;\
 }
 
-#define DEFINE_TYPE_VECTOR_CLASS_HEADER_PART(T) \
-    DEFINE_STRUCT_TYPE_VECTOR(T)\
-    DEFINE_STRUCT_TYPE_VECTOR_METHODS(T)\
-    DECLARE_TYPE_VECTOR_METHODS(T)\
-    extern struct T##VectorMethods GLOBAL_METHODS_STRUCT_VAR_NAME(T);\
-    DEFINE_TYPE_ARRAY_NEW_FUNCTION(T)
-
-#define INITIALIZE_GLOBAL_METHODS_STRUCT(T) struct T##VectorMethods GLOBAL_METHODS_STRUCT_VAR_NAME(T) = {\
+#define _Vector_internal_methods_address(T)\
     &T##Vector_free_,\
     &T##Vector_alloc_,\
     &T##Vector_get,\
-    &T##Vector_fill_,\
+    &T##Vector_index_,\
+    &T##Vector_slice_,\
+    &T##Vector_count,\
+    &T##Vector_index_flag_,\
+    &T##Vector_set_,\
+    &T##Vector_setas_,\
+    &T##Vector_vcat_,\
     &T##Vector_rand_,\
     &T##Vector_rand_from_,\
-    &T##Vector_set_,\
+    &T##Vector_fill_,\
     &T##Vector_range_,\
-    &T##Vector_index_,\
-    &T##Vector_index_f_,\
-    &T##Vector_slice_,\
+    &T##Vector_copy_from_,\
+    &T##Vector_find_trues_,\
     &T##Vector_sum,\
     &T##Vector_prod,\
     &T##Vector_min,\
@@ -119,183 +372,32 @@ void T##Vector_sort_(     struct T##Vector* this);
     &T##Vector_argmax,\
     &T##Vector_cumsum_,\
     &T##Vector_cumprod_,\
-    &T##Vector_sort_\
-};
+    &T##Vector_sort_,\
+    &T##Vector_sortperm_,\
+    &T##Vector_dot
 
-#define DEFINE_TYPE_VECTOR_METHODS(T)\
-void T##Vector_free_(struct T##Vector* this){\
-    if(this->data) free(this->data);\
-    this->data = NULL;\
+
+#define _Vector_inner(T) \
+_Vector_type_struct(T)\
+struct T##VectorMethods{\
+    _Vector_internal_methods_declaration(T)\
+    _CBL_MACRO_SECOND_TO_END _CBL_MACRO_EMPTY() (T##Vector_external_methods_declaration)\
+};\
+_Vector_internal_methods_defination(T)\
+_CBL_MACRO_SECOND_TO_END _CBL_MACRO_EMPTY() (T##Vector_external_methods_defination)\
+struct T##VectorMethods static _CBL_##T##_VECTOR_METHODS={\
+    _Vector_internal_methods_address(T)\
+    _CBL_MACRO_SECOND_TO_END _CBL_MACRO_EMPTY() (T##Vector_external_methods_address)\
+};\
+static inline void T##Vector_new_(struct T##Vector *this){\
     this->len = 0;\
-}\
-void T##Vector_alloc_(struct T##Vector* this, Int len){\
-    T *p = NULL;\
-    Int n;\
-    if(this->data)\
-        if(this->len == len) return;\
-        else {\
-            p = (T*)calloc(len, sizeof(T));\
-            n = len > this->len ? this->len : len;\
-            memcpy(p, this->data, n * sizeof(T));\
-            free(this->data);\
-            this->data = p;\
-        }\
-    else{\
-        this->data = (T*)calloc(len, sizeof(T));\
-        this->len = len;\
-    }\
-}\
-T T##Vector_get(const struct T##Vector* this, Int index){\
-    if(index<0 || index>=this->len) error_index_out_of_bounds("");\
-    return this->data[index];\
-}\
-void T##Vector_fill_(struct T##Vector* this, T value){\
-    Int i;\
-    for(i=0; i<this->len; i++) this->data[i] = value;\
-}\
-void T##Vector_rand_(struct T##Vector* this, T min, T max){\
-    Int i;\
-    srand(time(NULL));\
-    for(i=0; i<this->len; i++) this->data[i] = (T)(min + (Float)rand()/(Float)(max-min));\
-}\
-void T##Vector_rand_from_(struct T##Vector* this, const struct T##Vector seed){\
-    Int i, idx;\
-    srand(time(NULL));\
-    for(i=0; i<this->len; i++){\
-        idx = (Int)rand() % seed.len;\
-        this->data[i] = seed.data[idx];\
-    }\
-}\
-void T##Vector_set_(struct T##Vector* this, Int index, T value){\
-    if(index < 0 || index >= this->len) error_index_out_of_bounds("");\
-    this->data[index] = value;\
-}\
-void T##Vector_range_(struct T##Vector* this, T start, T step, T stop){\
-    Int i;\
-    if(this->len<=0) return;\
-    if(step == 0) step = (Int)((stop - start)/((Float)(this->len - 1)));\
-    for(i=0; i<this->len; i++) this->data[i] = start + i * step;\
-}\
-void T##Vector_index_(    struct T##Vector* this, const struct T##Vector src, struct IntVector indexs){\
-    Int i, j;\
-    T##Vector_alloc_(this, indexs.len);\
-    for(i=0; i<indexs.len; i++){\
-        j = indexs.data[i];\
-        if(j<0||j>=src.len) error_index_out_of_bounds("");\
-        this->data[i] = src.data[j];\
-    }\
-}\
-void T##Vector_index_f_(  struct T##Vector* this, const struct T##Vector src, struct IntVector flags){\
-    Int i, n;\
-    n = 0;\
-    for(i=0; i<flags.len; i++) if(flags.data[i]) n += 1;\
-    T##Vector_alloc_(this, n);\
-    n = 0; \
-    for(i=0; i<flags.len; i++) if(flags.data[i]){\
-        this->data[n] = src.data[i];\
-        n += 1;\
-    }\
-}\
-void T##Vector_slice_(struct T##Vector* this, const struct T##Vector src, Int start, Int step, Int stop){\
-    Int i, j, n;\
-    if((stop-start)*step <= 0) error_invalid_argument("");\
-    if(start < 0 || start >= src.len) error_invalid_argument("");\
-    if(stop < 0 || stop >= src.len) error_invalid_argument("");\
-    if(step == 0) step = 1;\
-    n = (stop - start) / step + 1;\
-    T##Vector_alloc_(this, n);\
-    j = start;\
-    for(i=0; i<n; i++){\
-        this->data[i] = src.data[j];\
-        j += step;\
-    }\
-}\
-T T##Vector_sum( const struct T##Vector* this){\
-    T sum = 0;\
-    Int i;\
-    for(i=0; i<this->len; i++) sum += this->data[i];\
-    return sum;\
-}\
-T T##Vector_prod(const struct T##Vector* this){\
-    T prod = 1;\
-    Int i;\
-    for(i=0; i<this->len; i++) prod *= this->data[i];\
-    return prod;\
-}\
-T T##Vector_min( const struct T##Vector* this){\
-    T min_val = 0.0;\
-    Int i;\
-    if(this->len<=0) error_invalid_argument("");\
-    min_val = this->data[0];\
-    for(i=0; i<this->len; i++)\
-        if(min_val > this->data[i])\
-            min_val = this->data[i];\
-}\
-T T##Vector_max( const struct T##Vector* this){\
-    T max_val = 0.0;\
-    Int i;\
-    if(this->len<=0) error_invalid_argument("");\
-    max_val = this->data[0];\
-    for(i=0; i<this->len; i++)\
-        if(max_val < this->data[i])\
-            max_val = this->data[i];\
-}\
-Int T##Vector_argmin(const struct T##Vector* this){\
-    T min_val = 0.0;\
-    Int i, min_idx;\
-    if(this->len<=0) error_invalid_argument("");\
-    min_val = this->data[0];\
-    min_idx = 0;\
-    for(i=0; i<this->len; i++)\
-        if(min_val > this->data[i]){\
-            min_val = this->data[i];\
-            min_idx = i;\
-        }\
-}\
-Int T##Vector_argmax(const struct T##Vector* this){\
-    T max_val = 0.0;\
-    Int i, max_idx;\
-    if(this->len<=0) error_invalid_argument("");\
-    max_val = this->data[0];\
-    max_idx = 0;\
-    for(i=0; i<this->len; i++)\
-        if(max_val < this->data[i]){\
-            max_val = this->data[i];\
-            max_idx = i;\
-        }\
-}\
-void T##Vector_cumsum_(   struct T##Vector* this, T initial_value){\
-    Int i;\
-    for(i=0; i<this->len; i++){\
-        initial_value += this->data[i];\
-        this->data[i] = initial_value;\
-    }\
-}\
-void T##Vector_cumprod_(  struct T##Vector* this, T initial_value){\
-    Int i;\
-    for(i=0; i<this->len; i++){\
-        initial_value *= this->data[i];\
-        this->data[i] = initial_value;\
-    }\
-}\
-void T##Vector_sort_(struct T##Vector* this){\
-    Int i, j, t;\
-    for(i = 0; i < this->len; i++)\
-        for(j = i + 1; j < this->len; j++)\
-            if(this->data[i] > this->data[j]) {\
-                t             = this->data[i];\
-                this->data[i] = this->data[j];\
-                this->data[j] = t;\
-            }\
+    this->data = NULL;\
+    this->methods = &_CBL_##T##_VECTOR_METHODS;\
 }
 
-#define DEFINE_TYPE_VECTOR_CLASS_SOURCE_PART(T)\
-    INITIALIZE_GLOBAL_METHODS_STRUCT(T)\
-    DEFINE_TYPE_VECTOR_METHODS(T)
+#define Vector(T) _CBL_MACRO_EXPAND(_Vector_inner(T))
 
-// DEFINE_TYPE_VECTOR_CLASS_HEADER_PART(Int)
-// DEFINE_TYPE_VECTOR_CLASS_HEADER_PART(Float)
-// DEFINE_TYPE_VECTOR_CLASS_SOURCE_PART(Int)
-// DEFINE_TYPE_VECTOR_METHODS(Float)
+// Vector(Int)
+// Vector(Float)
 
 #endif // _TEMPLATE_VECTOR_H_

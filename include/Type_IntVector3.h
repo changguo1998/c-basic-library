@@ -33,21 +33,13 @@
 #define IntVector3_external_methods_flag FLAG,
 #endif
 
-#define IntVector3_external_methods_declaration \
-IntVector3_external_methods_declaration \
-IntVector3_external_methods_flag \
-Int (*dot)(struct IntVector3* this, struct IntVector b);
+// #define IntVector3_external_methods_declaration \
+// IntVector3_external_methods_flag
 
-#define IntVector3_external_methods_defination \
-IntVector3_external_methods_defination \
-IntVector3_external_methods_flag \
-static inline Int IntVector3_dot(struct IntVector3* this, struct IntVector b){\
-    return this->data[0]*b.data[0] + this->data[1]*b.data[1] +this->data[2]*b.data[2];\
-}
+// #define IntVector3_external_methods_defination \
+// IntVector3_external_methods_flag
 
-#define IntVector3_external_methods_address \
-IntVector3_external_methods_address \
-IntVector3_external_methods_flag \
-,&IntVector3_dot
+// #define IntVector3_external_methods_address \
+// IntVector3_external_methods_flag
 
 #endif // _TYPE_INTVECTOR3_H_

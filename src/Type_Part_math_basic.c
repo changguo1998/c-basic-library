@@ -39,7 +39,7 @@
 
 #include <math.h>
 
-void _bm_rand_ull_(unsigned long long** buffer, long len) {
+void _bm_rand_ull_(unsigned long long* buffer, long len) {
 #ifdef UNIX
      FILE* fp = NULL;
      fp = fopen("/dev/urandom", "r");
@@ -51,10 +51,12 @@ void _bm_rand_ull_(unsigned long long** buffer, long len) {
     HCRYPTPROV hProv;
     CryptAcquireContext(&hProv, NULL, NULL,
         PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-    CryptGenRandom(hProv, len * sizeof(unsigned long long), (BYTE*)(*buffer));
+    CryptGenRandom(hProv, len * sizeof(unsigned long long), (BYTE*)buffer);
     CryptReleaseContext(hProv, 0);
 #endif
 }
+
+inline Int _bm_convert_ull_to_Int(unsigned long long ull, Int min, Int max) { return (Int)(ull % (max - min + 1)) + min; }
 
 Float _bm_float_sum(Float* v, Int n) {
     Float sum = 0;
@@ -79,4 +81,16 @@ Float _bm_float_std(Float* v, Int n, Int correct) {
     Int   i;
     for(i = 0; i < n; i++) var += (v[i] - correct) * (v[i] - correct);
     return sqrt(var / (n - correct));
+}
+
+inline Float _bm_convert_ull_to_Float(unsigned long long ull, Float min, Float max) {
+    return ((double)ull) / ((double)ULONG_LONG_MAX) * (max - min) + min;
+}
+
+Float _bm_n_root(Float x, Int n) {
+    long double  root, y, o;
+    y = (long double)x;
+    o = (long double)n;
+    root = expl(logl(y)/o);
+    return (Float)root;
 }

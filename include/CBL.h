@@ -30,12 +30,16 @@
 #include "Type_DateTime.h"
 #include "Module_Log.h"
 #include "Type_Dict.h"
-#include "Type_Part_math_basic.h"
+
+#include "Template_Vector.h"
+#include "Template_VectorN.h"
+
+#include "Type_IntVector3.h"
 #include "Type_IntVector.h"
-#include "Type_IntVectorN.h"
+
+#include "Type_FloatVector3.h"
 #include "Type_FloatVector.h"
-#include "Type_FloatVectorN.h"
-#include "Type_FloatMatrix.h"
+// #include "Type_FloatMatrix.h"
 
 /**
  * @brief get sizeof(type) by typecode

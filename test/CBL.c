@@ -26,6 +26,9 @@
 #include <string.h>
 #include "CBL.h"
 
+VectorN(Int, 3)
+VectorN(Int, 4)
+
 int main() {
     CBL_DECLARE_VARS(DateTime, 1, dt);
     CBL_DECLARE_VARS(String, 2, str1, str2);

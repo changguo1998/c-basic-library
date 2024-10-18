@@ -201,11 +201,17 @@ typedef Complex64 Complex;
 #define TYPECODE_COMPLEX TYPECODE_COMPLEX64
 
 // limits
-#define CBL_INT_MIN LONG_MIN
-#define CBL_INT_MAX LONG_MAX
-#define CBL_FLOAT_MIN DBL_MIN
-#define CBL_FLOAT_MAX DBL_MAX
+// #define CBL_INT_MIN LONG_MIN
+// #define CBL_INT_MAX LONG_MAX
+// #define CBL_FLOAT_MIN DBL_MIN
+// #define CBL_FLOAT_MAX DBL_MAX
 
+#define _VECTOR_N_VA_ARG_TYPE_Int long
+#define _VECTOR_N_VA_ARG_MIN_Int LONG_MIN
+#define _VECTOR_N_VA_ARG_MAX_Int LONG_MAX
+#define _VECTOR_N_VA_ARG_TYPE_Float double
+#define _VECTOR_N_VA_ARG_MIN_Float DBL_MIN
+#define _VECTOR_N_VA_ARG_MAX_Float DBL_MAX
 #else
 /**
  * @brief 32-bit integer
@@ -231,12 +237,19 @@ typedef Complex32 Complex;
 #define TYPECODE_COMPLEX TYPECODE_COMPLEX64
 
 // limits
-#define CBL_INT_MIN INT_MIN
-#define CBL_INT_MAX INT_MAX
-#define CBL_FLOAT_MIN FLT_MIN
-#define CBL_FLOAT_MAX FLT_MAX
+// #define CBL_INT_MIN INT_MIN
+// #define CBL_INT_MAX INT_MAX
+// #define CBL_FLOAT_MIN FLT_MIN
+// #define CBL_FLOAT_MAX FLT_MAX
 
+#define _VECTOR_N_VA_ARG_TYPE_Int int
+#define _VECTOR_N_VA_ARG_MIN_Int INT_MIN
+#define _VECTOR_N_VA_ARG_MAX_Int INT_MAX
+#define _VECTOR_N_VA_ARG_TYPE_Float float
+#define _VECTOR_N_VA_ARG_MIN_Float FLT_MIN
+#define _VECTOR_N_VA_ARG_MAX_Float FLT_MAX
 #endif
+
 
 // # Error handling
 
@@ -262,8 +275,16 @@ void error_failed_open_file(const char* msg);
 
 // # type define macros
 
+#define _CBL_MACRO_EXPAND(...) __VA_ARGS__
+
+#define _CBL_MACRO_EMPTY(...)
+
+#define _CBL_MACRO_SECOND_TO_END(a, ...) __VA_ARGS__
+
 #include "Module_Part_Macro_Loop_Basic.h"
 
-#define CBL_CALL(obj, mth, ...) ((obj).methods->mth(&(obj), ##__VA_ARGS__))
+#define _CBL_CALL_METHOD(obj, f, ...) ((obj).methods->f(&(obj), ##__VA_ARGS__))
+
+#define CBL_CALL(...) _CBL_CALL_METHOD(__VA_ARGS__)
 
 #endif // _CBL_BASIC_H_

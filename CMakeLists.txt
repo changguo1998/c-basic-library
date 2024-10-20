@@ -6,6 +6,9 @@ set(CMAKE_C_STANDARD 99)
 
 set(DEBUG False)
 
+include_directories("D:/Research/Projects/fftw-3.3.10/build/include")
+link_directories("D:/Research/Projects/fftw-3.3.10/build/bin")
+
 #set(CMAKE_INSTALL_PREFIX ./install)
 
 # experiment codes

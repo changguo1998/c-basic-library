@@ -125,7 +125,7 @@ static inline void T##Vector_slice_(struct T##Vector* this, struct T##Vector src
     if(start >= src.len) error_invalid_argument("(Vector_slice_) start >= this->len");\
     if(stop < 0) error_invalid_argument("(Vector_slice_) stop < 0");\
     if(stop >= src.len) error_invalid_argument("(IntVector_slice_) stop >= src.len");\
-    n = labs(stop - start) / labs(step) + 1;\
+    n = _bm_abs_int(stop - start) / _bm_abs_int(step) + 1;\
     T##Vector_alloc_(this, n);\
     for(i = 0; i < n; i++) this->data[i] = src.data[start + i * step];\
 }\

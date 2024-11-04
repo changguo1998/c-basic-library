@@ -30,6 +30,7 @@
 #include <complex.h>
 #include <stdbool.h>
 #include <float.h>
+#include <limits.h>
 
 
 #define USE_64_BIT 1
@@ -201,10 +202,10 @@ typedef Complex64 Complex;
 #define TYPECODE_COMPLEX TYPECODE_COMPLEX64
 
 // limits
-// #define CBL_INT_MIN LONG_MIN
-// #define CBL_INT_MAX LONG_MAX
-// #define CBL_FLOAT_MIN DBL_MIN
-// #define CBL_FLOAT_MAX DBL_MAX
+#define CBL_INT_MIN LONG_MIN
+#define CBL_INT_MAX LONG_MAX
+#define CBL_FLOAT_MIN DBL_MIN
+#define CBL_FLOAT_MAX DBL_MAX
 
 #define _VECTOR_N_VA_ARG_TYPE_Int long
 #define _VECTOR_N_VA_ARG_MIN_Int LONG_MIN
@@ -237,10 +238,10 @@ typedef Complex32 Complex;
 #define TYPECODE_COMPLEX TYPECODE_COMPLEX64
 
 // limits
-// #define CBL_INT_MIN INT_MIN
-// #define CBL_INT_MAX INT_MAX
-// #define CBL_FLOAT_MIN FLT_MIN
-// #define CBL_FLOAT_MAX FLT_MAX
+#define CBL_INT_MIN INT_MIN
+#define CBL_INT_MAX INT_MAX
+#define CBL_FLOAT_MIN FLT_MIN
+#define CBL_FLOAT_MAX FLT_MAX
 
 #define _VECTOR_N_VA_ARG_TYPE_Int int
 #define _VECTOR_N_VA_ARG_MIN_Int INT_MIN

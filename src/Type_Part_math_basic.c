@@ -56,13 +56,21 @@ void _bm_rand_ull_(unsigned long long* buffer, long len) {
 #endif
 }
 
-inline Int _bm_convert_ull_to_Int(unsigned long long ull, Int min, Int max) { return (Int)(ull % (max - min + 1)) + min; }
+inline Int _bm_convert_ull_to_Int(unsigned long long ull, Int min, Int max) {
+    return (Int)(ull % (max - min + 1)) + min;
+}
 
-Int _bm_round_zero_to_Int(Int x, Int m, Int *c) {
-    *c = x/m;
+Int _bm_round_zero_to_Int(Int x, Int m, Int* c) {
+    *c = x / m;
     x %= m;
-    while(x < 0)  {x += m; *c -= 1;}
-    while(x >= m) {x -= m; *c += 1;}
+    while(x < 0) {
+        x += m;
+        *c -= 1;
+    }
+    while(x >= m) {
+        x -= m;
+        *c += 1;
+    }
     return x;
 }
 
@@ -98,15 +106,21 @@ inline Float _bm_convert_ull_to_Float(unsigned long long ull, Float min, Float m
 Float _bm_round_zero_to_Float(Float x, Float m, Float* c) {
     modf(x / m, c);
     x -= (*c) * m;
-    while(x < 0)  {x += m; *c -= 1;}
-    while(x >= m) {x -= m; *c += 1;}
+    while(x < 0) {
+        x += m;
+        *c -= 1;
+    }
+    while(x >= m) {
+        x -= m;
+        *c += 1;
+    }
     return x;
 }
 
 Float _bm_n_root(Float x, Int n) {
-    long double  root, y, o;
+    long double root, y, o;
     y = (long double)x;
     o = (long double)n;
-    root = expl(logl(y)/o);
+    root = expl(logl(y) / o);
     return (Float)root;
 }

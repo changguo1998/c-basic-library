@@ -31,7 +31,7 @@
 #include "Module_Log.h"
 #include "Type_Dict.h"
 
-#include "Template_Vector.h"
+// #include "Template_Vector.h"
 #include "Template_VectorN.h"
 
 #include "Type_IntVector3.h"

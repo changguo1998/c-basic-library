@@ -28,6 +28,7 @@
 #include <time.h>
 #include <math.h>
 #include "Type_String.h"
+#include "Type_Part_math_basic.h"
 #include "Type_DateTime.h"
 
 
@@ -357,23 +358,23 @@ struct String Time_string(const struct Time* this) {
     Int h, m, s, ms, us, ns;
     Char sign = ' ';
     String_new_(&buffer);
-    h = labs(this->hour);
+    h = _bm_abs_int(this->hour);
     if(this->hour < 0) sign = '-';
-    m = labs(this->minute);
+    m = _bm_abs_int(this->minute);
     if(this->minute < 0) sign = '-';
-    s = labs(this->second);
+    s = _bm_abs_int(this->second);
     if(this->second < 0) sign = '-';
 
 #if TIME_PRECISION > 0
-    ms = labs(this->millisecond);
+    ms = _bm_abs_int(this->millisecond);
     if(this->millisecond < 0) sign = '-';
 #endif
 #if TIME_PRECISION > 3
-    us = labs(this->macrosecond);
+    us = _bm_abs_int(this->macrosecond);
     if(this->macrosecond < 0) sign = '-';
 #endif
 #if TIME_PRECISION > 6
-    ns = labs(this->nanosecond);
+    ns = _bm_abs_int(this->nanosecond);
     if(this->nanosecond < 0) sign = '-';
 #endif
 

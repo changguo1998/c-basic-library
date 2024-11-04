@@ -100,19 +100,25 @@ Float FloatVector_get(const struct FloatVector* this, Int index) {
 }
 
 void FloatVector_index_(struct FloatVector* this, struct FloatVector src, struct IntVector indexs) {
-    Int i;
+    Int    i;
+    Float* buf;
     if(indexs.len <= 0) return;
-    FloatVector_alloc_(this, indexs.len);
     if(src.len <= 0) return;
+    buf = (Float*)calloc(indexs.len, sizeof(Float));
     for(i = 0; i < indexs.len; i++) {
         if(indexs.data[i] < 0 || indexs.data[i] >= src.len)
             error_index_out_of_bounds("(Vector_index_) index out of bounds");
-        this->data[i] = src.data[indexs.data[i]];
+        buf[i] = src.data[indexs.data[i]];
     }
+
+    FloatVector_alloc_(this, indexs.len);
+    memcpy(this->data, buf, indexs.len * sizeof(Float));
+    free(buf);
 }
 
 void FloatVector_slice_(struct FloatVector* this, struct FloatVector src, Int start, Int step, Int stop) {
-    Int i, n;
+    Int    i, n;
+    Float* buf;
     if(stop == VECTOR_INDEX_END) stop = src.len - 1;
     if(step == 0) error_invalid_argument("(Vector_slice_) step is 0");
     if(start < 0) error_invalid_argument("(Vector_slice_) start < 0");
@@ -120,25 +126,38 @@ void FloatVector_slice_(struct FloatVector* this, struct FloatVector src, Int st
     if(stop < 0) error_invalid_argument("(Vector_slice_) stop < 0");
     if(stop >= src.len) error_invalid_argument("(IntVector_slice_) stop >= src.len");
     n = _bm_abs_int(stop - start) / _bm_abs_int(step) + 1;
+    buf = (Float*)calloc(n, sizeof(Float));
+
+    for(i = 0; i < n; i++) buf[i] = src.data[start + i * step];
+
     FloatVector_alloc_(this, n);
-    for(i = 0; i < n; i++) this->data[i] = src.data[start + i * step];
+    memcpy(this->data, buf, n * sizeof(Float));
+    free(buf);
 }
 
 void FloatVector_index_flag_(struct FloatVector* this, struct FloatVector src, struct IntVector flags) {
-    Int i, n;
+    Int    i, j, n;
+    Float* buf;
     if(src.len != flags.len) error_invalid_argument("(Vector_index_flag_) src.len != flags.len");
     if(src.len <= 0) {
         FloatVector_free_(this);
         return;
     }
     n = IntVector_count(&flags);
-    FloatVector_alloc_(this, n);
-    n = 0;
+    if(n <= 0) {
+        FloatVector_free_(this);
+        return;
+    }
+    buf = (Float*)calloc(n, sizeof(Float));
+    j = 0;
     for(i = 0; i < src.len; i++)
         if(flags.data[i]) {
-            this->data[n] = src.data[i];
-            n += 1;
+            buf[j] = src.data[i];
+            j += 1;
         }
+    FloatVector_alloc_(this, n);
+    memcpy(this->data, buf, n * sizeof(Float));
+    free(buf);
 }
 
 void FloatVector_set_(struct FloatVector* this, Int index, Float value) {
@@ -157,8 +176,10 @@ void FloatVector_setas_(struct FloatVector* this, Int n, ...) {
 }
 
 void FloatVector_vcat_(struct FloatVector* this, Int n, ...) {
-    Int                 i, j, row;
-    va_list             ap;
+    Int     i, j, k, row;
+    va_list ap;
+    Float*  buf;
+
     struct FloatVector* pvec = NULL;
     va_start(ap, n);
     pvec = (struct FloatVector*)malloc(n * sizeof(struct FloatVector));
@@ -167,15 +188,23 @@ void FloatVector_vcat_(struct FloatVector* this, Int n, ...) {
         pvec[i] = va_arg(ap, struct FloatVector);
         row += pvec[i].len;
     }
-    FloatVector_alloc_(this, row);
-    row = 0;
+    va_end(ap);
+
+    if(row <= 0) {
+        FloatVector_free_(this);
+        return;
+    }
+    buf = (Float*)calloc(row, sizeof(Float));
+    k = 0;
     for(i = 0; i < n; i++) {
         for(j = 0; j < pvec[i].len; j++) {
-            this->data[row] = pvec[i].data[j];
-            row += 1;
+            buf[k] = pvec[i].data[j];
+            k += 1;
         }
     }
-    va_end(ap);
+    FloatVector_alloc_(this, row);
+    memcpy(this->data, buf, row * sizeof(Float));
+    free(buf);
     free(pvec);
 }
 
@@ -191,14 +220,18 @@ void FloatVector_rand_(struct FloatVector* this, Float min, Float max) {
 }
 
 void FloatVector_rand_from_(struct FloatVector* this, struct FloatVector value_set) {
-    Int i;
+    Int    i;
+    Float* buf;
     CBL_DECLARE_VARS(IntVector, 1, idxs);
     if(value_set.len <= 0) return;
     if(this->len <= 0) return;
+    buf = (Float*)calloc(this->len, sizeof(Float));
     IntVector_alloc_(&idxs, this->len);
     IntVector_rand_(&idxs, 0, value_set.len - 1);
-    for(i = 0; i < this->len; i++) this->data[i] = value_set.data[idxs.data[i]];
+    for(i = 0; i < this->len; i++) buf[i] = value_set.data[idxs.data[i]];
     IntVector_free_(&idxs);
+    memcpy(this->data, buf, this->len * sizeof(Float));
+    free(buf);
 }
 
 void FloatVector_fill_(struct FloatVector* this, Float value) {
@@ -224,6 +257,7 @@ void FloatVector_copy_from_(struct FloatVector* this, struct FloatVector src) {
         FloatVector_free_(this);
         return;
     }
+    if(this->data == src.data) return;
     if(src.len != this->len) FloatVector_alloc_(this, src.len);
     memcpy(this->data, src.data, src.len * sizeof(Float));
 }

@@ -62,11 +62,12 @@ void FloatMatrix_free_(struct FloatMatrix* this) {
 }
 
 void FloatMatrix_alloc_(struct FloatMatrix* this, Int nrow, Int ncol) {
-    if(this->nrow == nrow && this->ncol == ncol) return;
     if(nrow <= 0) error_invalid_argument("nrow <= 0");
     if(ncol <= 0) error_invalid_argument("ncol <= 0");
-    if(nrow * ncol > 0) FloatMatrix_free_(this);
-    this->data = (Float*)calloc(nrow * ncol, sizeof(Float));
+    if((this->nrow * this->ncol) != (nrow * ncol)) {
+        FloatMatrix_free_(this);
+        this->data = (Float*)calloc(nrow * ncol, sizeof(Float));
+    }
     this->nrow = nrow;
     this->ncol = ncol;
 }
@@ -115,6 +116,7 @@ void FloatMatrix_hcatv_(struct FloatMatrix* this, Int n, ...) {
 
 void FloatMatrix_hcat_(struct FloatMatrix* this, Int nmat, ...) {
     Int     ir, ic, jc, nrow, ncol, imat;
+    Float*  buf;
     va_list ap;
 
     struct FloatMatrix* pmat;
@@ -129,24 +131,28 @@ void FloatMatrix_hcat_(struct FloatMatrix* this, Int nmat, ...) {
     for(imat = 0; imat < nmat; imat++) {
         ncol += pmat[imat].ncol;
         if(nrow != pmat[imat].nrow)
-            error_invalid_argument("(FloatMatrix_hcat) matrix row not equal");
+            error_invalid_argument("(FloatMatrix_hcat_) matrix row not equal");
     }
-    FloatMatrix_alloc_(this, nrow, ncol);
+    buf = (Float*)calloc(nrow * ncol, sizeof(Float));
     ic = 0;
     for(imat = 0; imat < nmat; imat++) {
         for(jc = 0; jc < pmat[imat].ncol; jc++) {
             for(ir = 0; ir < nrow; ir++) {
-                this->data[_idx(ir, ic, nrow, ncol)] =
+                buf[_idx(ir, ic, nrow, ncol)] =
                     pmat[imat].data[_idx(ir, jc, pmat[imat].nrow, pmat[imat].ncol)];
             } // ir
             ic += 1;
         } // jc
     } // imat
+    FloatMatrix_alloc_(this, nrow, ncol);
+    memcpy(this->data, buf, nrow * ncol * sizeof(Float));
+    free(buf);
     free(pmat);
 }
 
 void FloatMatrix_vcat_(struct FloatMatrix* this, Int nmat, ...) {
     Int     ir, ic, jr, nrow, ncol, imat;
+    Float*  buf;
     va_list ap;
 
     struct FloatMatrix* pmat;
@@ -161,19 +167,22 @@ void FloatMatrix_vcat_(struct FloatMatrix* this, Int nmat, ...) {
     for(imat = 0; imat < nmat; imat++) {
         nrow += pmat[imat].nrow;
         if(ncol != pmat[imat].ncol)
-            error_invalid_argument("(FloatMatrix_hcat) matrix column not equal");
+            error_invalid_argument("(FloatMatrix_vcat_) matrix column not equal");
     }
-    FloatMatrix_alloc_(this, nrow, ncol);
+    buf = (Float*)calloc(nrow * ncol, sizeof(Float));
     ir = 0;
     for(imat = 0; imat < nmat; imat++) {
         for(jr = 0; jr < pmat[imat].nrow; jr++) {
             for(ic = 0; ic < ncol; ic++) {
-                this->data[_idx(ir, ic, nrow, ncol)] =
+                buf[_idx(ir, ic, nrow, ncol)] =
                     pmat[imat].data[_idx(jr, ic, pmat[imat].nrow, pmat[imat].ncol)];
             } // ic
             ir += 1;
         } // jr
     } // imat
+    FloatMatrix_alloc_(this, nrow, ncol);
+    memcpy(this->data, buf, nrow * ncol * sizeof(Float));
+    free(buf);
     free(pmat);
 }
 
@@ -217,6 +226,7 @@ void FloatMatrix_fill_(struct FloatMatrix* this, Float value) {
 }
 
 void FloatMatrix_copy_from_(struct FloatMatrix* this, struct FloatMatrix src) {
+    if(this->data == src.data) return;
     FloatMatrix_alloc_(this, src.nrow, src.ncol);
     memcpy(this->data, src.data, src.nrow * src.ncol * sizeof(Float));
 }
@@ -231,26 +241,33 @@ void FloatMatrix_diag_(struct FloatMatrix* this, struct FloatVector dv) {
     for(i = 0; i < dv.len; i++) this->data[_idx(i, i, dv.len, dv.len)] = dv.data[i];
 }
 
-void FloatMatrix_add_(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y) {
-    if(X.nrow != Y.nrow) error_invalid_argument("(FloatMatrix_add_) X.nrow != Y.nrow");
-    if(X.ncol != Y.ncol) error_invalid_argument("(FloatMatrix_add_) X.ncol != Y.ncol");
+void FloatMatrix_add_(struct FloatMatrix* this, struct FloatMatrix X) {
+    if(X.nrow != this->nrow) error_invalid_argument("(FloatMatrix_add_) X.nrow != this->nrow");
+    if(X.ncol != this->ncol) error_invalid_argument("(FloatMatrix_add_) X.ncol != this->ncol");
     Int i, n;
     n = X.nrow * X.ncol;
-    FloatMatrix_alloc_(this, X.nrow, X.ncol);
-    for(i = 0; i < n; i++) this->data[i] = X.data[i] + Y.data[i];
+    for(i = 0; i < n; i++) this->data[i] += X.data[i];
 }
 
 void FloatMatrix_product_(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y) {
-    Int i, j, k, li;
+    Int    i, j, k, li;
+    Float* buf;
+    if(X.nrow <= 0) error_invalid_argument("(FloatMatrix_product_) X.nrow <= 0");
+    if(X.ncol <= 0) error_invalid_argument("(FloatMatrix_product_) X.ncol <= 0");
+    if(Y.nrow <= 0) error_invalid_argument("(FloatMatrix_product_) Y.nrow <= 0");
+    if(Y.ncol <= 0) error_invalid_argument("(FloatMatrix_product_) Y.ncol <= 0");
     if(X.ncol != Y.nrow) error_invalid_argument("(FloatMatrix_product_) matrix dimension mismatch");
-    FloatMatrix_alloc_(this, X.nrow, Y.ncol);
+    buf = (Float*)calloc(X.nrow * Y.ncol, sizeof(Float));
     for(i = 0; i < X.nrow; i++)
         for(j = 0; j < Y.ncol; j++) {
             li = _idx(i, j, X.nrow, Y.ncol);
-            this->data[li] = 0;
+            buf[li] = 0.0;
             for(k = 0; k < X.ncol; k++)
-                this->data[li] +=
+                buf[li] +=
                     X.data[_idx(i, k, X.nrow, X.ncol)] *
                     Y.data[_idx(k, j, Y.nrow, Y.ncol)];
         }
+    FloatMatrix_alloc_(this, X.nrow, Y.ncol);
+    memcpy(this->data, buf, X.nrow * Y.ncol * sizeof(Float));
+    free(buf);
 }

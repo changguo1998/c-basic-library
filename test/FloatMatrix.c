@@ -59,6 +59,10 @@ int main() {
     printf("X:\n");
     print_fmat(X);
 
+    call(X, hcat_, 2, X, Z);
+    printf("X:\n");
+    print_fmat(X);
+
     call(Z, alloc_, 2, 3);
     call(Z, fill_, 1.5);
     printf("Z:\n");

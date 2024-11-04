@@ -64,7 +64,7 @@ struct FloatMatrixMethods {
 
     void (*diag_)(struct FloatMatrix* this, struct FloatVector dv);
 
-    void (*add_)(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y);
+    void (*add_)(struct FloatMatrix* this, struct FloatMatrix X);
 
     void (*product_)(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y);
 };
@@ -91,7 +91,7 @@ void  FloatMatrix_rand_from_(struct FloatMatrix* this, struct FloatVector value_
 void  FloatMatrix_fill_(struct FloatMatrix* this, Float value);
 void  FloatMatrix_copy_from_(struct FloatMatrix* this, struct FloatMatrix src);
 void  FloatMatrix_diag_(struct FloatMatrix* this, struct FloatVector dv);
-void  FloatMatrix_add_(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y);
+void  FloatMatrix_add_(struct FloatMatrix* this, struct FloatMatrix X);
 void  FloatMatrix_product_(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y);
 
 #endif // _TYPE_FLOATMATRIX_H_

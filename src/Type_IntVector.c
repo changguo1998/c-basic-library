@@ -98,19 +98,22 @@ Int IntVector_get(const struct IntVector* this, Int index) {
 }
 
 void IntVector_index_(struct IntVector* this, struct IntVector src, struct IntVector indexs) {
-    Int i;
+    Int i, *buf;
     if(indexs.len <= 0) return;
-    IntVector_alloc_(this, indexs.len);
     if(src.len <= 0) return;
+    buf = (Int*)calloc(indexs.len, sizeof(Int));
     for(i = 0; i < indexs.len; i++) {
         if(indexs.data[i] < 0 || indexs.data[i] >= src.len)
             error_index_out_of_bounds("(IntVector_index_) index out of bounds");
-        this->data[i] = src.data[indexs.data[i]];
+        buf[i] = src.data[indexs.data[i]];
     }
+    IntVector_alloc_(this, indexs.len);
+    memcpy(this->data, buf, indexs.len * sizeof(Int));
+    free(buf);
 }
 
 void IntVector_slice_(struct IntVector* this, struct IntVector src, Int start, Int step, Int stop) {
-    Int i, n;
+    Int i, n, *buf;
     if(stop == VECTOR_INDEX_END) stop = src.len - 1;
     if(step == 0) error_invalid_argument("(IntVector_slice_) step is 0");
     if(start < 0) error_invalid_argument("(IntVector_slice_) start < 0");
@@ -118,8 +121,11 @@ void IntVector_slice_(struct IntVector* this, struct IntVector src, Int start, I
     if(stop < 0) error_invalid_argument("(IntVector_slice_) stop < 0");
     if(stop >= src.len) error_invalid_argument("(IntVector_slice_) stop >= src.len");
     n = _bm_abs_int(stop - start) / _bm_abs_int(step) + 1;
+    buf = (Int*)calloc(n, sizeof(Int));
+    for(i = 0; i < n; i++) buf[i] = src.data[start + i * step];
     IntVector_alloc_(this, n);
-    for(i = 0; i < n; i++) this->data[i] = src.data[start + i * step];
+    memcpy(this->data, buf, n * sizeof(Int));
+    free(buf);
 }
 
 Int IntVector_count(const struct IntVector* this) {
@@ -130,20 +136,23 @@ Int IntVector_count(const struct IntVector* this) {
 }
 
 void IntVector_index_flag_(struct IntVector* this, struct IntVector src, struct IntVector flags) {
-    Int i, n;
+    Int i, j, n, *buf;
     if(src.len != flags.len) error_invalid_argument("(IntVector_index_flag_) src.len != flags.len");
     if(src.len <= 0) {
         IntVector_free_(this);
         return;
     }
     n = IntVector_count(&flags);
-    IntVector_alloc_(this, n);
-    n = 0;
+    buf = (Int*)calloc(n, sizeof(Int));
+    j = 0;
     for(i = 0; i < src.len; i++)
         if(flags.data[i]) {
-            this->data[n] = src.data[i];
-            n += 1;
+            buf[j] = src.data[i];
+            j += 1;
         }
+    IntVector_alloc_(this, n);
+    memcpy(this->data, buf, n * sizeof(Int));
+    free(buf);
 }
 
 void IntVector_set_(struct IntVector* this, Int index, Int value) {
@@ -162,9 +171,11 @@ void IntVector_setas_(struct IntVector* this, Int n, ...) {
 }
 
 void IntVector_vcat_(struct IntVector* this, Int n, ...) {
-    Int               i, j, row;
-    va_list           ap;
+    Int     i, j, k, row, *buf;
+    va_list ap;
+
     struct IntVector* pvec = NULL;
+
     va_start(ap, n);
     pvec = (struct IntVector*)malloc(n * sizeof(struct IntVector));
     row = 0;
@@ -172,16 +183,19 @@ void IntVector_vcat_(struct IntVector* this, Int n, ...) {
         pvec[i] = va_arg(ap, struct IntVector);
         row += pvec[i].len;
     }
-    IntVector_alloc_(this, row);
-    row = 0;
+    buf = (Int*)calloc(row, sizeof(Int));
+    k = 0;
     for(i = 0; i < n; i++) {
         for(j = 0; j < pvec[i].len; j++) {
-            this->data[row] = pvec[i].data[j];
-            row += 1;
+            buf[k] = pvec[i].data[j];
+            k += 1;
         }
     }
     va_end(ap);
+    IntVector_alloc_(this, row);
+    memcpy(this->data, buf, row * sizeof(struct IntVector));
     free(pvec);
+    free(buf);
 }
 
 void IntVector_rand_(struct IntVector* this, Int min, Int max) {
@@ -200,6 +214,7 @@ void IntVector_rand_from_(struct IntVector* this, struct IntVector value_set) {
     CBL_DECLARE_VARS(IntVector, 1, idxs);
     if(value_set.len <= 0) return;
     if(this->len <= 0) return;
+    if(this->data == value_set.data) error_invalid_argument("(IntVector_rand_from_) this->data == value_set.data");
     IntVector_alloc_(&idxs, this->len);
     IntVector_rand_(&idxs, 0, value_set.len - 1);
     for(i = 0; i < this->len; i++) this->data[i] = value_set.data[idxs.data[i]];
@@ -230,23 +245,31 @@ void IntVector_copy_from_(struct IntVector* this, struct IntVector src) {
         return;
     }
     if(src.len != this->len) IntVector_alloc_(this, src.len);
+    if(this->data == src.data) return;
     memcpy(this->data, src.data, src.len * sizeof(Int));
 }
 
 void IntVector_find_trues_(struct IntVector* this, struct IntVector flags) {
-    Int i, n;
+    Int i, j, n, *buf;
     if(flags.len <= 0) {
         IntVector_free_(this);
         return;
     }
     n = IntVector_count(&flags);
-    if(n != this->len) IntVector_alloc_(this, n);
-    n = 0;
+    if(n <= 0) {
+        IntVector_free_(this);
+        return;
+    }
+    buf = (Int*)calloc(n, sizeof(Int));
+    j = 0;
     for(i = 0; i < flags.len; i++)
         if(flags.data[i]) {
-            this->data[n] = i;
-            n += 1;
+            buf[j] = i;
+            j += 1;
         }
+    IntVector_alloc_(this, n);
+    memcpy(this->data, buf, n * sizeof(Int));
+    free(buf);
 }
 
 Int IntVector_sum(const struct IntVector* this) {
@@ -340,6 +363,7 @@ void IntVector_sortperm_(struct IntVector* this, struct IntVector* perm) {
     Int i, j, ti;
     Int tv;
     if(this->len <= 0) return;
+    if(this == perm) error_invalid_argument("(IntVector_sortperm_) perm == perm");
     IntVector_alloc_(perm, this->len);
     IntVector_range_(perm, 0, 1, this->len - 1);
     for(i = 0; i < this->len; i++)
@@ -355,8 +379,7 @@ void IntVector_sortperm_(struct IntVector* this, struct IntVector* perm) {
 }
 
 Int IntVector_dot(const struct IntVector* this, struct IntVector b) {
-    Int i;
-    Int sum = 0;
+    Int i, sum = 0;
     if(this->len != b.len) error_invalid_argument("(IntVector_dot) length mismatch");
     for(i = 0; i < this->len; i++) sum += this->data[i] * b.data[i];
     return sum;

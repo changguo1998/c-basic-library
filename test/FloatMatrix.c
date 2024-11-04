@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Module_Basic.h"
-//#include "Type_FloatMatrix.h"
+#include "Type_FloatMatrix.h"
 
 #define call(...) CBL_CALL(__VA_ARGS__)
 
@@ -55,7 +55,7 @@ int main() {
     printf("Z:\n");
     print_fmat(Z);
 
-    call(X, hcat_, Y, Z);
+    call(X, hcat_, 2, Y, Z);
     printf("X:\n");
     print_fmat(X);
 
@@ -63,7 +63,7 @@ int main() {
     call(Z, fill_, 1.5);
     printf("Z:\n");
     print_fmat(Z);
-    call(X, vcat_, Y, Z);
+    call(X, vcat_, 2, Y, Z);
     printf("X:\n");
     print_fmat(X);
 

@@ -36,6 +36,10 @@ extern struct DateTimeMethods _CBL_DATETIME_METHODS;
 
 Bool _DATETIME_is_leap_year(Int year);
 
+Int DateTime_second2precision(Float s);
+
+Float DateTime_precision2second(Int tp);
+
 /**
  * @brief Date: year; month; day;
  */

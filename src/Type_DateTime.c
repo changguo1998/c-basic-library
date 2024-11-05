@@ -85,9 +85,9 @@ const Int _DT_DAYS_PER_MONTH[12] = {
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
 
-Int _second2precision(Float s) { return (Int)(s * _DT_SECOND_PRECISION_RATIO); }
+Int DateTime_second2precision(Float s) { return (Int)(s * _DT_SECOND_PRECISION_RATIO); }
 
-Float _precision2second(Int tp) {
+Float DateTime_precision2second(Int tp) {
     return (Float)(tp / _DT_SECOND_PRECISION_RATIO);
 }
 
@@ -441,7 +441,7 @@ struct Time Time_add_(struct Time* this, Int precision) {
 }
 
 struct Time Time_add_second_(struct Time* this, Float seconds) {
-    return Time_add_(this, _second2precision(seconds));
+    return Time_add_(this, DateTime_second2precision(seconds));
 }
 
 // # ========================================================================
@@ -509,7 +509,7 @@ struct DateTime DateTime_set_julian_(struct DateTime* this, Float mjdatetime) {
         jtime_res_f += 1.0;
     }
     julian_day_number = (Int)mjdate_f;
-    time_residual = _second2precision(jtime_res_f * 86400.0);
+    time_residual = DateTime_second2precision(jtime_res_f * 86400.0);
     Date_set_julian_(&(this->date), julian_day_number);
     Time_zero_(&(this->time));
     return DateTime_add_(this, time_residual);
@@ -532,7 +532,7 @@ Int DateTime_diff(const struct DateTime* this, struct DateTime datetime) {
     Int day_diff, time_diff;
     day_diff = Date_diff(&(this->date), datetime.date);
     time_diff = Time_diff(&(this->time), datetime.time);
-    return _second2precision(86400) * day_diff + time_diff;
+    return DateTime_second2precision(86400) * day_diff + time_diff;
 }
 
 Float DateTime_diff_second(const struct DateTime* this,
@@ -540,7 +540,7 @@ Float DateTime_diff_second(const struct DateTime* this,
     Int day_diff, time_diff;
     day_diff = Date_diff(&(this->date), datetime.date);
     time_diff = Time_diff(&(this->time), datetime.time);
-    return 86400.0 * day_diff + _precision2second(time_diff);
+    return 86400.0 * day_diff + DateTime_precision2second(time_diff);
 }
 
 struct DateTime DateTime_add_(struct DateTime* this, Int precision) {
@@ -557,7 +557,7 @@ struct DateTime DateTime_add_(struct DateTime* this, Int precision) {
 }
 
 struct DateTime DateTime_add_second_(struct DateTime* this, Float seconds) {
-    return DateTime_add_(this, _second2precision(seconds));
+    return DateTime_add_(this, DateTime_second2precision(seconds));
 }
 
 Float DateTime_julian(const struct DateTime* this) {
@@ -565,7 +565,7 @@ Float DateTime_julian(const struct DateTime* this) {
     struct Time tt;
     Time_new_(&tt);
     Time_zero_(&tt);
-    second_residual = _precision2second(Time_diff(&(this->time), tt)) /
+    second_residual = DateTime_precision2second(Time_diff(&(this->time), tt)) /
         (24.0 * 60.0 * 60.0);
     return (Float)Date_julian(&(this->date)) - 0.5 + second_residual;
 }

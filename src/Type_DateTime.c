@@ -36,7 +36,7 @@ struct DateMethods _CBL_DATE_METHODS = {
     &Date_today_,
     &Date_set_,
     &Date_set_julian_,
-    &Date_less_than,
+    &Date_lessthan,
     &Date_isequal,
     &Date_day_of_year,
     &Date_diff,
@@ -54,6 +54,8 @@ struct TimeMethods _CBL_TIME_METHODS = {
     &Time_string,
     &Time_diff,
     &Time_diff_second,
+    &Time_lessthan,
+    &Time_isequal,
     &Time_add_,
     &Time_add_second_
 };
@@ -65,6 +67,8 @@ struct DateTimeMethods _CBL_DATETIME_METHODS = {
     &DateTime_regularize_,
     &DateTime_diff,
     &DateTime_diff_second,
+    &DateTime_lessthan,
+    &DateTime_isequal,
     &DateTime_add_,
     &DateTime_add_second_,
     &DateTime_julian,
@@ -87,9 +91,7 @@ const Int _DT_DAYS_PER_MONTH[12] = {
 
 Int DateTime_second2precision(Float s) { return (Int)(s * _DT_SECOND_PRECISION_RATIO); }
 
-Float DateTime_precision2second(Int tp) {
-    return (Float)(tp / _DT_SECOND_PRECISION_RATIO);
-}
+Float DateTime_precision2second(Int tp) { return (Float)(tp / _DT_SECOND_PRECISION_RATIO); }
 
 // # ========================================================================
 // # Methods for Date
@@ -105,9 +107,9 @@ struct Date Date_today_(struct Date* this, Int type) {
 struct Date Date_set_(struct Date* this, Int n, ...) {
     va_list ap;
     va_start(ap, n);
-    this->year  = (n > 0) ? va_arg(ap, long) : 0;
+    this->year = (n > 0) ? va_arg(ap, long) : 0;
     this->month = (n > 1) ? va_arg(ap, long) : 0;
-    this->day   = (n > 2) ? va_arg(ap, long) : 0;
+    this->day = (n > 2) ? va_arg(ap, long) : 0;
     va_end(ap);
     return *this;
 }
@@ -177,7 +179,7 @@ struct Date Date_set_julian_(struct Date* this, Int mjday) {
     return *this;
 }
 
-Bool Date_less_than(const struct Date* this, struct Date another) {
+Bool Date_lessthan(const struct Date* this, struct Date another) {
     if(this->year < another.year) return true;
     if(this->year > another.year) return false;
     if(this->month < another.month) return true;
@@ -257,7 +259,7 @@ struct Time Time_now_(struct Time* this, Int type) {
 struct Time Time_set_(struct Time* this, Int n, ...) {
     va_list args;
     va_start(args, n);
-    this->hour   = (n > 0) ? va_arg(args, int) : 0;
+    this->hour = (n > 0) ? va_arg(args, int) : 0;
     this->minute = (n > 1) ? va_arg(args, int) : 0;
     this->second = (n > 2) ? va_arg(args, int) : 0;
 #if TIME_PRECISION > 0
@@ -289,7 +291,7 @@ struct Time Time_zero_(struct Time* this) {
     return *this;
 }
 
-static inline void _time_round_same_sign(long long *large, long long *small, long long base) {
+static inline void _time_round_same_sign(long long* large, long long* small, long long base) {
     *large = *small / base;
     *small -= *large * base;
     while(*small >= base) {
@@ -355,8 +357,8 @@ struct Time Time_regularize_(struct Time* this) {
 
 struct String Time_string(const struct Time* this) {
     struct String buffer;
-    Int h, m, s, ms, us, ns;
-    Char sign = ' ';
+    Int           h, m, s, ms, us, ns;
+    Char          sign = ' ';
     String_new_(&buffer);
     h = _bm_abs_int(this->hour);
     if(this->hour < 0) sign = '-';
@@ -426,6 +428,20 @@ Float Time_diff_second(const struct Time* this, struct Time time) {
     return buf;
 }
 
+Bool Time_lessthan(const struct Time* this, struct Time another) {
+    Int dt;
+    dt = Time_diff(this, another);
+    if(dt < 0) return true;
+    return false;
+}
+
+Bool Time_isequal(const struct Time* this, struct Time another) {
+    Int dt;
+    dt = Time_diff(this, another);
+    if(dt == 0) return true;
+    return false;
+}
+
 struct Time Time_add_(struct Time* this, Int precision) {
 #if TIME_PRECISION > 6
     this->nanosecond += precision;
@@ -478,10 +494,10 @@ struct DateTime DateTime_now_(struct DateTime* this, Int tz) {
 struct DateTime DateTime_set_(struct DateTime* this, Int n, ...) {
     va_list ap;
     va_start(ap, n);
-    this->date.year   = (n > 0) ? va_arg(ap, long) : 0;
-    this->date.month  = (n > 1) ? va_arg(ap, long) : 0;
-    this->date.day    = (n > 2) ? va_arg(ap, long) : 0;
-    this->time.hour   = (n > 3) ? va_arg(ap, long) : 0;
+    this->date.year = (n > 0) ? va_arg(ap, long) : 0;
+    this->date.month = (n > 1) ? va_arg(ap, long) : 0;
+    this->date.day = (n > 2) ? va_arg(ap, long) : 0;
+    this->time.hour = (n > 3) ? va_arg(ap, long) : 0;
     this->time.minute = (n > 4) ? va_arg(ap, long) : 0;
     this->time.second = (n > 5) ? va_arg(ap, long) : 0;
 #if TIME_PRECISION > 0
@@ -505,7 +521,7 @@ struct DateTime DateTime_set_julian_(struct DateTime* this, Float mjdatetime) {
     jdatetime_f = mjdatetime + 0.5;
     jtime_res_f = modf(jdatetime_f, &mjdate_f);
     if(jtime_res_f < 0.0) {
-        mjdate_f    -= 1.0;
+        mjdate_f -= 1.0;
         jtime_res_f += 1.0;
     }
     julian_day_number = (Int)mjdate_f;
@@ -541,6 +557,18 @@ Float DateTime_diff_second(const struct DateTime* this,
     day_diff = Date_diff(&(this->date), datetime.date);
     time_diff = Time_diff(&(this->time), datetime.time);
     return 86400.0 * day_diff + DateTime_precision2second(time_diff);
+}
+
+Bool DateTime_lessthan(const struct DateTime* this, struct DateTime another) {
+    if(Date_lessthan(&this->date, another.date)) return true;
+    if(Date_isequal(&this->date, another.date))
+        if(Time_lessthan(&this->time, another.time)) return true;
+    return false;
+}
+
+Bool DateTime_isequal(const struct DateTime* this, struct DateTime another) {
+    if(Date_isequal(&this->date, another.date) && Time_isequal(&this->time, another.time)) return true;
+    return false;
 }
 
 struct DateTime DateTime_add_(struct DateTime* this, Int precision) {

@@ -166,7 +166,7 @@ struct DateMethods {
 struct Date   Date_today_(struct Date* this, Int type);
 struct Date   Date_set_(struct Date* this, Int n, ...);
 struct Date   Date_set_julian_(struct Date* this, Int mjday);
-Bool          Date_less_than(const struct Date* this, struct Date another);
+Bool          Date_lessthan(const struct Date* this, struct Date another);
 Bool          Date_isequal(const struct Date* this, struct Date another);
 Int           Date_day_of_year(const struct Date* this);
 Int           Date_diff(const struct Date* this, struct Date date);
@@ -215,6 +215,10 @@ struct TimeMethods {
 
     Float (*diff_second)(const struct Time* this, struct Time time);
 
+    Bool (*lessthan)(const struct Time* this, struct Time another);
+
+    Bool (*isequal)(const struct Time* this, struct Time another);
+
     /**
      * @brief shift time struct by time precision
      * @param this
@@ -226,13 +230,15 @@ struct TimeMethods {
     struct Time (*add_second_)(struct Time* this, Float seconds);
 };
 
-struct Time Time_now_(struct Time* this, Int type);
-struct Time Time_set_(struct Time* this, Int n, ...);
+struct Time   Time_now_(struct Time* this, Int type);
+struct Time   Time_set_(struct Time* this, Int n, ...);
 struct Time   Time_zero_(struct Time* this);
 struct Time   Time_regularize_(struct Time* this);
 struct String Time_string(const struct Time* this);
 Int           Time_diff(const struct Time* this, struct Time time);
 Float         Time_diff_second(const struct Time* this, struct Time time);
+Bool          Time_lessthan(const struct Time* this, struct Time another);
+Bool          Time_isequal(const struct Time* this, struct Time another);
 struct Time   Time_add_(struct Time* this, Int precision);
 struct Time   Time_add_second_(struct Time* this, Float seconds);
 
@@ -270,6 +276,10 @@ struct DateTimeMethods {
 
     Float (*diff_second)(const struct DateTime* this, struct DateTime datetime);
 
+    Bool (*lessthan)(const struct DateTime* this, struct DateTime another);
+
+    Bool (*isequal)(const struct DateTime* this, struct DateTime another);
+
     /**
      * @brief shift date time by precision
      * @param this
@@ -292,6 +302,8 @@ struct DateTime DateTime_regularize_(struct DateTime* this);
 Int             DateTime_diff(const struct DateTime* this, struct DateTime datetime);
 Float           DateTime_diff_second(const struct DateTime* this,
                                      struct DateTime        datetime);
+Bool           DateTime_lessthan(const struct DateTime* this, struct DateTime another);
+Bool           DateTime_isequal(const struct DateTime* this, struct DateTime another);
 struct DateTime DateTime_add_(struct DateTime* this, Int precision);
 struct DateTime DateTime_add_second_(struct DateTime* this, Float seconds);
 Float           DateTime_julian(const struct DateTime* this);

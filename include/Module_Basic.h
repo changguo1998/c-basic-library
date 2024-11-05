@@ -246,7 +246,7 @@ typedef Complex32 Complex;
 #define _VECTOR_N_VA_ARG_TYPE_Int int
 #define _VECTOR_N_VA_ARG_MIN_Int INT_MIN
 #define _VECTOR_N_VA_ARG_MAX_Int INT_MAX
-#define _VECTOR_N_VA_ARG_TYPE_Float float
+#define _VECTOR_N_VA_ARG_TYPE_Float double
 #define _VECTOR_N_VA_ARG_MIN_Float FLT_MIN
 #define _VECTOR_N_VA_ARG_MAX_Float FLT_MAX
 #endif

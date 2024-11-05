@@ -31,7 +31,7 @@
 
 
 struct FloatVector {
-    Int  len;
+    Int    len;
     Float* data;
 
     struct FloatVectorMethods* methods;
@@ -67,6 +67,12 @@ struct FloatVectorMethods {
     void (*copy_from_)(struct FloatVector* this, struct FloatVector src);
 
     Float (*sum)(const struct FloatVector* this);
+
+    Float (*mean)(const struct FloatVector* this);
+
+    Float (*var)(const struct FloatVector* this);
+
+    Float (*std)(const struct FloatVector* this);
 
     Float (*prod)(const struct FloatVector* this);
 
@@ -128,6 +134,12 @@ void FloatVector_range_(struct FloatVector* this, Float start, Float step, Float
 void FloatVector_copy_from_(struct FloatVector* this, struct FloatVector src);
 
 Float FloatVector_sum(const struct FloatVector* this);
+
+Float FloatVector_mean(const struct FloatVector* this);
+
+Float FloatVector_var(const struct FloatVector* this);
+
+Float FloatVector_std(const struct FloatVector* this);
 
 Float FloatVector_prod(const struct FloatVector* this);
 

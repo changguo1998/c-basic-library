@@ -49,6 +49,9 @@ struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
     &FloatVector_range_,
     &FloatVector_copy_from_,
     &FloatVector_sum,
+    &FloatVector_mean,
+    &FloatVector_var,
+    &FloatVector_std,
     &FloatVector_prod,
     &FloatVector_min,
     &FloatVector_max,
@@ -241,14 +244,16 @@ void FloatVector_fill_(struct FloatVector* this, Float value) {
 }
 
 void FloatVector_range_(struct FloatVector* this, Float start, Float step, Float stop) {
-    Int i;
-    if(this->len <= 0) return;
-    if(this->len == 1) {
+    Int i, n;
+    if(step == 0) error_invalid_argument("(FloatVector_range_) step == 0");
+    if(start == stop) error_invalid_argument("(FloatVector_range_) start == stop");
+    n = (stop - start) / step + 1;
+    if(n <= 0) return;
+    FloatVector_alloc_(this, n);
+    if(n == 1) {
         this->data[0] = start;
         return;
     }
-    if(step == 0)
-        if(start != stop) step = (stop - start) / (this->len - 1);
     for(i = 0; i < this->len; i++) this->data[i] = start + i * step;
 }
 
@@ -269,6 +274,20 @@ Float FloatVector_sum(const struct FloatVector* this) {
     for(i = 0; i < this->len; i++) sum += this->data[i];
     return sum;
 }
+
+Float FloatVector_mean(const struct FloatVector* this) { return FloatVector_sum(this) / this->len; }
+
+Float FloatVector_var(const struct FloatVector* this) {
+    Float s, m;
+    Int   i;
+
+    m = FloatVector_mean(this);
+    s = 0;
+    for(i = 0; i < this->len; i++) s += (this->data[i] - m) * (this->data[i] - m);
+    return s / this->len;
+}
+
+Float FloatVector_std(const struct FloatVector* this) { return _bm_sqrt(FloatVector_var(this)); }
 
 Float FloatVector_prod(const struct FloatVector* this) {
     Int   i = 0;

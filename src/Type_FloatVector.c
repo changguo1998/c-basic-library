@@ -46,12 +46,14 @@ struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
     &FloatVector_rand_,
     &FloatVector_rand_from_,
     &FloatVector_fill_,
+    &FloatVector_fill_range_,
     &FloatVector_range_,
     &FloatVector_copy_from_,
     &FloatVector_sum,
     &FloatVector_mean,
     &FloatVector_var,
     &FloatVector_std,
+    &FloatVector_norm,
     &FloatVector_prod,
     &FloatVector_min,
     &FloatVector_max,
@@ -62,7 +64,21 @@ struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
     &FloatVector_sort_,
     &FloatVector_sortperm_,
     &FloatVector_dot,
-    &FloatVector_norm
+    &FloatVector_add_scalar_,
+    &FloatVector_sub_scalar_,
+    &FloatVector_mul_scalar_,
+    &FloatVector_div_scalar_,
+    &FloatVector_add_,
+    &FloatVector_sub_,
+    &FloatVector_mul_,
+    &FloatVector_div_,
+    &FloatVector_sqrt_,
+    &FloatVector_root_,
+    &FloatVector_pow_,
+    &FloatVector_normalize_,
+    &FloatVector_polyval,
+    &FloatVector_polyint_,
+    &FloatVector_polydiff_
 };
 
 void FloatVector_free_(struct FloatVector* this) {
@@ -243,11 +259,22 @@ void FloatVector_fill_(struct FloatVector* this, Float value) {
     for(i = 0; i < this->len; i++) this->data[i] = value;
 }
 
+void FloatVector_fill_range_(struct FloatVector* this, Float start, Float stop) {
+    Float step;
+    if(this->len <= 0) return;
+    if(this->len == 1) {
+        this->data[0] = start;
+        return;
+    }
+    step = (stop - start) / (this->len - 1);
+    for(Int i = 0; i < this->len; i++) this->data[i] = start + step * i;
+}
+
 void FloatVector_range_(struct FloatVector* this, Float start, Float step, Float stop) {
     Int i, n;
     if(step == 0) error_invalid_argument("(FloatVector_range_) step == 0");
     if(start == stop) error_invalid_argument("(FloatVector_range_) start == stop");
-    n = (stop - start) / step + 1;
+    n = (Int)((stop - start) / step) + 1;
     if(n <= 0) return;
     FloatVector_alloc_(this, n);
     if(n == 1) {
@@ -288,6 +315,28 @@ Float FloatVector_var(const struct FloatVector* this) {
 }
 
 Float FloatVector_std(const struct FloatVector* this) { return _bm_sqrt(FloatVector_var(this)); }
+
+Float FloatVector_norm(const struct FloatVector* this, Int order) {
+    Float v = 0.0;
+    Int   i;
+    if(this->len <= 0) return v;
+    if(order < 0) error_invalid_argument("(FloatVector_norm) order < 0");
+    if(order == 0) return this->len;
+    if(order == 1) {
+        v = 0.0;
+        for(i = 0; i < this->len; i++) v += _bm_abs_float(this->data[i]);
+        return v;
+    }
+    if(order == 2) {
+        v = 0.0;
+        for(i = 0; i < this->len; i++) v += this->data[i] * this->data[i];
+        return _bm_sqrt(v);
+    }
+    if(order == CBL_INT_MAX) return FloatVector_max(this);
+    v = 0.0;
+    for(i = 0; i < this->len; i++) v += pow(this->data[i], order);
+    return _bm_n_root(v, order);
+}
 
 Float FloatVector_prod(const struct FloatVector* this) {
     Int   i = 0;
@@ -394,24 +443,122 @@ Float FloatVector_dot(const struct FloatVector* this, struct FloatVector b) {
     return sum;
 }
 
-Float FloatVector_norm(const struct FloatVector* this, Int order) {
-    Float v = 0.0;
+void FloatVector_add_scalar_(struct FloatVector* this, Float value) {
+    if(this->len <= 0) return;
+    for(Int i = 0; i < this->len; i++) this->data[i] += value;
+}
+
+void FloatVector_sub_scalar_(struct FloatVector* this, Float value) {
+    if(this->len <= 0) return;
+    for(Int i = 0; i < this->len; i++) this->data[i] -= value;
+}
+
+void FloatVector_mul_scalar_(struct FloatVector* this, Float value) {
+    if(this->len <= 0) return;
+    for(Int i = 0; i < this->len; i++) this->data[i] *= value;
+}
+
+void FloatVector_div_scalar_(struct FloatVector* this, Float value) {
+    if(this->len <= 0) return;
+    if(value == 0) error_invalid_argument("(FloatVector_div_scalar) division by zero");
+    for(Int i = 0; i < this->len; i++) this->data[i] /= value;
+}
+
+void FloatVector_add_(struct FloatVector* this, struct FloatVector b) {
+    if(this->len <= 0) return;
+    if(this->len != b.len) error_invalid_argument("(FloatVector_add) length mismatch");
+    for(Int i = 0; i < this->len; i++) this->data[i] += b.data[i];
+}
+
+void FloatVector_sub_(struct FloatVector* this, struct FloatVector b) {
+    if(this->len <= 0) return;
+    if(this->len != b.len) return;
+    for(Int i = 0; i < this->len; i++) this->data[i] -= b.data[i];
+}
+
+void FloatVector_mul_(struct FloatVector* this, struct FloatVector b) {
+    if(this->len <= 0) return;
+    if(this->len != b.len) return;
+    for(Int i = 0; i < this->len; i++) this->data[i] *= b.data[i];
+}
+
+void FloatVector_div_(struct FloatVector* this, struct FloatVector b) {
+    if(this->len <= 0) return;
+    if(this->len != b.len) return;
+    Int i = 0;
+    for(i = 0; i < b.len; i++) if(b.data[i] == 0) error_invalid_argument("(FloatVector_div) division by zero");
+    for(i = 0; i < this->len; i++) this->data[i] /= b.data[i];
+}
+
+void FloatVector_sqrt_(struct FloatVector* this) {
+    if(this->len <= 0) return;
+    for(Int i = 0; i < this->len; i++) this->data[i] = _bm_sqrt(this->data[i]);
+}
+
+void FloatVector_root_(struct FloatVector* this, Int order) {
+    if(this->len <= 0) return;
+    for(Int i = 0; i < this->len; i++) this->data[i] = _bm_n_root(this->data[i], order);
+}
+
+void FloatVector_pow_(struct FloatVector* this, Int order) {
+    if(this->len <= 0) return;
+    for(Int i = 0; i < this->len; i++) this->data[i] = pow(this->data[i], order);
+}
+
+void FloatVector_normalize_(struct FloatVector* this) {
+    if(this->len <= 0) return;
+    Float nm;
+    nm = FloatVector_norm(this, 2);
+    if(nm == 0) error_invalid_argument("(FloatVector_normalize) norm is zero");
+    FloatVector_div_scalar_(this, nm);
+}
+
+Float FloatVector_polyval(const struct FloatVector* this, Float x) {
+    Float v;
     Int   i;
-    if(this->len <= 0) return v;
-    if(order < 0) error_invalid_argument("(FloatVector_norm) order < 0");
-    if(order == 0) return this->len;
-    if(order == 1) {
-        v = 0.0;
-        for(i = 0; i < this->len; i++) v += _bm_abs_float(this->data[i]);
-        return v;
-    }
-    if(order == 2) {
-        v = 0.0;
-        for(i = 0; i < this->len; i++) v += this->data[i] * this->data[i];
-        return _bm_sqrt(v);
-    }
-    if(order == CBL_INT_MAX) return FloatVector_max(this);
+    if(this->len <= 0) error_invalid_argument("(FloatVector_polyval) polynomial is empty");
     v = 0.0;
-    for(i = 0; i < this->len; i++) v += pow(this->data[i], order);
-    return _bm_n_root(v, order);
+    for(i = 0; i < this->len; i++) {
+        v *= x;
+        v += this->data[this->len - 1 - i];
+    }
+    return v;
+}
+
+void FloatVector_polyint_(struct FloatVector* this, Float y0) {
+    Float* buf;
+    Int    i, n;
+
+    if(this->len < 0) return;
+    if(this->len == 0) {
+        FloatVector_alloc_(this, 1);
+        this->data[0] = y0;
+        return;
+    }
+    n = this->len + 1;
+    buf = (Float*)calloc(n, sizeof(Float));
+    buf[0] = y0;
+    for(i = 1; i < n; i++) buf[i] = this->data[i-1] / i;
+
+    FloatVector_alloc_(this, n);
+    memcpy(this->data, buf, n * sizeof(Float));
+    free(buf);
+}
+
+void FloatVector_polydiff_(struct FloatVector* this) {
+    Float* buf;
+    Int    i, n;
+
+    if(this->len <= 0) return;
+    if(this->len == 1) {
+        this->data[0] = 0.0;
+        return;
+    }
+    n = this->len - 1;
+    buf = (Float*)calloc(n, sizeof(Float));
+    for(i = 0; i < n; i++) buf[i] = this->data[i + 1] * (i + 1);
+
+    FloatVector_alloc_(this, n);
+    memcpy(this->data, buf, n * sizeof(Float));
+    free(buf);
 }

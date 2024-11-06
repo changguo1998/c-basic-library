@@ -36,6 +36,8 @@ struct FloatMatrixMethods _CBL_FLOAT_MATRIX_METHODS = {
     &FloatMatrix_free_,
     &FloatMatrix_alloc_,
     &FloatMatrix_get,
+    &FloatMatrix_get_row_,
+    &FloatMatrix_get_column_,
     &FloatMatrix_set_,
     &FloatMatrix_set_vector_,
     &FloatMatrix_hcatv_,
@@ -76,6 +78,28 @@ Float FloatMatrix_get(const struct FloatMatrix* this, Int irow, Int icol) {
     if(irow < 0 || irow >= this->nrow) error_index_out_of_bounds("(FloatMatrix_get) irow");
     if(icol < 0 || icol >= this->ncol) error_index_out_of_bounds("(FloatMatrix_get) icol");
     return this->data[_idx(irow, icol, this->nrow, this->ncol)];
+}
+
+void FloatMatrix_get_row_(const struct FloatMatrix* this, struct FloatVector* fv, Int irow) {
+    if(irow >= this->nrow) error_index_out_of_bounds("(FloatMatrix_get_row) irow >= this->nrow");
+    if(irow < 0) error_invalid_argument("(FloatMatrix_get_row) irow < 0");
+    if(this->ncol <= 0) {
+        FloatVector_free_(fv);
+        return;
+    }
+    FloatVector_alloc_(fv, this->ncol);
+    for(Int i = 0; i < this->nrow; i++) FloatVector_set_(fv, i, FloatMatrix_get(this, irow, i));
+}
+
+void FloatMatrix_get_column_(const struct FloatMatrix* this, struct FloatVector* fv, Int icol) {
+    if(icol >= this->ncol) error_invalid_argument("(FloatMatrix_get_column) icol >= this->ncol");
+    if(icol < 0) error_invalid_argument("(FloatMatrix_get_column) icol < 0");
+    if(this->nrow <= 0) {
+        FloatVector_free_(fv);
+        return;
+    }
+    FloatVector_alloc_(fv, this->nrow);
+    for(Int i = 0; i < this->nrow; i++) FloatVector_set_(fv, i, FloatMatrix_get(this, i, icol));
 }
 
 void FloatMatrix_set_(struct FloatMatrix* this, Int irow, Int icol, Float value) {

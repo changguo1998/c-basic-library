@@ -68,7 +68,7 @@ int main() {
     j = CBL_CALL(fv, argmax);
     printf("max: %.3f at %d\n", y, j);
 
-    CBL_CALL(fv, range_, 1.0, 0.0, 2.0);
+    CBL_CALL(fv, fill_range_, 1.0, 2.0);
     printf("range: ");
     print_fvec(&fv);
 
@@ -82,6 +82,18 @@ int main() {
     print_fvec(&fv);
     printf("perm:");
     print_ivec(&iv);
+
+    CBL_CALL(fv, setas_, 3, 1.0, 2.0, 3.0);
+    print_fvec(&fv);
+    x = 2.0;
+    printf("polyval: f(%g)=%g\n", x, CBL_CALL(fv, polyval, x));
+    printf("Integral:\n");
+    CBL_CALL(fv, polyint_, 1.0);
+    print_fvec(&fv);
+
+    printf("Diff:\n");
+    CBL_CALL(fv, polydiff_);
+    print_fvec(&fv);
 
     CBL_FREE_VARS(FloatVector, 1, fv);
     return 0;

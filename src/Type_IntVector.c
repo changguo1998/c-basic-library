@@ -57,7 +57,9 @@ struct IntVectorMethods _CBL_INT_VECTOR_METHODS = {
     &IntVector_cumprod_,
     &IntVector_sort_,
     &IntVector_sortperm_,
-    &IntVector_dot
+    &IntVector_dot,
+    &IntVector_coord_linear,
+    &IntVector_coord_cartesian_
 };
 
 void IntVector_free_(struct IntVector* this) {
@@ -383,4 +385,33 @@ Int IntVector_dot(const struct IntVector* this, struct IntVector b) {
     if(this->len != b.len) error_invalid_argument("(IntVector_dot) length mismatch");
     for(i = 0; i < this->len; i++) sum += this->data[i] * b.data[i];
     return sum;
+}
+
+Int IntVector_coord_linear(const struct IntVector* this, struct IntVector size) {
+    Int i, idx, n;
+    if(this->len <= 0) error_invalid_argument("(IntVector_coord_linear) coordinate is empty");
+    if(size.len <= 0) error_invalid_argument("(IntVector_coord_linear) size is empty");
+    if(this->len != size.len) error_invalid_argument("(IntVector_coord_linear) length mismatch");
+    idx = 0;
+    n = size.len;
+    for(i = 0; i < n; i++) {
+        idx *= size.data[n - 1 - i];
+        idx += this->data[n - 1 - i];
+    }
+    return idx;
+}
+
+void IntVector_coord_cartesian_(struct IntVector* this, struct IntVector size, Int linear_index) {
+    Int i, rem, dv;
+    if(size.len <= 0) error_invalid_argument("(IntVector_coord_cartesian_) size is empty");
+    if(linear_index < 0) error_index_out_of_bounds("(IntVector_coord_cartesian_) linear_index < 0");
+    if(linear_index >= IntVector_prod(&size))
+        error_index_out_of_bounds("(IntVector_coord_cartesian_) linear_index >= max element");
+    IntVector_alloc_(this, size.len);
+    IntVector_fill_(this, 0);
+    dv = linear_index;
+    for(i = 0; i < size.len; i++) {
+        rem = _bm_round_zero_to_Int(dv, size.data[i], &dv);
+        this->data[i] = rem;
+    }
 }

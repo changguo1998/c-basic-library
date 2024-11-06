@@ -76,6 +76,20 @@ int main() {
     printf("perm:");
     print_fvec(&iw);
 
+    CBL_CALL(iv, setas_, 3, 2, 1, 1);
+    CBL_CALL(iw, setas_, 3, 5, 4, 3);
+    printf("iv: ");
+    print_fvec(&iv);
+    printf("iw: ");
+    print_fvec(&iw);
+    i = CBL_CALL(iv, coord_linear, iw);
+    printf("linear index: %d\n", i);
+    CBL_CALL(iv, free_);
+
+    CBL_CALL(iv, coord_cartesian_, iw, i);
+    printf("reverse iv:");
+    print_fvec(&iv);
+
     CBL_FREE_VARS(IntVector, 2, iv, iw);
     return 0;
 }

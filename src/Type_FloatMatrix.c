@@ -30,6 +30,7 @@
 #include <float.h>
 #include "Type_Part_math_basic.h"
 #include "Type_IntVector.h"
+#include "Type_FloatVector.h"
 #include "Type_FloatMatrix.h"
 
 struct FloatMatrixMethods _CBL_FLOAT_MATRIX_METHODS = {

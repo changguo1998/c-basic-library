@@ -27,7 +27,7 @@
 #define _CBL_BASIC_H_
 
 #include <stdlib.h>
-#include <complex.h>
+// #include <complex.h>
 #include <stdbool.h>
 #include <float.h>
 #include <limits.h>
@@ -135,9 +135,7 @@ typedef long double Float128;
 
 // Complex
 
-typedef float complex       Complex32;
-typedef double complex      Complex64;
-typedef long double complex Complex128;
+#include "Type_Complex.h"
 
 // Pointer
 typedef void* Address;
@@ -195,7 +193,8 @@ typedef Float64 Float;
 /**
  * @brief 64-bit complex
  */
-typedef Complex64 Complex;
+// typedef Complex64 Complex;
+DEFINE_COMPLEX(Float, Complex,)
 #define TYPECODE_INT     TYPECODE_INT64
 #define TYPECODE_UINT    TYPECODE_UINT64
 #define TYPECODE_FLOAT   TYPECODE_FLOAT64
@@ -231,7 +230,8 @@ typedef Float32   Float;
 /**
  * @brief 32-bit complex
  */
-typedef Complex32 Complex;
+// typedef Complex32 Complex;
+DEFINE_COMPLEX(Float, Complex,)
 #define TYPECODE_INT     TYPECODE_INT32
 #define TYPECODE_UINT    TYPECODE_UINT32
 #define TYPECODE_FLOAT   TYPECODE_FLOAT32

@@ -11,13 +11,16 @@ include(ExternalProject)
 externalproject_add(fftw
     URL ${CMAKE_CURRENT_SOURCE_DIR}/external/fftw.tar.gz
     PREFIX external
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_SOURCE_DIR}/external
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_SOURCE_DIR}/external -DCMAKE_BUILD_TYPE=Debug
 )
 
 externalproject_add(lapack
         URL ${CMAKE_CURRENT_SOURCE_DIR}/external/lapack.tar.gz
         PREFIX external
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_SOURCE_DIR}/external -DCBLAS=ON -DLAPACKE=ON
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_SOURCE_DIR}/external
+        -DCBLAS=ON
+        -DLAPACKE=ON
+        -DCMAKE_BUILD_TYPE=Debug
 )
 
 include_directories("external/include")
@@ -66,9 +69,11 @@ function(add_test_target modulename)
 
     add_executable(test_${modulename} ${deps} test/${modulename}.c)
     target_include_directories(test_${modulename} PRIVATE include)
+#    target_link_libraries(test_${modulename} PRIVATE fftw3)
     install(TARGETS test_${modulename} DESTINATION bin)
 endfunction()
 
+add_test_target(Complex)
 add_test_target(String)
 add_test_target(DateTime ${String_C} ${MATH_BASIC})
 add_test_target(Log ${DateTime_C} ${String_C})
@@ -87,9 +92,11 @@ file(GLOB CBL_C "src/*.c")
 
 add_executable(test_CBL ${CBL_C} ${CBL_H} test/CBL.c)
 target_include_directories(test_CBL PRIVATE include)
+#target_link_libraries(test_CBL PRIVATE fftw3)
 
 add_library(CBL STATIC ${CBL_C} ${CBL_H})
 target_include_directories(CBL PUBLIC include)
+#target_link_libraries(CBL PRIVATE fftw3)
 target_sources(CBL PUBLIC
         FILE_SET headerCBL
         TYPE HEADERS

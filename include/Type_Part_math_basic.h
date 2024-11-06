@@ -91,8 +91,7 @@ static inline Float _bm_atand(Float x) { return _bm_rad2deg(atan(x)); }
 
 static inline Float _bm_atan2d(Float y, Float x) { return _bm_rad2deg(atan2(y, x)); }
 
-void _bm_fft(Int n, Float *x, Complex *X);
-
-void _bm_ifft(Int n, Float *x, Complex *X);
+// void _bm_fft(Int n, Float *x, Complex *X);
+// void _bm_ifft(Int n, Float *x, Complex *X);
 
 #endif // _TYPE_PART_MATH_BASIC_H_

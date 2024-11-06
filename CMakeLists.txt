@@ -6,8 +6,22 @@ set(CMAKE_C_STANDARD 99)
 
 set(DEBUG False)
 
-include_directories("D:/Research/Projects/fftw-3.3.10/build/include")
-link_directories("D:/Research/Projects/fftw-3.3.10/build/bin")
+include(ExternalProject)
+
+externalproject_add(fftw
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/external/fftw.tar.gz
+    PREFIX external
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_SOURCE_DIR}/external
+)
+
+externalproject_add(lapack
+        URL ${CMAKE_CURRENT_SOURCE_DIR}/external/lapack.tar.gz
+        PREFIX external
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_SOURCE_DIR}/external -DCBLAS=ON -DLAPACKE=ON
+)
+
+include_directories("external/include")
+link_directories("external/lib")
 
 #set(CMAKE_INSTALL_PREFIX ./install)
 
@@ -62,7 +76,7 @@ list(APPEND Log_C ${DateTime_C} ${String_C})
 add_test_target(Dict ${String_C})
 add_test_target(IntVector ${MATH_BASIC})
 add_test_target(FloatVector ${MATH_BASIC} ${IntVector_C})
-add_test_target(FloatMatrix ${MATH_BASIC} ${IntVector_C})
+add_test_target(FloatMatrix ${MATH_BASIC} ${IntVector_C} ${FloatVector_C})
 add_test_target(IntVectorN ${MATH_BASIC} include/Template_VectorN.h)
 add_test_target(FloatVectorN ${MATH_BASIC} include/Template_VectorN.h)
 # add_test_target(TypeArray)

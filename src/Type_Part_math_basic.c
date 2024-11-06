@@ -26,8 +26,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <complex.h>
 #include <math.h>
 #include "Module_Basic.h"
+
+#include <fftw3.h>
 
 #ifdef WINDOWS
 #define _CRT_RAND_S
@@ -123,4 +126,44 @@ Float _bm_n_root(Float x, Int n) {
     o = (long double)n;
     root = expl(logl(y) / o);
     return (Float)root;
+}
+
+void _bm_fft(Int n, Float* x, Complex* X) {
+    Int           i;
+    double*       in;
+    fftw_complex* out;
+    fftw_plan     p;
+
+    out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
+    in = (double*)malloc(sizeof(double) * n);
+
+    p = fftw_plan_dft_r2c_1d(n, in, out, FFTW_ESTIMATE);
+
+    for(i = 0; i < n; i++) in[i] = x[i];
+    fftw_execute(p);
+    for(i = 0; i < n; i++) X[i] = out[i];
+
+    fftw_destroy_plan(p);
+    fftw_free(out);
+    free(in);
+}
+
+void _bm_ifft(Int n, Float* x, Complex* X) {
+    Int           i;
+    double*       out;
+    fftw_complex* in;
+    fftw_plan     p;
+
+    in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
+    out = (double*)malloc(sizeof(double) * n);
+
+    p = fftw_plan_dft_c2r_1d(n, in, out, FFTW_ESTIMATE);
+
+    for(i = 0; i < n; i++) in[i] = X[i];
+    fftw_execute(p);
+    for(i = 0; i < n; i++) x[i] = out[i];
+
+    fftw_destroy_plan(p);
+    fftw_free(in);
+    free(out);
 }

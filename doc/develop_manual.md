@@ -24,6 +24,11 @@ To define new methods, one need to add declaration to
 method in `Type_external_methods_address` macro.
 See `include/Type_IntVector3.h` for example
 
+## variable setting
+
+For methods whose parameters include more than one mutable struct, such as
+FloatVector and FloatMatrix, the caller should be the **result** object
+
 ## Q&A
 
 ###### FFTW3 not working

@@ -81,6 +81,11 @@ struct FloatVectorMethods {
     Float (*polyval)(const struct FloatVector* this, Float x);
     void (* polyint_)(struct FloatVector* this, Float y0);
     void (* polydiff_)(struct FloatVector* this);
+    // matrix
+    void (*get_row_)(struct FloatVector* this, struct FloatMatrix M, Int r);
+    void (*get_column_)(struct FloatVector* this, struct FloatMatrix M, Int c);
+    // complex
+    void (*ifft_)(struct FloatVector* this, struct ComplexVector X);
 };
 
 extern struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS;
@@ -137,5 +142,8 @@ void  FloatVector_normalize_(struct FloatVector* this);
 Float FloatVector_polyval(const struct FloatVector* this, Float x);
 void  FloatVector_polyint_(struct FloatVector* this, Float y0);
 void  FloatVector_polydiff_(struct FloatVector* this);
+void  FloatVector_get_row_(struct FloatVector* this, struct FloatMatrix M, Int r);
+void  FloatVector_get_column_(struct FloatVector* this, struct FloatMatrix M, Int c);
+void  FloatVector_ifft_(struct FloatVector* this, struct ComplexVector X);
 
 #endif // _CBL_FLOATVECTOR_H_

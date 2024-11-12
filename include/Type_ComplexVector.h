@@ -41,8 +41,7 @@ struct ComplexVectorMethods {
     Complex (*polyval_zeros)(struct ComplexVector* this, Complex x);
     void (*   fft_)(struct ComplexVector* this, struct ComplexVector x);
     void (*   ifft_)(struct ComplexVector* this, struct ComplexVector x);
-    void (*   fft_rc_)(struct ComplexVector* this, struct FloatVector x);
-    void (*   ifft_cr_)(struct ComplexVector* this, struct FloatVector x);
+    void (*   fftr_)(struct ComplexVector* this, struct FloatVector x);
 };
 
 extern struct ComplexVectorMethods _CBL_COMPLEX_VECTOR_METHODS;
@@ -62,7 +61,6 @@ void    ComplexVector_set_float_(struct ComplexVector* this, struct FloatVector 
 Complex ComplexVector_polyval_zeros(struct ComplexVector* this, Complex x);
 void    ComplexVector_fft_(struct ComplexVector* this, struct ComplexVector x);
 void    ComplexVector_ifft_(struct ComplexVector* this, struct ComplexVector x);
-void    ComplexVector_fft_rc_(struct ComplexVector* this, struct FloatVector x);
-void    ComplexVector_ifft_cr_(struct ComplexVector* this, struct FloatVector x);
+void    ComplexVector_fftr_(struct ComplexVector* this, struct FloatVector x);
 
 #endif // _TYPE_COMPLEXVECTOR_H_

@@ -30,6 +30,7 @@
 #include "Type_Part_math_basic.h"
 #include "Type_IntVector.h"
 #include "Type_FloatVector.h"
+#include "Type_FloatMatrix.h"
 
 #include <math.h>
 
@@ -79,7 +80,10 @@ struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
     &FloatVector_normalize_,
     &FloatVector_polyval,
     &FloatVector_polyint_,
-    &FloatVector_polydiff_
+    &FloatVector_polydiff_,
+    &FloatVector_get_row_,
+    &FloatVector_get_column_,
+    &FloatVector_ifft_
 };
 
 void FloatVector_free_(struct FloatVector* this) {
@@ -571,4 +575,35 @@ void FloatVector_polydiff_(struct FloatVector* this) {
     FloatVector_alloc_(this, n);
     memcpy(this->data, buf, n * sizeof(Float));
     free(buf);
+}
+
+void FloatVector_get_row_(struct FloatVector* this, struct FloatMatrix M, Int r) {
+    if(r >= M.nrow) error_index_out_of_bounds("(FloatMatrix_get_row) irow >= this->nrow");
+    if(r < 0) error_invalid_argument("(FloatMatrix_get_row) irow < 0");
+    if(M.ncol <= 0) {
+        FloatVector_free_(this);
+        return;
+    }
+    FloatVector_alloc_(this, M.ncol);
+    for(Int i = 0; i < M.nrow; i++) this->data[i] = CBL_CALL(M, get, r, i);
+}
+
+void FloatVector_get_column_(struct FloatVector* this, struct FloatMatrix M, Int c) {
+    if(c >= M.ncol) error_invalid_argument("(FloatMatrix_get_column) icol >= this->ncol");
+    if(c < 0) error_invalid_argument("(FloatMatrix_get_column) icol < 0");
+    if(M.nrow <= 0) {
+        FloatVector_free_(this);
+        return;
+    }
+    FloatVector_alloc_(this, M.nrow);
+    for(Int i = 0; i < M.nrow; i++) this->data[i] = CBL_CALL(M, get, i, c);
+}
+
+void FloatVector_ifft_(struct FloatVector* this, struct ComplexVector X) {
+    if(X.len <= 0) {
+        FloatVector_free_(this);
+        return;
+    }
+    FloatVector_alloc_(this, X.len);
+    _bm_ifftr(X.len, this->data, X.data);
 }

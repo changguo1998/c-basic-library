@@ -39,8 +39,7 @@ struct ComplexVectorMethods _CBL_COMPLEX_VECTOR_METHODS = {
     &ComplexVector_polyval_zeros,
     &ComplexVector_fft_,
     &ComplexVector_ifft_,
-    &ComplexVector_fft_rc_,
-    &ComplexVector_ifft_cr_
+    &ComplexVector_fftr_,
 };
 
 void ComplexVector_free_(struct ComplexVector* this) {
@@ -138,20 +137,11 @@ void ComplexVector_ifft_(struct ComplexVector* this, struct ComplexVector x) {
     _bm_ifft(x.len, x.data, this->data);
 }
 
-void ComplexVector_fft_rc_(struct ComplexVector* this, struct FloatVector x) {
+void ComplexVector_fftr_(struct ComplexVector* this, struct FloatVector x) {
     if(x.len <= 0) {
         ComplexVector_free_(this);
         return;
     }
     ComplexVector_alloc_(this, x.len);
     _bm_fftr(x.len, x.data, this->data);
-}
-
-void ComplexVector_ifft_cr_(struct ComplexVector* this, struct FloatVector x) {
-    if(x.len <= 0) {
-        ComplexVector_free_(this);
-        return;
-    }
-    ComplexVector_alloc_(this, x.len);
-    _bm_ifftr(x.len, x.data, this->data);
 }

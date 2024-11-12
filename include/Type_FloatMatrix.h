@@ -34,8 +34,6 @@ struct FloatMatrixMethods {
     void (*alloc_)(struct FloatMatrix* this, Int nrow, Int ncol);
     // basic
     Float (*get)(const struct FloatMatrix* this, Int irow, Int icol);
-    void (* get_row_)(const struct FloatMatrix* this, struct FloatVector* fv, Int irow);
-    void (* get_column_)(const struct FloatMatrix* this, struct FloatVector* fv, Int icol);
     void (* set_)(struct FloatMatrix* this, Int irow, Int icol, Float value);
     void (* set_vector_)(struct FloatMatrix* this, struct FloatVector fv);
     void (* hcatv_)(struct FloatMatrix* this, Int n, ...);
@@ -63,8 +61,6 @@ static inline void FloatMatrix_new_(struct FloatMatrix* this) {
 void  FloatMatrix_free_(struct FloatMatrix* this);
 void  FloatMatrix_alloc_(struct FloatMatrix* this, Int nrow, Int ncol);
 Float FloatMatrix_get(const struct FloatMatrix* this, Int irow, Int icol);
-void  FloatMatrix_get_row_(const struct FloatMatrix* this, struct FloatVector* fv, Int irow);
-void  FloatMatrix_get_column_(const struct FloatMatrix* this, struct FloatVector* fv, Int icol);
 void  FloatMatrix_set_(struct FloatMatrix* this, Int irow, Int icol, Float value);
 void  FloatMatrix_set_vector_(struct FloatMatrix* this, struct FloatVector fv);
 void  FloatMatrix_hcatv_(struct FloatMatrix* this, Int n, ...);

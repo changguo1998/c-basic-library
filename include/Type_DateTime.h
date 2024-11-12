@@ -302,8 +302,8 @@ struct DateTime DateTime_regularize_(struct DateTime* this);
 Int             DateTime_diff(const struct DateTime* this, struct DateTime datetime);
 Float           DateTime_diff_second(const struct DateTime* this,
                                      struct DateTime        datetime);
-Bool           DateTime_lessthan(const struct DateTime* this, struct DateTime another);
-Bool           DateTime_isequal(const struct DateTime* this, struct DateTime another);
+Bool            DateTime_lessthan(const struct DateTime* this, struct DateTime another);
+Bool            DateTime_isequal(const struct DateTime* this, struct DateTime another);
 struct DateTime DateTime_add_(struct DateTime* this, Int precision);
 struct DateTime DateTime_add_second_(struct DateTime* this, Float seconds);
 Float           DateTime_julian(const struct DateTime* this);

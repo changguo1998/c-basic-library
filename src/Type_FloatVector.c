@@ -64,6 +64,7 @@ struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
     &FloatVector_sort_,
     &FloatVector_sortperm_,
     &FloatVector_dot,
+    &FloatVector_cross_,
     &FloatVector_add_scalar_,
     &FloatVector_sub_scalar_,
     &FloatVector_mul_scalar_,
@@ -438,9 +439,18 @@ void FloatVector_sortperm_(struct FloatVector* this, struct IntVector* perm) {
 Float FloatVector_dot(const struct FloatVector* this, struct FloatVector b) {
     Int   i;
     Float sum = 0;
-    if(this->len != b.len) error_invalid_argument("(Vector_dot) length mismatch");
+    if(this->len != b.len) error_invalid_argument("(FloatVector_dot) length mismatch");
     for(i = 0; i < this->len; i++) sum += this->data[i] * b.data[i];
     return sum;
+}
+
+void FloatVector_cross_(struct FloatVector* this, struct FloatVector x, struct FloatVector y) {
+    if(x.len != 3) error_invalid_argument("(FloatVector_cross) x.len != 3");
+    if(y.len != 3) error_invalid_argument("(FloatVector_cross) y.len != 3");
+    FloatVector_alloc_(this, 3);
+    this->data[0] = x.data[1] * y.data[2] - x.data[2] * y.data[1];
+    this->data[1] = x.data[2] * y.data[0] - x.data[0] * y.data[2];
+    this->data[2] = x.data[0] * y.data[1] - x.data[1] * y.data[0];
 }
 
 void FloatVector_add_scalar_(struct FloatVector* this, Float value) {
@@ -538,7 +548,7 @@ void FloatVector_polyint_(struct FloatVector* this, Float y0) {
     n = this->len + 1;
     buf = (Float*)calloc(n, sizeof(Float));
     buf[0] = y0;
-    for(i = 1; i < n; i++) buf[i] = this->data[i-1] / i;
+    for(i = 1; i < n; i++) buf[i] = this->data[i - 1] / i;
 
     FloatVector_alloc_(this, n);
     memcpy(this->data, buf, n * sizeof(Float));

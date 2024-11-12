@@ -38,39 +38,26 @@ struct FloatMatrix {
 };
 
 struct FloatMatrixMethods {
-    void (*free_)(struct FloatMatrix* this);
-
-    void (*alloc_)(struct FloatMatrix* this, Int nrow, Int ncol);
-
+    // memory management
+    void (* free_)(struct FloatMatrix* this);
+    void (* alloc_)(struct FloatMatrix* this, Int nrow, Int ncol);
+    // basic
     Float (*get)(const struct FloatMatrix* this, Int irow, Int icol);
-
-    void (*get_row_)(const struct FloatMatrix* this, struct FloatVector* fv, Int irow);
-
-    void (*get_column_)(const struct FloatMatrix* this, struct FloatVector* fv, Int icol);
-
-    void (*set_)(struct FloatMatrix* this, Int irow, Int icol, Float value);
-
-    void (*set_vector_)(struct FloatMatrix* this, struct FloatVector fv);
-
-    void (*hcatv_)(struct FloatMatrix* this, Int n, ...);
-
-    void (*hcat_)(struct FloatMatrix* this, Int nmat, ...);
-
-    void (*vcat_)(struct FloatMatrix* this, Int nmat, ...);
-
-    void (*rand_)(struct FloatMatrix* this, Float min, Float max);
-
-    void (*rand_from_)(struct FloatMatrix* this, struct FloatVector value_set);
-
-    void (*fill_)(struct FloatMatrix* this, Float value);
-
-    void (*copy_from_)(struct FloatMatrix* this, struct FloatMatrix src);
-
-    void (*diag_)(struct FloatMatrix* this, struct FloatVector dv);
-
-    void (*add_)(struct FloatMatrix* this, struct FloatMatrix X);
-
-    void (*product_)(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y);
+    void (* get_row_)(const struct FloatMatrix* this, struct FloatVector* fv, Int irow);
+    void (* get_column_)(const struct FloatMatrix* this, struct FloatVector* fv, Int icol);
+    void (* set_)(struct FloatMatrix* this, Int irow, Int icol, Float value);
+    void (* set_vector_)(struct FloatMatrix* this, struct FloatVector fv);
+    void (* hcatv_)(struct FloatMatrix* this, Int n, ...);
+    void (* hcat_)(struct FloatMatrix* this, Int nmat, ...);
+    void (* vcat_)(struct FloatMatrix* this, Int nmat, ...);
+    void (* rand_)(struct FloatMatrix* this, Float min, Float max);
+    void (* rand_from_)(struct FloatMatrix* this, struct FloatVector value_set);
+    void (* fill_)(struct FloatMatrix* this, Float value);
+    void (* copy_from_)(struct FloatMatrix* this, struct FloatMatrix src);
+    void (* diag_)(struct FloatMatrix* this, struct FloatVector dv);
+    // math
+    void (* add_)(struct FloatMatrix* this, struct FloatMatrix X);
+    void (* product_)(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y);
 };
 
 extern struct FloatMatrixMethods _CBL_FLOAT_MATRIX_METHODS;

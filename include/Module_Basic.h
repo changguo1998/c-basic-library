@@ -246,19 +246,12 @@ DEFINE_COMPLEX(Float, Complex,)
 // # Error handling
 
 void error_exit();
-
 void error_invalid_argument(const char* msg);
-
 void error_index_out_of_bounds(const char* msg);
-
 void error_not_initialized(const char* msg);
-
 void error_out_of_memory(const char* msg);
-
 void error_unexpected_allocated_memory(const char* msg);
-
 void error_file_not_exists(const char* msg);
-
 void error_failed_open_file(const char* msg);
 
 // # Flags

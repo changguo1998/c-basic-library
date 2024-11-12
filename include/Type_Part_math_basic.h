@@ -34,10 +34,8 @@ static const long double PI = 3.141592653589793238462643383279502884197169399375
 // # int
 
 void _bm_rand_ull_(unsigned long long* buffer, long len);
-
-Int _bm_convert_ull_to_Int(unsigned long long ull, Int min, Int max);
-
-Int _bm_round_zero_to_Int(Int x, Int m, Int* c);
+Int  _bm_convert_ull_to_Int(unsigned long long ull, Int min, Int max);
+Int  _bm_round_zero_to_Int(Int x, Int m, Int* c);
 
 static inline Int _bm_abs_int(Int x) {
 #if USE_64_BIT == 1
@@ -50,15 +48,10 @@ static inline Int _bm_abs_int(Int x) {
 // # float
 
 Float _bm_float_sum(Float* v, Int n);
-
 Float _bm_float_mean(Float* v, Int n);
-
 Float _bm_float_var(Float* v, Int n);
-
 Float _bm_float_std(Float* v, Int n, Int correct);
-
 Float _bm_convert_ull_to_Float(unsigned long long ull, Float min, Float max);
-
 Float _bm_round_zero_to_Float(Float x, Float m, Float* c);
 
 static inline Float _bm_abs_float(Float x) {
@@ -69,26 +62,17 @@ static inline Float _bm_abs_float(Float x) {
 #endif
 }
 
-static inline Float _bm_sqrt(Float x) { return sqrtl(x); }
-
 Float _bm_n_root(Float x, Int n);
 
+static inline Float _bm_sqrt(Float x) { return sqrtl(x); }
 static inline Float _bm_deg2rad(Float x) { return x * PI / 180.0; }
-
 static inline Float _bm_rad2deg(Float x) { return x * 180.0 / PI; }
-
 static inline Float _bm_sind(Float x) { return sin(_bm_deg2rad(x)); }
-
 static inline Float _bm_cosd(Float x) { return cos(_bm_deg2rad(x)); }
-
 static inline Float _bm_tand(Float x) { return tan(_bm_deg2rad(x)); }
-
 static inline Float _bm_asind(Float x) { return _bm_rad2deg(asin(x)); }
-
 static inline Float _bm_acosd(Float x) { return _bm_rad2deg(acos(x)); }
-
 static inline Float _bm_atand(Float x) { return _bm_rad2deg(atan(x)); }
-
 static inline Float _bm_atan2d(Float y, Float x) { return _bm_rad2deg(atan2(y, x)); }
 
 void _bm_fft(Int n, Complex* X, Complex* Y);

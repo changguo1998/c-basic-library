@@ -215,24 +215,6 @@ static inline void String_new_(struct String* this) {
     this->methods = &_CBL_STRING_METHODS;
 }
 
-// static inline void StringMethods_new(struct StringMethods* this) {
-//     this->clean_ = &String_clean_;
-//     this->set_ = &String_set_;
-//     this->isequal = &String_isequal;
-//     this->append_ = &String_append_;
-//     this->join_ = &String_join_;
-//     this->next_match = &String_next_match;
-//     this->starts_with = &String_starts_with;
-//     this->ends_with = &String_ends_with;
-//     this->contains = &String_contains;
-//     this->split = &String_split;
-//     this->substring_ = &String_substring_;
-//     this->strip_ = &String_strip_;
-//     this->replace_ = &String_replace_;
-//     this->replace_all_ = &String_replace_all_;
-//     this->reverse_ = &String_reverse_;
-// }
-
 // /**
 //  * @brief read one line from ascii file
 //  * @param fp

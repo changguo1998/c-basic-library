@@ -77,6 +77,7 @@ static inline void FloatVector3_normalize_(struct FloatVector3 *this, Int order)
     Int i;\
     Float n;\
     n = FloatVector3_norm(this, order);\
+    if(n==0) error_invalid_argument("(FloatVector3_normalize_) norm is 0");\
     for(i=0; i<3; i++) this->data[i] /= n;\
 }
 

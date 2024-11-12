@@ -36,62 +36,38 @@ struct IntVector {
 };
 
 struct IntVectorMethods {
+    // memory management
     void (*free_)(struct IntVector* this);
-
     void (*alloc_)(struct IntVector* this, Int len);
-
+    // basic
     Int (*get)(const struct IntVector* this, Int index);
-
     void (*index_)(struct IntVector* this, struct IntVector src, struct IntVector indexs);
-
     void (*slice_)(struct IntVector* this, struct IntVector src, Int start, Int step, Int stop);
-
     Int (*count)(const struct IntVector* this);
-
     void (*index_flag_)(struct IntVector* this, struct IntVector src, struct IntVector flags);
-
     void (*set_)(struct IntVector* this, Int index, Int value);
-
     void (*setas_)(struct IntVector* this, Int n, ...);
-
     void (*vcat_)(struct IntVector* this, Int n, ...);
-
     void (*rand_)(struct IntVector* this, Int min, Int max);
-
     void (*rand_from_)(struct IntVector* this, struct IntVector value_set);
-
     void (*fill_)(struct IntVector* this, Int value);
-
     void (*range_)(struct IntVector* this, Int start, Int step, Int stop);
-
     void (*copy_from_)(struct IntVector* this, struct IntVector src);
-
     void (*find_trues_)(struct IntVector* this, struct IntVector flags);
-
+    // math
     Int (*sum)(const struct IntVector* this);
-
     Int (*prod)(const struct IntVector* this);
-
     Int (*min)(const struct IntVector* this);
-
     Int (*max)(const struct IntVector* this);
-
     Int (*argmin)(const struct IntVector* this);
-
     Int (*argmax)(const struct IntVector* this);
-
     void (*cumsum_)(struct IntVector* this, Int initial);
-
     void (*cumprod_)(struct IntVector* this, Int initial);
-
     void (*sort_)(struct IntVector* this);
-
     void (*sortperm_)(struct IntVector* this, struct IntVector* perm);
-
     Int (*dot)(const struct IntVector* this, struct IntVector b);
-
+    // index converting
     Int (*coord_linear)(const struct IntVector* this, struct IntVector size);
-
     void (*coord_cartesian_)(struct IntVector* this, struct IntVector size, Int linear_index);
 };
 

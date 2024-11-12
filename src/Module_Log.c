@@ -170,13 +170,3 @@ void LOG_print_state() {
     prefix = LOG_prefix(LOG_LEVEL_DEBUG);
     printf("prefix format: %s\n", prefix.str);
 }
-
-void LOG_print_error(const char* message) { LOG_print_message(message, LOG_LEVEL_ERROR); }
-
-void LOG_print_warning(const char* message) { LOG_print_message(message, LOG_LEVEL_WARNING); }
-
-void LOG_print_info(const char* message) { LOG_print_message(message, LOG_LEVEL_INFO); }
-
-void LOG_print_debug(const char* message) { LOG_print_message(message, LOG_LEVEL_DEBUG); }
-
-void LOG_print_trace(const char* message) { LOG_print_message(message, LOG_LEVEL_TRACE); }

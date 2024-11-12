@@ -81,7 +81,7 @@ extern UInt8 LOG_prefix_format;
 #define LOG_LEVEL_INFO    300
 #define LOG_LEVEL_DEBUG   400
 #define LOG_LEVEL_TRACE   500
-#define LOG_LEVEL_ALL     INT_MAX
+#define LOG_LEVEL_ALL     CBL_INT_MAX
 
 #define LOG_PREFIX_DATE      0b00000001
 #define LOG_PREFIX_TIME      0b00000010
@@ -126,14 +126,10 @@ void LOG_print_message(const char* message, Int level);
  */
 void LOG_print_state();
 
-void LOG_print_error(const char* message);
-
-void LOG_print_warning(const char* message);
-
-void LOG_print_info(const char* message);
-
-void LOG_print_debug(const char* message);
-
-void LOG_print_trace(const char* message);
+static void LOG_print_error(const char* message) { LOG_print_message(message, LOG_LEVEL_ERROR); }
+static void LOG_print_warning(const char* message) { LOG_print_message(message, LOG_LEVEL_WARNING); }
+static void LOG_print_info(const char* message) { LOG_print_message(message, LOG_LEVEL_INFO); }
+static void LOG_print_debug(const char* message) { LOG_print_message(message, LOG_LEVEL_DEBUG); }
+static void LOG_print_trace(const char* message) { LOG_print_message(message, LOG_LEVEL_TRACE); }
 
 #endif // _CBL_LOG_H_

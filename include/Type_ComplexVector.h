@@ -36,12 +36,15 @@ struct ComplexVector {
 };
 
 struct ComplexVectorMethods {
-    void (*   free_)(struct ComplexVector* this);
-    void (*   alloc_)(struct ComplexVector* this, int len);
+    // memory manage
+    void (*free_)(struct ComplexVector* this);
+    void (*alloc_)(struct ComplexVector* this, int len);
+    // basic
     void (*   copy_from_)(struct ComplexVector* this, struct ComplexVector src);
     Complex (*get)(struct ComplexVector* this, Int index);
     void (*   set_)(struct ComplexVector* this, Int index, Complex value);
     void (*   set_float_)(struct ComplexVector* this, struct FloatVector res, struct FloatVector ims);
+    // math
     Complex (*polyval_zeros)(struct ComplexVector* this, Complex x);
     void (*   fft_)(struct ComplexVector* this, struct ComplexVector x);
     void (*   ifft_)(struct ComplexVector* this, struct ComplexVector x);

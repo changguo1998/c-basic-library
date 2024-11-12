@@ -30,13 +30,6 @@
 #include "Type_IntVector.h"
 
 
-struct FloatVector {
-    Int    len;
-    Float* data;
-
-    struct FloatVectorMethods* methods;
-};
-
 struct FloatVectorMethods {
     // memory management
     void (*free_)(struct FloatVector* this);

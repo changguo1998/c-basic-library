@@ -10,7 +10,7 @@ set(DEBUG False)
 set(FFTW D:/Softwares/fftw3)
 include_directories(${FFTW}/include)
 
-#set(CMAKE_INSTALL_PREFIX ./install)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
 
 # experiment codes
 #add_executable(exp_Macro_template experiment/macro_template.c)
@@ -83,11 +83,13 @@ file(GLOB CBL_C "src/*.c")
 
 add_executable(test_CBL ${CBL_C} ${CBL_H} test/CBL.c)
 target_include_directories(test_CBL PRIVATE include)
-#target_link_libraries(test_CBL PRIVATE fftw3)
+target_link_directories(test_CBL PRIVATE "${FFTW}/bin")
+target_link_libraries(test_CBL PRIVATE fftw3)
 
 add_library(CBL STATIC ${CBL_C} ${CBL_H})
 target_include_directories(CBL PUBLIC include)
-#target_link_libraries(CBL PRIVATE fftw3)
+target_link_directories(CBL PRIVATE "${FFTW}/bin")
+target_link_libraries(CBL PRIVATE fftw3)
 target_sources(CBL PUBLIC
         FILE_SET headerCBL
         TYPE HEADERS

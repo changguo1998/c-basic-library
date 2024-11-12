@@ -33,24 +33,6 @@
 // # StaticDict
 
 
-/**
- * @brief struct StaticDict
- * @param key String[]
- * @param flag Bool[]
- * @param typecode Int[]
- * @param address Address[]
- * @param methods
- */
-struct StaticDict {
-    struct String key[STATIC_DICT_SIZE];
-
-    Bool    flag[STATIC_DICT_SIZE];
-    Int     typecode[STATIC_DICT_SIZE];
-    Address address[STATIC_DICT_SIZE];
-
-    struct StaticDictMethods* methods;
-};
-
 struct StaticDictMethods {
 
     /**
@@ -143,15 +125,6 @@ struct DynamicDictNode {
     struct DynamicDictNode* next;
 };
 
-/**
- * @brief struct Dict\n
- * Address get(Dict* this, String key, Int* typecode);
- */
-struct DynamicDict {
-    struct DynamicDictNode*    data;
-    struct DynamicDictMethods* methods;
-};
-
 struct DynamicDictMethods {
     /**
      * @brief get address of saved data by key
@@ -226,30 +199,6 @@ Int     DynamicDict_n_elements(const struct DynamicDict* this);
 Int     DynamicDict_keys(const struct DynamicDict* this, struct String* key_list, Int len_key_list);
 
 // # Table
-
-/**
- * @brief Table struct
- * @param nrow Int
- * @param ncol Int
- * @param linear_row Bool
- * @param elsize Int[TABLE_MAX_COLUMNS]
- * @param addr Address[TABLE_MAX_COLUMNS]
- * @param row_name struct String*
- * @param col_name struct String[TABLE_MAX_COLUMNS]
- * @param methods
- */
-struct Table {
-    Int  nrow, ncol;
-    Bool linear_row;
-    Int  elsize[TABLE_MAX_COLUMNS];
-
-    Address addr[TABLE_MAX_COLUMNS];
-
-    struct String* row_name;
-    struct String  col_name[TABLE_MAX_COLUMNS];
-
-    struct TableMethods* methods;
-};
 
 struct TableMethods {
     /**

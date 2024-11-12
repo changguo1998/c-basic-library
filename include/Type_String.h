@@ -30,13 +30,6 @@
 #include <string.h>
 #include "Module_Basic.h"
 
-struct String {
-    Char str[STRING_MAX_LENGTH];
-    Int  len;
-
-    const struct StringMethods* methods;
-};
-
 /**
  * @brief StringMethods
  */

@@ -28,13 +28,6 @@
 
 #include "Module_Basic.h"
 
-struct IntVector {
-    Int  len;
-    Int* data;
-
-    struct IntVectorMethods* methods;
-};
-
 struct IntVectorMethods {
     // memory management
     void (*free_)(struct IntVector* this);

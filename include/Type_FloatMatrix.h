@@ -27,20 +27,11 @@
 #define _TYPE_FLOATMATRIX_H_
 
 #include "Module_Basic.h"
-#include "Type_IntVector.h"
-#include "Type_FloatVector.h"
-
-struct FloatMatrix {
-    Int    nrow, ncol;
-    Float* data;
-
-    struct FloatMatrixMethods* methods;
-};
 
 struct FloatMatrixMethods {
     // memory management
-    void (* free_)(struct FloatMatrix* this);
-    void (* alloc_)(struct FloatMatrix* this, Int nrow, Int ncol);
+    void (*free_)(struct FloatMatrix* this);
+    void (*alloc_)(struct FloatMatrix* this, Int nrow, Int ncol);
     // basic
     Float (*get)(const struct FloatMatrix* this, Int irow, Int icol);
     void (* get_row_)(const struct FloatMatrix* this, struct FloatVector* fv, Int irow);
@@ -56,8 +47,8 @@ struct FloatMatrixMethods {
     void (* copy_from_)(struct FloatMatrix* this, struct FloatMatrix src);
     void (* diag_)(struct FloatMatrix* this, struct FloatVector dv);
     // math
-    void (* add_)(struct FloatMatrix* this, struct FloatMatrix X);
-    void (* product_)(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y);
+    void (*add_)(struct FloatMatrix* this, struct FloatMatrix X);
+    void (*product_)(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y);
 };
 
 extern struct FloatMatrixMethods _CBL_FLOAT_MATRIX_METHODS;

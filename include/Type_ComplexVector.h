@@ -28,13 +28,6 @@
 
 #include "Module_Basic.h"
 
-struct ComplexVector {
-    Int      len;
-    Complex* data;
-
-    struct ComplexVectorMethods* methods;
-};
-
 struct ComplexVectorMethods {
     // memory manage
     void (*free_)(struct ComplexVector* this);

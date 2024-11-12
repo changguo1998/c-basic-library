@@ -40,47 +40,6 @@ Int DateTime_second2precision(Float s);
 
 Float DateTime_precision2second(Int tp);
 
-/**
- * @brief Date: year; month; day;
- */
-struct Date {
-    Int year, month, day;
-
-    struct DateMethods* methods;
-};
-
-/**
- * @brief Time struct
- * @param hour Hour
- * @param minute Minute
- * @param second Second
- * @param millisecond Millisecond (possible not exit depending on time precision)
- * @param macrosecond Macrosecond (possible not exit depending on time precision)
- * @param Nanosecond Nanosecond (possible not exit depending on time precision)
- */
-struct Time {
-    Int hour;
-    Int minute;
-    Int second;
-#if TIME_PRECISION > 0
-    Int millisecond;
-#endif
-#if TIME_PRECISION > 3
-    Int macrosecond;
-#endif
-#if TIME_PRECISION > 6
-    Int nanosecond;
-#endif
-    struct TimeMethods* methods;
-};
-
-struct DateTime {
-    struct Date date;
-    struct Time time;
-
-    struct DateTimeMethods* methods;
-};
-
 struct DateMethods {
     // # set value
     /**

@@ -23,8 +23,6 @@
 #
 #
 
-install_path="$(pwd)/../external"
-cd $install_path
 if [ ! -f fftw.tar.gz ];then
 echo "Download fftw"
 wget https://www.fftw.org/fftw-3.3.10.tar.gz -O fftw.tar.gz

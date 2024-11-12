@@ -272,4 +272,136 @@ void error_failed_open_file(const char* msg);
 
 #define CBL_CALL(...) _CBL_CALL_METHOD(__VA_ARGS__)
 
+// newly defined types
+
+
+/**
+ * @brief Date: year; month; day;
+ */
+struct Date {
+    Int year, month, day;
+
+    struct DateMethods* methods;
+};
+
+/**
+ * @brief Time struct
+ * @param hour Hour
+ * @param minute Minute
+ * @param second Second
+ * @param millisecond Millisecond (possible not exit depending on time precision)
+ * @param macrosecond Macrosecond (possible not exit depending on time precision)
+ * @param Nanosecond Nanosecond (possible not exit depending on time precision)
+ */
+struct Time {
+    Int hour;
+    Int minute;
+    Int second;
+#if TIME_PRECISION > 0
+    Int millisecond;
+#endif
+#if TIME_PRECISION > 3
+    Int macrosecond;
+#endif
+#if TIME_PRECISION > 6
+ Int nanosecond;
+#endif
+    struct TimeMethods* methods;
+};
+
+struct DateTime {
+    struct Date date;
+    struct Time time;
+
+    struct DateTimeMethods* methods;
+};
+
+struct String {
+    Char str[STRING_MAX_LENGTH];
+    Int  len;
+
+    const struct StringMethods* methods;
+};
+
+/**
+ * @brief struct StaticDict
+ * @param key String[]
+ * @param flag Bool[]
+ * @param typecode Int[]
+ * @param address Address[]
+ * @param methods
+ */
+struct StaticDict {
+    struct String key[STATIC_DICT_SIZE];
+
+    Bool    flag[STATIC_DICT_SIZE];
+    Int     typecode[STATIC_DICT_SIZE];
+    Address address[STATIC_DICT_SIZE];
+
+    struct StaticDictMethods* methods;
+};
+
+/**
+ * @brief struct Dict\n
+ * Address get(Dict* this, String key, Int* typecode);
+ */
+struct DynamicDict {
+    struct DynamicDictNode*    data;
+    struct DynamicDictMethods* methods;
+};
+
+/**
+ * @brief Table struct
+ * @param nrow Int
+ * @param ncol Int
+ * @param linear_row Bool
+ * @param elsize Int[TABLE_MAX_COLUMNS]
+ * @param addr Address[TABLE_MAX_COLUMNS]
+ * @param row_name struct String*
+ * @param col_name struct String[TABLE_MAX_COLUMNS]
+ * @param methods
+ */
+struct Table {
+    Int  nrow, ncol;
+    Bool linear_row;
+    Int  elsize[TABLE_MAX_COLUMNS];
+
+    Address addr[TABLE_MAX_COLUMNS];
+
+    struct String* row_name;
+    struct String  col_name[TABLE_MAX_COLUMNS];
+
+    struct TableMethods* methods;
+};
+
+// Vectors
+
+struct IntVector {
+    Int  len;
+    Int* data;
+
+    struct IntVectorMethods* methods;
+};
+
+struct FloatVector {
+    Int    len;
+    Float* data;
+
+    struct FloatVectorMethods* methods;
+};
+
+struct ComplexVector {
+    Int      len;
+    Complex* data;
+
+    struct ComplexVectorMethods* methods;
+};
+
+struct FloatMatrix {
+    Int    nrow, ncol;
+    Float* data;
+
+    struct FloatMatrixMethods* methods;
+};
+
 #endif // _CBL_BASIC_H_

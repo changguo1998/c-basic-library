@@ -75,9 +75,9 @@ static inline C cmplx_div##BIT(C z1, C z2){\
     return t;\
 }
 
-// DEFINE_COMPLEX(float, Complex32, 32)
-// DEFINE_COMPLEX(double, Complex64, 64)
-// DEFINE_COMPLEX(long double, Complex128, 128)
+DEFINE_COMPLEX(float, Complex32, 32)
+DEFINE_COMPLEX(double, Complex64, 64)
+DEFINE_COMPLEX(long double, Complex128, 128)
 
 
 #endif // _TYPE_COMPLEX_H_

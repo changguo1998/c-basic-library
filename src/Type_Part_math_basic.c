@@ -126,18 +126,69 @@ Float _bm_n_root(Float x, Int n) {
     return root;
 }
 
-void _bm_fft(Int n, Float* x, Complex* X) {
+void _bm_fft(Int n, Complex* X, Complex* Y) {
     Int           i;
-    double*       in;
-    fftw_complex* out;
+    fftw_complex *fftw_in, *fftw_out;
     fftw_plan     p;
 
+    fftw_in = fftw_alloc_complex(n);
+    fftw_out = fftw_alloc_complex(n);
+
+    p = fftw_plan_dft_1d(n, fftw_in, fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
+
+    for(i = 0; i < n; i++) {
+        fftw_in[i][0] = X[i].re;
+        fftw_in[i][1] = X[i].im;
+    }
+    fftw_execute(p);
+    for(i = 0; i < n; i++) {
+        Y[i].re = fftw_out[i][0];
+        Y[i].im = fftw_out[i][1];
+    }
+
+    fftw_destroy_plan(p);
+    fftw_free(fftw_in);
+    fftw_free(fftw_out);
+}
+
+void _bm_ifft(Int n, Complex* X, Complex* Y) {
+    Int           i;
+    fftw_complex *fftw_in, *fftw_out;
+    fftw_plan     p;
+
+    fftw_in = fftw_alloc_complex(n);
+    fftw_out = fftw_alloc_complex(n);
+
+    p = fftw_plan_dft_1d(n, fftw_in, fftw_out, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    for(i = 0; i < n; i++) {
+        fftw_in[i][0] = X[i].re;
+        fftw_in[i][1] = X[i].im;
+    }
+    fftw_execute(p);
+    for(i = 0; i < n; i++) {
+        Y[i].re = fftw_out[i][0];
+        Y[i].im = fftw_out[i][1];
+    }
+
+    fftw_destroy_plan(p);
+    fftw_free(fftw_in);
+    fftw_free(fftw_out);
+}
+
+void _bm_fftr(Int n, Float* x, Complex* X) {
+    Int           i;
+    fftw_complex *in, *out;
+    fftw_plan     p;
+
+    in = fftw_alloc_complex(n);
     out = fftw_alloc_complex(n);
-    in = fftw_alloc_real(n);
+    p = fftw_plan_dft_1d(n, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
-    p = fftw_plan_dft_r2c_1d(n, in, out, FFTW_ESTIMATE);
-
-    for(i = 0; i < n; i++) in[i] = x[i];
+    for(i = 0; i < n; i++) {
+        in[i][0] = x[i];
+        in[i][1] = 0.0;
+    }
     fftw_execute(p);
     for(i = 0; i < n; i++) X[i] = cmplx_(out[i][0], out[i][1]);
 
@@ -146,23 +197,22 @@ void _bm_fft(Int n, Float* x, Complex* X) {
     fftw_free(in);
 }
 
-void _bm_ifft(Int n, Float* x, Complex* X) {
+void _bm_ifftr(Int n, Float* x, Complex* X) {
     Int           i;
-    double*       out;
-    fftw_complex* in;
+    fftw_complex *in, *out;
     fftw_plan     p;
 
     in = fftw_alloc_complex(n);
-    out = fftw_alloc_real(n);
+    out = fftw_alloc_complex(n);
 
-    p = fftw_plan_dft_c2r_1d(n, in, out, FFTW_ESTIMATE);
+    p = fftw_plan_dft_1d(n, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
 
-    for(i = 0; i < n; i++){
+    for(i = 0; i < n; i++) {
         in[i][0] = X[i].re;
         in[i][1] = X[i].im;
     }
     fftw_execute(p);
-    for(i = 0; i < n; i++) x[i] = out[i];
+    for(i = 0; i < n; i++) x[i] = out[i][0];
 
     fftw_destroy_plan(p);
     fftw_free(in);

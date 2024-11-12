@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(c_basic_library VERSION 0.0.1 LANGUAGES C)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 99)
 
 set(DEBUG False)
 
@@ -71,6 +71,7 @@ list(APPEND Log_C ${DateTime_C} ${String_C})
 add_test_target(Dict ${String_C})
 add_test_target(IntVector ${MATH_BASIC})
 add_test_target(FloatVector ${MATH_BASIC} ${IntVector_C})
+add_test_target(ComplexVector ${MATH_BASIC} ${IntVector_C} ${FloatVector_C})
 add_test_target(FloatMatrix ${MATH_BASIC} ${IntVector_C} ${FloatVector_C})
 add_test_target(IntVectorN ${MATH_BASIC} include/Template_VectorN.h)
 add_test_target(FloatVectorN ${MATH_BASIC} include/Template_VectorN.h)

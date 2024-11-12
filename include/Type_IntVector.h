@@ -105,10 +105,10 @@ static inline void IntVector_new_(struct IntVector* this) {
 
 void IntVector_free_(struct IntVector* this);
 void IntVector_alloc_(struct IntVector* this, Int len);
-Int IntVector_get(const struct IntVector* this, Int index);
+Int  IntVector_get(const struct IntVector* this, Int index);
 void IntVector_index_(struct IntVector* this, struct IntVector src, struct IntVector indexs);
 void IntVector_slice_(struct IntVector* this, struct IntVector src, Int start, Int step, Int stop);
-Int IntVector_count(const struct IntVector* this);
+Int  IntVector_count(const struct IntVector* this);
 void IntVector_index_flag_(struct IntVector* this, struct IntVector src, struct IntVector flags);
 void IntVector_set_(struct IntVector* this, Int index, Int value);
 void IntVector_setas_(struct IntVector* this, Int n, ...);
@@ -119,18 +119,18 @@ void IntVector_fill_(struct IntVector* this, Int value);
 void IntVector_range_(struct IntVector* this, Int start, Int step, Int stop);
 void IntVector_copy_from_(struct IntVector* this, struct IntVector src);
 void IntVector_find_trues_(struct IntVector* this, struct IntVector flags);
-Int IntVector_sum(const struct IntVector* this);
-Int IntVector_prod(const struct IntVector* this);
-Int IntVector_min(const struct IntVector* this);
-Int IntVector_max(const struct IntVector* this);
-Int IntVector_argmin(const struct IntVector* this);
-Int IntVector_argmax(const struct IntVector* this);
+Int  IntVector_sum(const struct IntVector* this);
+Int  IntVector_prod(const struct IntVector* this);
+Int  IntVector_min(const struct IntVector* this);
+Int  IntVector_max(const struct IntVector* this);
+Int  IntVector_argmin(const struct IntVector* this);
+Int  IntVector_argmax(const struct IntVector* this);
 void IntVector_cumsum_(struct IntVector* this, Int initial);
 void IntVector_cumprod_(struct IntVector* this, Int initial);
 void IntVector_sort_(struct IntVector* this);
 void IntVector_sortperm_(struct IntVector* this, struct IntVector* perm);
-Int IntVector_dot(const struct IntVector* this, struct IntVector b);
-Int IntVector_coord_linear(const struct IntVector* this, struct IntVector size);
+Int  IntVector_dot(const struct IntVector* this, struct IntVector b);
+Int  IntVector_coord_linear(const struct IntVector* this, struct IntVector size);
 void IntVector_coord_cartesian_(struct IntVector* this, struct IntVector size, Int linear_index);
 
 #endif // _CBL_INTVECTOR_H_

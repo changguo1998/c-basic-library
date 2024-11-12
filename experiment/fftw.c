@@ -25,28 +25,44 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
-#include "Module_Basic.h"
-#include "Type_Complex.h"
+//#include <complex.h>
+#include <fftw3.h>
 
 int main() {
-    Complex z1, z2, z3;
+    int     m,   n, i;
+    double *in, *in_ref;
 
-    z1 = cmplx_(1, 2);
-    z2 = cmplx_(3, 4);
+    fftw_complex* out;
+    fftw_plan     p;
 
-    printf("z1: %g%+gi\n", z1.re, cmplx_imag(z1));
-    printf("z2: %g%+gi\n", z2.re, cmplx_imag(z2));
-    printf("abs2(z2): %g\n", cmplx_abs2(z2));
-    printf("angle(z2): %g\n", cmplx_angle(z2));
+    printf("Begin\n");
+    n = 16;
+    m = n / 2 + 1;
+    printf("m = %d, n = %d\n", m, n);
+    in_ref = (double*)malloc(n * sizeof(double));
+    in = fftw_alloc_real(n);
+    out = fftw_alloc_complex(m);
 
-    z3 = cmplx_conj(z1);
-    printf("cconj(z1): %g%+gi\n", z3.re, z3.im);
-    z3 = cmplx_add(z1, z2);
-    printf("z1+z2: %g%+gi\n", z3.re, z3.im);
-    z3 = cmplx_mul(z1, z2);
-    printf("z1*z2: %g%+gi\n", z3.re, z3.im);
-    z3 = cmplx_div(z1, z2);
-    printf("z1/z2: %g%+gi\n", z3.re, z3.im);
+    p = fftw_plan_dft_r2c_1d(n, in, out, FFTW_ESTIMATE);
+
+    for(i = 0; i < n; i++)
+        in_ref[i] = sin(M_2_PI * 2.0 * i / m);
+    memcpy(in, in_ref, n * sizeof(double));
+
+    fftw_execute(p);
+
+    for(i = 0; i < n; i++) {
+        printf("%.4f %.4f", in_ref[i], in[i]);
+        if(i < m) printf(" %.4f%+.4fi", out[i][0], out[i][1]);
+        printf("\n");
+    }
+
+    free(in_ref);
+    fftw_destroy_plan(p);
+    fftw_free(in);
+    fftw_free(out);
     return 0;
 }

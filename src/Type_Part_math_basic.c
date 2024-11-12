@@ -40,8 +40,6 @@
 
 #include "Type_Part_math_basic.h"
 
-#include <math.h>
-
 void _bm_rand_ull_(unsigned long long* buffer, long len) {
 #ifdef UNIX
      FILE* fp = NULL;
@@ -127,25 +125,25 @@ Float _bm_n_root(Float x, Int n) {
     root = expl(logl(y) / o);
     return root;
 }
-/*
+
 void _bm_fft(Int n, Float* x, Complex* X) {
     Int           i;
     double*       in;
     fftw_complex* out;
     fftw_plan     p;
 
-    out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
-    in = (double*)malloc(sizeof(double) * n);
+    out = fftw_alloc_complex(n);
+    in = fftw_alloc_real(n);
 
     p = fftw_plan_dft_r2c_1d(n, in, out, FFTW_ESTIMATE);
 
     for(i = 0; i < n; i++) in[i] = x[i];
     fftw_execute(p);
-    for(i = 0; i < n; i++) X[i] = cmplx(out[i][0], out[i][1]);
+    for(i = 0; i < n; i++) X[i] = cmplx_(out[i][0], out[i][1]);
 
     fftw_destroy_plan(p);
     fftw_free(out);
-    free(in);
+    fftw_free(in);
 }
 
 void _bm_ifft(Int n, Float* x, Complex* X) {
@@ -154,12 +152,12 @@ void _bm_ifft(Int n, Float* x, Complex* X) {
     fftw_complex* in;
     fftw_plan     p;
 
-    in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
-    out = (double*)malloc(sizeof(double) * n);
+    in = fftw_alloc_complex(n);
+    out = fftw_alloc_real(n);
 
     p = fftw_plan_dft_c2r_1d(n, in, out, FFTW_ESTIMATE);
 
-    for(i = 0; i < n; i++) {
+    for(i = 0; i < n; i++){
         in[i][0] = X[i].re;
         in[i][1] = X[i].im;
     }
@@ -168,6 +166,5 @@ void _bm_ifft(Int n, Float* x, Complex* X) {
 
     fftw_destroy_plan(p);
     fftw_free(in);
-    free(out);
+    fftw_free(out);
 }
-*/

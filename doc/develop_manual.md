@@ -23,3 +23,9 @@ To define new methods, one need to add declaration to
 `Type_external_methods_defination` macro, and function pointer to
 method in `Type_external_methods_address` macro.
 See `include/Type_IntVector3.h` for example
+
+## Q&A
+
+###### FFTW3 not working
+
+Solutin: add .../fftw3/bin into path. (make dll in searching path)

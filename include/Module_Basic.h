@@ -190,11 +190,6 @@ typedef UInt64 UInt;
  */
 typedef Float64 Float;
 
-/**
- * @brief 64-bit complex
- */
-// typedef Complex64 Complex;
-DEFINE_COMPLEX(Float, Complex,)
 #define TYPECODE_INT     TYPECODE_INT64
 #define TYPECODE_UINT    TYPECODE_UINT64
 #define TYPECODE_FLOAT   TYPECODE_FLOAT64
@@ -227,11 +222,6 @@ typedef UInt32    UInt;
  */
 typedef Float32   Float;
 
-/**
- * @brief 32-bit complex
- */
-// typedef Complex32 Complex;
-DEFINE_COMPLEX(Float, Complex,)
 #define TYPECODE_INT     TYPECODE_INT32
 #define TYPECODE_UINT    TYPECODE_UINT32
 #define TYPECODE_FLOAT   TYPECODE_FLOAT32
@@ -251,6 +241,7 @@ DEFINE_COMPLEX(Float, Complex,)
 #define _VECTOR_N_VA_ARG_MAX_Float FLT_MAX
 #endif
 
+DEFINE_COMPLEX(Float, Complex,)
 
 // # Error handling
 

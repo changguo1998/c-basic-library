@@ -2,34 +2,23 @@ cmake_minimum_required(VERSION 3.15)
 
 project(c_basic_library VERSION 0.0.1 LANGUAGES C)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 
 set(DEBUG False)
 
-include(ExternalProject)
-
-externalproject_add(fftw
-    URL ${CMAKE_CURRENT_SOURCE_DIR}/external/fftw.tar.gz
-    PREFIX external
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_SOURCE_DIR}/external -DCMAKE_BUILD_TYPE=Debug
-)
-
-externalproject_add(lapack
-        URL ${CMAKE_CURRENT_SOURCE_DIR}/external/lapack.tar.gz
-        PREFIX external
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_SOURCE_DIR}/external
-        -DCBLAS=ON
-        -DLAPACKE=ON
-        -DCMAKE_BUILD_TYPE=Debug
-)
-
-include_directories("external/include")
-link_directories("external/lib")
+#include(D:/Softwares/fftw3/lib/cmake/fftw3/FFTW3Config.cmake)
+set(FFTW D:/Softwares/fftw3)
+include_directories(${FFTW}/include)
 
 #set(CMAKE_INSTALL_PREFIX ./install)
 
 # experiment codes
 #add_executable(exp_Macro_template experiment/macro_template.c)
+
+add_executable(exp_FFTW experiment/fftw.c)
+target_include_directories(exp_FFTW PRIVATE "${FFTW}/include")
+target_link_directories(exp_FFTW PRIVATE "${FFTW}/bin")
+target_link_libraries(exp_FFTW PRIVATE fftw3)
 
 # tests
 set(BASIC_LIB include/Module_Basic.h src/Module_Basic.c)
@@ -69,7 +58,8 @@ function(add_test_target modulename)
 
     add_executable(test_${modulename} ${deps} test/${modulename}.c)
     target_include_directories(test_${modulename} PRIVATE include)
-#    target_link_libraries(test_${modulename} PRIVATE fftw3)
+    target_link_directories(test_${modulename} PRIVATE ${FFTW}/bin)
+    target_link_libraries(test_${modulename} fftw3)
     install(TARGETS test_${modulename} DESTINATION bin)
 endfunction()
 

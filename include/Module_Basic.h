@@ -397,11 +397,20 @@ struct ComplexVector {
     struct ComplexVectorMethods* methods;
 };
 
+// Matrixs
+
 struct FloatMatrix {
     Int    nrow, ncol;
     Float* data;
 
     struct FloatMatrixMethods* methods;
+};
+
+struct ComplexMatrix {
+    Int      nrow, ncol;
+    Complex* data;
+
+    struct ComplexMatrixMethods* methods;
 };
 
 #endif // _CBL_BASIC_H_

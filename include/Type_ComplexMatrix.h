@@ -23,72 +23,26 @@
  *                                                                                *
  **********************************************************************************/
 
-#ifndef _TYPE_COMPLEX_H_
-#define _TYPE_COMPLEX_H_
+#ifndef _TYPE_COMPLEXMATRIX_H_
+#define _TYPE_COMPLEXMATRIX_H_
 
-#include <math.h>
+#include "Module_Basic.h"
 
-#define DEFINE_COMPLEX(R, C, BIT) \
-typedef struct { R re, im; } C; \
-static inline C cmplx_##BIT(R re, R im){\
-    C t;\
-    t.re = re;\
-    t.im = im;\
-    return t;\
-}\
-static inline R cmplx_real##BIT(C z){ return z.re; }\
-static inline R cmplx_imag##BIT(C z){ return z.im; }\
-static inline R cmplx_abs2##BIT(C z){ return z.re*z.re+z.im*z.im;}\
-static inline R cmplx_abs##BIT(C z){ return sqrtl(z.re*z.re+z.im*z.im);}\
-static inline R cmplx_angle##BIT(C z){ return atan2l(z.im, z.re);}\
-static inline C cmplx_sqrt##BIT(C z){\
-    long double r0, t0, r1, t1;\
-    C t;\
-    r0 = cmplx_abs##BIT(z);\
-    t0 = cmplx_angle##BIT(z);\
-    r1 = sqrtl(r0);\
-    t1 = t0 / 2.0;\
-    t.re = r1 * cosl(t1);\
-    t.im = r1 * sinl(t1);\
-    return t;\
-}\
-static inline C cmplx_conj##BIT(C z){\
-    C t;\
-    t.re = z.re;\
-    t.im = -z.im;\
-    return t;\
-}\
-static inline C cmplx_add##BIT(C z1, C z2){\
-    C t;\
-    t.re = z1.re + z2.re;\
-    t.im = z1.im + z2.im;\
-    return t;\
-}\
-static inline C cmplx_sub##BIT(C z1, C z2){\
-    C t;\
-    t.re = z1.re - z2.re;\
-    t.im = z1.im - z2.im;\
-    return t;\
-}\
-static inline C cmplx_mul##BIT(C z1, C z2){\
-    C t;\
-    t.re = z1.re * z2.re - z1.im * z2.im;\
-    t.im = z1.im * z2.re + z1.re * z2.im;\
-    return t;\
-}\
-static inline C cmplx_div##BIT(C z1, C z2){\
-    C t;\
-    R n;\
-    n = cmplx_abs2##BIT(z2);\
-    t = cmplx_mul##BIT(z1, cmplx_conj##BIT(z2));\
-    t.re /= n;\
-    t.im /= n;\
-    return t;\
+struct ComplexMatrixMethods {
+    void (*free_)(struct ComplexMatrix* this);
+    void (*alloc_)(struct ComplexMatrix* this, Int nrow, Int ncol);
+    // basic
+    Complex (*get)(const struct ComplexMatrix* this, Int r, Int c);
+    void (*   set_)(struct ComplexMatrix* this, Int r, Int c, Complex value);
+    void (*   set_float_)(struct ComplexMatrix* this, struct FloatMatrix R, struct FloatMatrix I);
+};
+
+extern struct ComplexMatrixMethods _CBL_COMPLEX_MATRIX_METHODS;
+
+static inline void ComplexMatrix_new_(struct ComplexMatrix* this) {
+    this->nrow = this->ncol = 0;
+    this->data = NULL;
+    this->methods = &_CBL_COMPLEX_MATRIX_METHODS;
 }
 
-DEFINE_COMPLEX(float, Complex32, 32)
-DEFINE_COMPLEX(double, Complex64, 64)
-DEFINE_COMPLEX(long double, Complex128, 128)
-
-
-#endif // _TYPE_COMPLEX_H_
+#endif // _TYPE_COMPLEXMATRIX_H_

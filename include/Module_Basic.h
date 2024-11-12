@@ -274,7 +274,6 @@ void error_failed_open_file(const char* msg);
 
 // newly defined types
 
-
 /**
  * @brief Date: year; month; day;
  */
@@ -412,5 +411,33 @@ struct ComplexMatrix {
 
     struct ComplexMatrixMethods* methods;
 };
+
+// general function types
+
+#define _CBL_GENERAL_FUNCTION_TYPEDEFINE(S, s, T, t, ...)\
+    typedef S (*s##_Func_##t)(T);\
+    typedef S (*s##_Func_##t##t)(T, T);
+
+/*
+ * abbreviations
+ * i - Int
+ * u - UInt
+ * a - Address(void*)
+ * f - Float
+ * c - Complex
+ * d - Date
+ * t - Time
+ * s - String
+ */
+
+_CBL_GENERAL_FUNCTION_TYPEDEFINE(Int, i, Int, i)
+_CBL_GENERAL_FUNCTION_TYPEDEFINE(Float, f, Float, f)
+_CBL_GENERAL_FUNCTION_TYPEDEFINE(Complex, c, Complex, c)
+_CBL_GENERAL_FUNCTION_TYPEDEFINE(Float, f, Complex, c)
+_CBL_GENERAL_FUNCTION_TYPEDEFINE(Complex, c, Float, f)
+_CBL_GENERAL_FUNCTION_TYPEDEFINE(Int, i, struct Date, d)
+_CBL_GENERAL_FUNCTION_TYPEDEFINE(Int, i, struct Time, t)
+_CBL_GENERAL_FUNCTION_TYPEDEFINE(Int, i, struct String, s)
+_CBL_GENERAL_FUNCTION_TYPEDEFINE(Float, f, struct String, s)
 
 #endif // _CBL_BASIC_H_

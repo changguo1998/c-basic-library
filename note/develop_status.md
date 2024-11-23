@@ -45,24 +45,3 @@
 |              |       |          |          |          |
 | *Basic Type* |       |          |          |          |
 | Log          | Log   | &#x2714; | &#x2714; | &#x2714; |
-
-# Depencency
-
-| Module   | String | DateTime |
-|----------|--------|----------|
-| Basic    |        |          |
-| String   |        |          |
-| DateTime | String |          |
-| Log      | String | DateTime |
-| Dict     | String |          |
-
-|              | IntVector | IntVectorN | FloatVector |
-|--------------|-----------|------------|-------------|
-| IntVector    |           |            |             |
-| IntVectorN   | IntVector |            |             |
-| FloatVector  | IntVector |            |             |
-| FloatVectorN | IntVector | IntVectorN | FloatVector |
-
-# By file
-
-## DateTime

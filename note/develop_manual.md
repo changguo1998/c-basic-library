@@ -24,10 +24,15 @@ To define new methods, one need to add declaration to
 method in `Type_external_methods_address` macro.
 See `include/Type_IntVector3.h` for example
 
-## variable setting
+## Coding style
 
 For methods whose parameters include more than one mutable struct, such as
-FloatVector and FloatMatrix, the caller should be the **result** object
+FloatVector and FloatMatrix, the caller should be the **result** object.
+
+Methods for arrays such as FloatVector which also follows old->new data flow
+(like `add_`), should not be treated as buffer. The data will be modified **inplace**.
+
+Though the arrays are modified inplace, the methods should keep data-safty and thread-safty.
 
 ## Q&A
 

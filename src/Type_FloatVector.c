@@ -45,9 +45,9 @@ struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
     &FloatVector_rand_,
     &FloatVector_rand_from_,
     &FloatVector_fill_,
-    &FloatVector_fill_range_,
+    &FloatVector_linrange_,
     &FloatVector_range_,
-    &FloatVector_copy_from_,
+    &FloatVector_copy_,
     &FloatVector_sum,
     &FloatVector_mean,
     &FloatVector_var,
@@ -95,24 +95,13 @@ void FloatVector_free_(struct FloatVector* this) {
 }
 
 void FloatVector_alloc_(struct FloatVector* this, Int len) {
-    Float* p = NULL;
-    Int    n;
     if(this == NULL) return;
     if(this->len == len) return;
-    if(len <= 0) {
-        FloatVector_free_(this);
-        return;
-    }
-    if(this->len <= 0) {
-        this->data = (Float*)calloc(len, sizeof(Float));
-        this->len = len;
-        return;
-    }
-    p = (Float*)calloc(len, sizeof(Float));
-    n = this->len < len ? this->len : len;
-    memcpy(p, this->data, n * sizeof(Float));
-    free(this->data);
-    this->data = p;
+
+    FloatVector_free_(this);
+    if(len <= 0) return;
+
+    this->data = (Float*)calloc(len, sizeof(Float));
     this->len = len;
 }
 
@@ -122,65 +111,73 @@ Float FloatVector_get(const struct FloatVector* this, Int index) {
     return this->data[index];
 }
 
-void FloatVector_index_(struct FloatVector* this, struct FloatVector src, struct IntVector indexs) {
+void FloatVector_index_(struct FloatVector* this, struct IntVector indexs) {
     Int    i;
     Float* buf;
-    if(indexs.len <= 0) return;
-    if(src.len <= 0) return;
-    buf = (Float*)calloc(indexs.len, sizeof(Float));
-    for(i = 0; i < indexs.len; i++) {
-        if(indexs.data[i] < 0 || indexs.data[i] >= src.len)
-            error_index_out_of_bounds("(Vector_index_) index out of bounds");
-        buf[i] = src.data[indexs.data[i]];
-    }
-
-    FloatVector_alloc_(this, indexs.len);
-    memcpy(this->data, buf, indexs.len * sizeof(Float));
-    free(buf);
-}
-
-void FloatVector_slice_(struct FloatVector* this, struct FloatVector src, Int start, Int step, Int stop) {
-    Int    i, n;
-    Float* buf;
-    if(stop == VECTOR_INDEX_END) stop = src.len - 1;
-    if(step == 0) error_invalid_argument("(Vector_slice_) step is 0");
-    if(start < 0) error_invalid_argument("(Vector_slice_) start < 0");
-    if(start >= src.len) error_invalid_argument("(Vector_slice_) start >= this->len");
-    if(stop < 0) error_invalid_argument("(Vector_slice_) stop < 0");
-    if(stop >= src.len) error_invalid_argument("(IntVector_slice_) stop >= src.len");
-    n = _bm_abs_int(stop - start) / _bm_abs_int(step) + 1;
-    buf = (Float*)calloc(n, sizeof(Float));
-
-    for(i = 0; i < n; i++) buf[i] = src.data[start + i * step];
-
-    FloatVector_alloc_(this, n);
-    memcpy(this->data, buf, n * sizeof(Float));
-    free(buf);
-}
-
-void FloatVector_index_flag_(struct FloatVector* this, struct FloatVector src, struct IntVector flags) {
-    Int    i, j, n;
-    Float* buf;
-    if(src.len != flags.len) error_invalid_argument("(Vector_index_flag_) src.len != flags.len");
-    if(src.len <= 0) {
+    if(indexs.len <= 0) {
         FloatVector_free_(this);
         return;
     }
+    for(i = 0; i < indexs.len; i++)
+        if(indexs.data[i] < 0 || indexs.data[i] >= this->len)
+            error_index_out_of_bounds("(FloatVector_index_) index out of bounds");
+
+    buf = (Float*)calloc(indexs.len, sizeof(Float));
+    for(i = 0; i < indexs.len; i++) buf[i] = this->data[indexs.data[i]];
+
+
+    FloatVector_free_(this);
+    this->len = indexs.len;
+    this->data = buf;
+}
+
+void FloatVector_slice_(struct FloatVector* this, Int start, Int step, Int stop) {
+    Int    i, n;
+    Float* buf;
+
+    if(stop == VECTOR_INDEX_END) stop = this->len - 1;
+    if(step == 0) error_invalid_argument("(FloatVector_slice_) step is 0");
+    if(start < 0) error_invalid_argument("(FloatVector_slice_) start < 0");
+    if(start >= this->len) error_invalid_argument("(FloatVector_slice_) start >= this->len");
+    if(stop < 0) error_invalid_argument("(FloatVector_slice_) stop < 0");
+    if(stop >= this->len) error_invalid_argument("(FloatVector_slice_) stop >= this->len");
+    n = (stop - start) / step + 1;
+    if(n <= 0) {
+        FloatVector_free_(this);
+        return;
+    }
+    if(n == this->len) return;
+    buf = (Float*)calloc(n, sizeof(Float));
+    for(i = 0; i < n; i++) buf[i] = this->data[start + i * step];
+
+    FloatVector_free_(this);
+    this->len = n;
+    this->data = buf;
+}
+
+void FloatVector_index_flag_(struct FloatVector* this, struct IntVector flags) {
+    Int    i, j, n;
+    Float* buf;
+    if(this->len != flags.len) error_invalid_argument("(FloatVector_index_flag_) src.len != flags.len");
+    if(this->len <= 0) return;
+
     n = IntVector_count(&flags);
     if(n <= 0) {
         FloatVector_free_(this);
         return;
     }
+    if(n == this->len) return;
     buf = (Float*)calloc(n, sizeof(Float));
     j = 0;
-    for(i = 0; i < src.len; i++)
+    for(i = 0; i < this->len; i++)
         if(flags.data[i]) {
-            buf[j] = src.data[i];
+            buf[j] = this->data[i];
             j += 1;
         }
-    FloatVector_alloc_(this, n);
-    memcpy(this->data, buf, n * sizeof(Float));
-    free(buf);
+
+    FloatVector_free_(this);
+    this->len = n;
+    this->data = buf;
 }
 
 void FloatVector_set_(struct FloatVector* this, Int index, Float value) {
@@ -192,8 +189,11 @@ void FloatVector_set_(struct FloatVector* this, Int index, Float value) {
 void FloatVector_setas_(struct FloatVector* this, Int n, ...) {
     va_list ap;
     Int     i;
-    va_start(ap, n);
+
+    if(n <= 0) error_invalid_argument("(FloatVector_setas_) n =< 0");
     FloatVector_alloc_(this, n);
+
+    va_start(ap, n);
     for(i = 0; i < n; i++) this->data[i] = va_arg(ap, _VECTOR_N_VA_ARG_TYPE_Float);
     va_end(ap);
 }
@@ -204,38 +204,58 @@ void FloatVector_vcat_(struct FloatVector* this, Int n, ...) {
     Float*  buf;
 
     struct FloatVector* pvec = NULL;
-    va_start(ap, n);
+
+    if(n <= 0) return;
+
+    // load input data
     pvec = (struct FloatVector*)malloc(n * sizeof(struct FloatVector));
-    row = 0;
-    for(i = 0; i < n; i++) {
-        pvec[i] = va_arg(ap, struct FloatVector);
-        row += pvec[i].len;
-    }
+    va_start(ap, n);
+    for(i = 0; i < n; i++) pvec[i] = va_arg(ap, struct FloatVector);
     va_end(ap);
 
+    // count buffer size
+    row = this->len;
+    for(i = 0; i < n; i++) row += pvec[i].len;
+
+    if(row == this->len) {
+        free(pvec);
+        return;
+    }
     if(row <= 0) {
+        free(pvec);
         FloatVector_free_(this);
         return;
     }
+
+    // collect data
     buf = (Float*)calloc(row, sizeof(Float));
-    k = 0;
+    for(k = 0; k < this->len; k++) buf[k] = this->data[k];
     for(i = 0; i < n; i++) {
         for(j = 0; j < pvec[i].len; j++) {
             buf[k] = pvec[i].data[j];
             k += 1;
         }
     }
-    FloatVector_alloc_(this, row);
-    memcpy(this->data, buf, row * sizeof(Float));
-    free(buf);
+
+    FloatVector_free_(this);
+    this->len = row;
+    this->data = buf;
     free(pvec);
 }
 
-void FloatVector_rand_(struct FloatVector* this, Float min, Float max) {
-    Int i;
-    if(this->len <= 0) return;
-    if(max <= min) error_invalid_argument("(Vector_rand_) min >= max");
+void FloatVector_rand_(struct FloatVector* this, Float a, Float b) {
+    Int   i;
+    Float min, max;
+
     unsigned long long* pf = NULL;
+
+    if(this->len <= 0) return;
+    if(a == b) {
+        FloatVector_fill_(this, a);
+        return;
+    }
+    min = (a < b) ? a : b;
+    max = (a > b) ? a : b;
     pf = (unsigned long long*)malloc(this->len * sizeof(unsigned long long));
     _bm_rand_ull_(pf, this->len);
     for(i = 0; i < this->len; i++) this->data[i] = _bm_convert_ull_to_Float(pf[i], min, max);
@@ -243,18 +263,18 @@ void FloatVector_rand_(struct FloatVector* this, Float min, Float max) {
 }
 
 void FloatVector_rand_from_(struct FloatVector* this, struct FloatVector value_set) {
-    Int    i;
-    Float* buf;
+    Int i;
     CBL_DECLARE_VARS(IntVector, 1, idxs);
+
     if(value_set.len <= 0) return;
     if(this->len <= 0) return;
-    buf = (Float*)calloc(this->len, sizeof(Float));
+    if(this->data == value_set.data)
+        error_invalid_argument("(FloatVector_rand_from_) this->data == value_set.data");
+
     IntVector_alloc_(&idxs, this->len);
     IntVector_rand_(&idxs, 0, value_set.len - 1);
-    for(i = 0; i < this->len; i++) buf[i] = value_set.data[idxs.data[i]];
+    for(i = 0; i < this->len; i++) this->data[i] = value_set.data[idxs.data[i]];
     IntVector_free_(&idxs);
-    memcpy(this->data, buf, this->len * sizeof(Float));
-    free(buf);
 }
 
 void FloatVector_fill_(struct FloatVector* this, Float value) {
@@ -263,14 +283,14 @@ void FloatVector_fill_(struct FloatVector* this, Float value) {
     for(i = 0; i < this->len; i++) this->data[i] = value;
 }
 
-void FloatVector_fill_range_(struct FloatVector* this, Float start, Float stop) {
+void FloatVector_linrange_(struct FloatVector* this, Float start, Float stop) {
     Float step;
     if(this->len <= 0) return;
     if(this->len == 1) {
         this->data[0] = start;
         return;
     }
-    step = (stop - start) / (this->len - 1);
+    step = (stop - start) / (Float)(this->len - 1);
     for(Int i = 0; i < this->len; i++) this->data[i] = start + step * i;
 }
 
@@ -278,42 +298,46 @@ void FloatVector_range_(struct FloatVector* this, Float start, Float step, Float
     Int i, n;
     if(step == 0) error_invalid_argument("(FloatVector_range_) step == 0");
     if(start == stop) error_invalid_argument("(FloatVector_range_) start == stop");
+    if(step * (stop - start) <= 0)
+        error_invalid_argument("(FloatVector_range_) step * (stop - start) <= 0");
+
     n = (Int)((stop - start) / step) + 1;
-    if(n <= 0) return;
-    FloatVector_alloc_(this, n);
-    if(n == 1) {
-        this->data[0] = start;
+    if(n <= 0) {
+        FloatVector_free_(this);
         return;
     }
-    for(i = 0; i < this->len; i++) this->data[i] = start + i * step;
+    FloatVector_alloc_(this, n);
+    for(i = 0; i < n; i++) this->data[i] = start + i * step;
 }
 
-void FloatVector_copy_from_(struct FloatVector* this, struct FloatVector src) {
+void FloatVector_copy_(struct FloatVector* this, struct FloatVector src) {
+    if(this->data == src.data)
+        error_invalid_argument("(FloatVector_copy_) this->data == src.data");
     if(src.len <= 0) {
         FloatVector_free_(this);
         return;
     }
-    if(this->data == src.data) return;
-    if(src.len != this->len) FloatVector_alloc_(this, src.len);
+    FloatVector_alloc_(this, src.len);
     memcpy(this->data, src.data, src.len * sizeof(Float));
 }
 
 Float FloatVector_sum(const struct FloatVector* this) {
     Int   i;
-    Float sum = 0;
+    Float sum = 0.0;
     if(this->len <= 0) return sum;
     for(i = 0; i < this->len; i++) sum += this->data[i];
     return sum;
 }
 
-Float FloatVector_mean(const struct FloatVector* this) { return FloatVector_sum(this) / this->len; }
+Float FloatVector_mean(const struct FloatVector* this) { return FloatVector_sum(this) / (Float)this->len; }
 
 Float FloatVector_var(const struct FloatVector* this) {
     Float s, m;
     Int   i;
 
+    if(this->len <= 0) return 0.0;
+    s = 0.0;
     m = FloatVector_mean(this);
-    s = 0;
     for(i = 0; i < this->len; i++) s += (this->data[i] - m) * (this->data[i] - m);
     return s / this->len;
 }
@@ -336,9 +360,14 @@ Float FloatVector_norm(const struct FloatVector* this, Int order) {
         for(i = 0; i < this->len; i++) v += this->data[i] * this->data[i];
         return _bm_sqrt(v);
     }
-    if(order == CBL_INT_MAX) return FloatVector_max(this);
+    if(order == CBL_INT_MAX) {
+        v = 0.0;
+        for(i = 0; i < this->len; i++)
+            v = v < _bm_abs_float(this->data[i]) ? _bm_abs_float(this->data[i]) : v;
+        return v;
+    }
     v = 0.0;
-    for(i = 0; i < this->len; i++) v += pow(this->data[i], order);
+    for(i = 0; i < this->len; i++) v += pow(_bm_abs_float(this->data[i]), order);
     return _bm_n_root(v, order);
 }
 

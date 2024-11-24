@@ -25,7 +25,6 @@
 #define _CBL_FLOATVECTOR_H_
 
 #include "Module_Basic.h"
-#include "Type_IntVector.h"
 
 
 struct FloatVectorMethods {
@@ -34,18 +33,18 @@ struct FloatVectorMethods {
     void (*alloc_)(struct FloatVector* this, Int len);
     // basic
     Float (*get)(const struct FloatVector* this, Int index);
-    void (* index_)(struct FloatVector* this, struct FloatVector src, struct IntVector indexs);
-    void (* slice_)(struct FloatVector* this, struct FloatVector src, Int start, Int step, Int stop);
-    void (* index_flag_)(struct FloatVector* this, struct FloatVector src, struct IntVector flags);
+    void (* index_)(struct FloatVector* this, struct IntVector indexs);
+    void (* slice_)(struct FloatVector* this, Int start, Int step, Int stop);
+    void (* index_flag_)(struct FloatVector* this, struct IntVector flags);
     void (* set_)(struct FloatVector* this, Int index, Float value);
     void (* setas_)(struct FloatVector* this, Int n, ...);
     void (* vcat_)(struct FloatVector* this, Int n, ...);
-    void (* rand_)(struct FloatVector* this, Float min, Float max);
+    void (* rand_)(struct FloatVector* this, Float a, Float b);
     void (* rand_from_)(struct FloatVector* this, struct FloatVector value_set);
     void (* fill_)(struct FloatVector* this, Float value);
-    void (* fill_range_)(struct FloatVector* this, Float start, Float stop);
+    void (* linrange_)(struct FloatVector* this, Float start, Float stop);
     void (* range_)(struct FloatVector* this, Float start, Float step, Float stop);
-    void (* copy_from_)(struct FloatVector* this, struct FloatVector src);
+    void (* copy_)(struct FloatVector* this, struct FloatVector src);
     // math
     Float (*sum)(const struct FloatVector* this);
     Float (*mean)(const struct FloatVector* this);
@@ -98,18 +97,18 @@ static inline void FloatVector_new_(struct FloatVector* this) {
 void  FloatVector_free_(struct FloatVector* this);
 void  FloatVector_alloc_(struct FloatVector* this, Int len);
 Float FloatVector_get(const struct FloatVector* this, Int index);
-void  FloatVector_index_(struct FloatVector* this, struct FloatVector src, struct IntVector indexs);
-void  FloatVector_slice_(struct FloatVector* this, struct FloatVector src, Int start, Int step, Int stop);
-void  FloatVector_index_flag_(struct FloatVector* this, struct FloatVector src, struct IntVector flags);
+void  FloatVector_index_(struct FloatVector* this, struct IntVector indexs);
+void  FloatVector_slice_(struct FloatVector* this, Int start, Int step, Int stop);
+void  FloatVector_index_flag_(struct FloatVector* this, struct IntVector flags);
 void  FloatVector_set_(struct FloatVector* this, Int index, Float value);
 void  FloatVector_setas_(struct FloatVector* this, Int n, ...);
 void  FloatVector_vcat_(struct FloatVector* this, Int n, ...);
-void  FloatVector_rand_(struct FloatVector* this, Float min, Float max);
+void  FloatVector_rand_(struct FloatVector* this, Float a, Float b);
 void  FloatVector_rand_from_(struct FloatVector* this, struct FloatVector value_set);
 void  FloatVector_fill_(struct FloatVector* this, Float value);
-void  FloatVector_fill_range_(struct FloatVector* this, Float start, Float stop);
+void  FloatVector_linrange_(struct FloatVector* this, Float start, Float stop);
 void  FloatVector_range_(struct FloatVector* this, Float start, Float step, Float stop);
-void  FloatVector_copy_from_(struct FloatVector* this, struct FloatVector src);
+void  FloatVector_copy_(struct FloatVector* this, struct FloatVector src);
 Float FloatVector_sum(const struct FloatVector* this);
 Float FloatVector_mean(const struct FloatVector* this);
 Float FloatVector_var(const struct FloatVector* this);

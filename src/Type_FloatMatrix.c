@@ -1,27 +1,25 @@
-/**********************************************************************************
- * MIT License                                                                    *
- *                                                                                *
- * Copyright (c) 2024 Chang Guo                                                   *
- *                                                                                *
- * Permission is hereby granted, free of charge, to any person obtaining a copy   *
- * of this software and associated documentation files (the "Software"), to deal  *
- * in the Software without restriction, including without limitation the rights   *
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
- * copies of the Software, and to permit persons to whom the Software is          *
- * furnished to do so, subject to the following conditions:                       *
- *                                                                                *
- * The above copyright notice and this permission notice shall be included in all *
- * copies or substantial portions of the Software.                                *
- *                                                                                *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
- * SOFTWARE.                                                                      *
- *                                                                                *
- **********************************************************************************/
+// MIT License
+//
+// Copyright (c) 2024 Chang Guo
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -47,7 +45,7 @@ struct FloatMatrixMethods _CBL_FLOAT_MATRIX_METHODS = {
     &FloatMatrix_rand_,
     &FloatMatrix_rand_from_,
     &FloatMatrix_fill_,
-    &FloatMatrix_copy_from_,
+    &FloatMatrix_copy_,
     &FloatMatrix_diag_,
     &FloatMatrix_add_,
     &FloatMatrix_product_
@@ -228,7 +226,7 @@ void FloatMatrix_fill_(struct FloatMatrix* this, Float value) {
     for(i = 0; i < this->nrow * this->ncol; i++) this->data[i] = value;
 }
 
-void FloatMatrix_copy_from_(struct FloatMatrix* this, struct FloatMatrix src) {
+void FloatMatrix_copy_(struct FloatMatrix* this, struct FloatMatrix src) {
     if(this->data == src.data) return;
     FloatMatrix_alloc_(this, src.nrow, src.ncol);
     memcpy(this->data, src.data, src.nrow * src.ncol * sizeof(Float));

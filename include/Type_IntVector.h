@@ -43,7 +43,7 @@ struct IntVectorMethods {
     void (*rand_from_)(struct IntVector* this, struct IntVector value_set);
     void (*fill_)(struct IntVector* this, Int value);
     void (*range_)(struct IntVector* this, Int start, Int step, Int stop);
-    void (*copy_from_)(struct IntVector* this, struct IntVector src);
+    void (*copy_)(struct IntVector* this, struct IntVector src);
     void (*find_trues_)(struct IntVector* this, struct IntVector flags);
     void (*filter_)(struct IntVector* this, i_Func_i isOK);
     void (*push_)(struct IntVector* this, Int value);
@@ -87,7 +87,7 @@ void IntVector_rand_(struct IntVector* this, Int a, Int b);
 void IntVector_rand_from_(struct IntVector* this, struct IntVector value_set);
 void IntVector_fill_(struct IntVector* this, Int value);
 void IntVector_range_(struct IntVector* this, Int start, Int step, Int stop);
-void IntVector_copy_from_(struct IntVector* this, struct IntVector src);
+void IntVector_copy_(struct IntVector* this, struct IntVector src);
 void IntVector_find_trues_(struct IntVector* this, struct IntVector flags);
 void IntVector_filter_(struct IntVector* this, i_Func_i isOK);
 void IntVector_push_(struct IntVector* this, Int value);

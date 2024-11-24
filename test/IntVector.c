@@ -186,13 +186,13 @@ int main() {
     CBL_CALL(iu, range_, 3, 2, 13);
     print_ivec(iu);
 
-    print_section("copy_from_");
+    print_section("copy_");
     printf("before:\n");
     printf("  iu: ");
     print_ivec(iu);
     printf("  iv: ");
     print_ivec(iv);
-    CBL_CALL(iv, copy_from_, iu);
+    CBL_CALL(iv, copy_, iu);
     printf("after:\n");
     printf("  iu: ");
     print_ivec(iu);
@@ -240,7 +240,7 @@ int main() {
     printf("  iv: ");
     print_ivec(iv);
     printf("iu == iv: %d\n", CBL_CALL(iu, isequal, iv));
-    CBL_CALL(iv, copy_from_, iu);
+    CBL_CALL(iv, copy_, iu);
     printf("  iu: ");
     print_ivec(iu);
     printf("  iv: ");

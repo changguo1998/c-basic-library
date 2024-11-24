@@ -43,7 +43,7 @@ struct IntVectorMethods _CBL_INT_VECTOR_METHODS = {
     &IntVector_rand_from_,
     &IntVector_fill_,
     &IntVector_range_,
-    &IntVector_copy_from_,
+    &IntVector_copy_,
     &IntVector_find_trues_,
     &IntVector_filter_,
     &IntVector_push_,
@@ -281,8 +281,9 @@ void IntVector_range_(struct IntVector* this, Int start, Int step, Int stop) {
     for(i = 0; i < n; i++) this->data[i] = start + i * step;
 }
 
-void IntVector_copy_from_(struct IntVector* this, struct IntVector src) {
-    if(this->data == src.data) error_invalid_argument("(IntVector_copy_from_) data == src.data: copy from self");
+void IntVector_copy_(struct IntVector* this, struct IntVector src) {
+    if(this->data == src.data)
+        error_invalid_argument("(IntVector_copy_) data == src.data: copy from self");
     if(src.len <= 0) {
         IntVector_free_(this);
         return;

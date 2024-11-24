@@ -1,27 +1,25 @@
-/**********************************************************************************
- * MIT License                                                                    *
- *                                                                                *
- * Copyright (c) 2024 Chang Guo                                                   *
- *                                                                                *
- * Permission is hereby granted, free of charge, to any person obtaining a copy   *
- * of this software and associated documentation files (the "Software"), to deal  *
- * in the Software without restriction, including without limitation the rights   *
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
- * copies of the Software, and to permit persons to whom the Software is          *
- * furnished to do so, subject to the following conditions:                       *
- *                                                                                *
- * The above copyright notice and this permission notice shall be included in all *
- * copies or substantial portions of the Software.                                *
- *                                                                                *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
- * SOFTWARE.                                                                      *
- *                                                                                *
- **********************************************************************************/
+// MIT License
+//
+// Copyright (c) 2024 Chang Guo
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
 
 #ifndef _TYPE_FLOATMATRIX_H_
 #define _TYPE_FLOATMATRIX_H_
@@ -42,7 +40,7 @@ struct FloatMatrixMethods {
     void (* rand_)(struct FloatMatrix* this, Float min, Float max);
     void (* rand_from_)(struct FloatMatrix* this, struct FloatVector value_set);
     void (* fill_)(struct FloatMatrix* this, Float value);
-    void (* copy_from_)(struct FloatMatrix* this, struct FloatMatrix src);
+    void (* copy_)(struct FloatMatrix* this, struct FloatMatrix src);
     void (* diag_)(struct FloatMatrix* this, struct FloatVector dv);
     // math
     void (*add_)(struct FloatMatrix* this, struct FloatMatrix X);
@@ -69,7 +67,7 @@ void  FloatMatrix_vcat_(struct FloatMatrix* this, Int nmat, ...);
 void  FloatMatrix_rand_(struct FloatMatrix* this, Float min, Float max);
 void  FloatMatrix_rand_from_(struct FloatMatrix* this, struct FloatVector value_set);
 void  FloatMatrix_fill_(struct FloatMatrix* this, Float value);
-void  FloatMatrix_copy_from_(struct FloatMatrix* this, struct FloatMatrix src);
+void  FloatMatrix_copy_(struct FloatMatrix* this, struct FloatMatrix src);
 void  FloatMatrix_diag_(struct FloatMatrix* this, struct FloatVector dv);
 void  FloatMatrix_add_(struct FloatMatrix* this, struct FloatMatrix X);
 void  FloatMatrix_product_(struct FloatMatrix* this, struct FloatMatrix X, struct FloatMatrix Y);

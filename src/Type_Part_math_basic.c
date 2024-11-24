@@ -118,12 +118,25 @@ Float _bm_round_zero_to_Float(Float x, Float m, Float* c) {
     return x;
 }
 
+static inline double _pow_n(double x, long n) {
+    double y;
+    long   i;
+    y = x;
+    for(i = 0; i < n - 1; i++) y *= x;
+    return y;
+}
+
 Float _bm_n_root(Float x, Int n) {
-    long double root, y, o;
-    y = (long double)x;
-    o = (long double)n;
-    root = expl(logl(y) / o);
-    return root;
+    double root1, root2, y, o;
+    y = x;
+    o = n;
+    root2 = exp(log(y) / o);
+    do {
+        root1 = root2;
+        root2 = ((o - 1.0) * _pow_n(root1, n) + x) / (o * _pow_n(root1, n - 1));
+    }
+    while(fabs(root1 - root2) > 1e-10);
+    return root2;
 }
 
 void _bm_fft(Int n, Complex* X, Complex* Y) {

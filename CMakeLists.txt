@@ -20,6 +20,8 @@ target_include_directories(exp_FFTW PRIVATE "${FFTW}/include")
 target_link_directories(exp_FFTW PRIVATE "${FFTW}/bin")
 target_link_libraries(exp_FFTW PRIVATE fftw3)
 
+add_executable(exp_high_precision_root experiment/high_precision_root.c)
+
 # tests
 set(BASIC_LIB include/Module_Basic.h src/Module_Basic.c)
 set(MATH_BASIC include/Type_Part_math_basic.h src/Type_Part_math_basic.c)

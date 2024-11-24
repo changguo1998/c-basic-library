@@ -180,7 +180,10 @@ int main() {
 
     print_section("range_");
     randinit(iu, 5);
-    CBL_CALL(iu, range_, 3, 1, 100);
+    print_ivec(iu);
+    CBL_CALL(iu, range_, 3, 2, 12);
+    print_ivec(iu);
+    CBL_CALL(iu, range_, 3, 2, 13);
     print_ivec(iu);
 
     print_section("copy_from_");

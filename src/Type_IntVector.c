@@ -250,7 +250,8 @@ void IntVector_rand_from_(struct IntVector* this, struct IntVector value_set) {
 
     if(value_set.len <= 0) return;
     if(this->len <= 0) return;
-    if(this->data == value_set.data) error_invalid_argument("(IntVector_rand_from_) this->data == value_set.data");
+    if(this->data == value_set.data)
+        error_invalid_argument("(IntVector_rand_from_) this->data == value_set.data");
 
     IntVector_alloc_(&idxs, this->len);
     IntVector_rand_(&idxs, 0, value_set.len - 1);
@@ -266,16 +267,17 @@ void IntVector_fill_(struct IntVector* this, Int value) {
 
 void IntVector_range_(struct IntVector* this, Int start, Int step, Int stop) {
     Int i, n;
-    if(this->len <= 0) return;
+    if(step == 0) error_invalid_argument("(IntVector_range_) step == 0");
     if(start == stop) error_invalid_argument("(IntVector_range_) start == stop");
-    if(this->len == 1) {
-        this->data[0] = start;
+    if(step * (stop - start) <= 0)
+        error_invalid_argument("(IntVector_range_) step * (stop - start) <= 0");
+
+    n = (stop - start) / step + 1;
+    if(n <= 0) {
+        IntVector_free_(this);
         return;
     }
-    if(step == 0) step = (stop - start) / (this->len - 1);
-    if(step == 0) if(start > stop) step = -1; else step = 1;
-    n = (stop - start) / step + 1;
-    n = (n > this->len) ? this->len : n;
+    IntVector_alloc_(this, n);
     for(i = 0; i < n; i++) this->data[i] = start + i * step;
 }
 

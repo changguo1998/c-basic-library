@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "Module_Basic.h"
+#include "Type_String.h"
 #include "Type_Dict.h"
 
 #define NROW 4
@@ -40,19 +41,16 @@ int main() {
     Char   buf[STRING_MAX_LENGTH];
     Float* pf;
 
-    struct Table       sheet, sheet2, *ptable1, *ptable2;
-    struct String      k0,    k1, bs[2], *key_list1, *key_list2;
-    struct StaticDict  fdict;
-    struct DynamicDict ddict;
+    CBL_DECLARE_VARS(Table, 2, sheet, sheet2);
+    CBL_DECLARE_VARS(String, 2, k0, k1);
+    CBL_DECLARE_VARS(StaticDict, 1, fdict);
+    CBL_DECLARE_VARS(DynamicDict, 1, ddict);
 
-    Table_new_(&sheet);
-    Table_new_(&sheet2);
-    String_new_(&k0);
-    String_new_(&k1);
+    struct Table       *ptable1, *ptable2;
+    struct String      bs[2], *key_list1, *key_list2;
+
     String_new_(&bs[0]);
     String_new_(&bs[1]);
-    StaticDict_new_(&fdict);
-    DynamicDict_new_(&ddict);
 
     srand(time(NULL));
 

@@ -4,7 +4,7 @@ project(c_basic_library VERSION 0.0.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 
-set(DEBUG False)
+set(DEBUG ON)
 
 #include(D:/Softwares/fftw3/lib/cmake/fftw3/FFTW3Config.cmake)
 set(FFTW D:/Softwares/fftw3)
@@ -23,42 +23,18 @@ target_link_libraries(exp_FFTW PRIVATE fftw3)
 add_executable(exp_high_precision_root experiment/high_precision_root.c)
 
 # tests
-set(BASIC_LIB include/Module_Basic.h src/Module_Basic.c)
-set(MATH_BASIC include/Type_Part_math_basic.h src/Type_Part_math_basic.c)
+#set(Module_Basic_C include/Module_Basic.h src/Module_Basic.c)
+#set(MATH_BASIC include/Type_Part_math_basic.h src/Type_Part_math_basic.c)
+include(sources.cmake)
 
 function(add_test_target modulename)
+    set(allsrcs ${${modulename}_SET} ${Basic_SET} ${ARGN} test/${modulename}.c)
     if (DEBUG)
         message("===========================")
         message("modulename: ${modulename}")
-        message("deps: ${ARGN}")
+        message("deps: ${allsrcs}")
     endif ()
-
-    file(GLOB ${modulename}_C_inc include/*_${modulename}.h)
-
-    if (DEBUG)
-        message("INC: ${${modulename}_C_inc}")
-    endif ()
-
-    file(GLOB ${modulename}_C_src src/*_${modulename}.c)
-
-    if (DEBUG)
-        message("SRC: ${${modulename}_C_src}")
-    endif ()
-
-    set(${modulename}_C "${${modulename}_C_inc}" "${${modulename}_C_src}" PARENT_SCOPE)
-    list(APPEND ${modulename}_C "${${modulename}_C_inc}" "${${modulename}_C_src}")
-
-    if (DEBUG)
-        message("${modulename}_C: ${${modulename}_C}")
-    endif ()
-
-    list(APPEND deps ${BASIC_LIB} ${${modulename}_C} ${ARGN})
-
-    if (DEBUG)
-        message("sources: ${deps}")
-    endif ()
-
-    add_executable(test_${modulename} ${deps} test/${modulename}.c)
+    add_executable(test_${modulename} ${allsrcs})
     target_include_directories(test_${modulename} PRIVATE include)
     target_link_directories(test_${modulename} PRIVATE ${FFTW}/bin)
     target_link_libraries(test_${modulename} fftw3)
@@ -67,17 +43,16 @@ endfunction()
 
 add_test_target(Complex)
 add_test_target(String)
-add_test_target(DateTime ${String_C} ${MATH_BASIC})
-add_test_target(Log ${DateTime_C} ${String_C})
-list(APPEND Log_C ${DateTime_C} ${String_C})
-add_test_target(Dict ${String_C})
-add_test_target(IntVector ${MATH_BASIC})
-add_test_target(FloatVector ${MATH_BASIC} ${IntVector_C})
-add_test_target(ComplexVector ${MATH_BASIC} ${IntVector_C} ${FloatVector_C})
-add_test_target(FloatMatrix ${MATH_BASIC} ${IntVector_C} ${FloatVector_C})
-add_test_target(ComplexMatrix ${MATH_BASIC} ${FloatVector_C} ${ComplexVector_C})
-add_test_target(IntVectorN ${MATH_BASIC} include/Template_VectorN.h)
-add_test_target(FloatVectorN ${MATH_BASIC} include/Template_VectorN.h)
+add_test_target(DateTime ${String_SET} ${Part_math_basic_SET})
+add_test_target(Log ${DateTime_SET} ${String_SET})
+add_test_target(Dict ${String_SET})
+add_test_target(IntVector ${Part_math_basic_SET})
+add_test_target(FloatVector ${Part_math_basic_SET} ${IntVector_SET} ${FloatMatrix_SET})
+add_test_target(ComplexVector ${Part_math_basic_SET} ${IntVector_SET} ${FloatVector_SET})
+add_test_target(FloatMatrix ${Part_math_basic_SET} ${IntVector_SET} ${FloatVector_SET})
+#add_test_target(ComplexMatrix ${Part_math_basic_SET} ${FloatVector_SET} ${ComplexVector_SET})
+add_test_target(IntVectorN ${Part_math_basic_SET} ${IntVector_SET} include/Template_VectorN.h)
+add_test_target(FloatVectorN ${Part_math_basic_SET} include/Template_VectorN.h)
 # add_test_target(TypeArray)
 
 # CBL

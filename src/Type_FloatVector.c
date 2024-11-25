@@ -1,25 +1,27 @@
-// MIT License
-//
-// Copyright (c) 2024 Chang Guo
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2024 Chang Guo                                                   *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ *                                                                                *
+ **********************************************************************************/
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -64,6 +66,7 @@ struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
     &FloatVector_sortperm_,
     &FloatVector_dot,
     &FloatVector_cross_,
+    &FloatVector_map_f_f_,
     &FloatVector_map_f_ff_,
     &FloatVector_add_scalar_,
     &FloatVector_sub_scalar_,
@@ -76,6 +79,7 @@ struct FloatVectorMethods _CBL_FLOAT_VECTOR_METHODS = {
     &FloatVector_sqrt_,
     &FloatVector_root_,
     &FloatVector_pow_,
+    &FloatVector_normalize2_,
     &FloatVector_normalize_,
     &FloatVector_polyval,
     &FloatVector_polyint_,
@@ -454,7 +458,6 @@ void FloatVector_sortperm_(struct FloatVector* this, struct IntVector* perm) {
     Int   i, j, ti;
     Float tv;
     if(this->len <= 0) return;
-    IntVector_alloc_(perm, this->len);
     IntVector_range_(perm, 0, 1, this->len - 1);
     for(i = 0; i < this->len; i++)
         for(j = i + 1; j < this->len; j++)
@@ -483,6 +486,11 @@ void FloatVector_cross_(struct FloatVector* this, struct FloatVector x, struct F
     this->data[0] = x.data[1] * y.data[2] - x.data[2] * y.data[1];
     this->data[1] = x.data[2] * y.data[0] - x.data[0] * y.data[2];
     this->data[2] = x.data[0] * y.data[1] - x.data[1] * y.data[0];
+}
+
+void FloatVector_map_f_f_(struct FloatVector* this, f_Func_f func) {
+    if(this->len <= 0) return;
+    for(Int i = 0; i < this->len; i++) this->data[i] = func(this->data[i]);
 }
 
 void FloatVector_map_f_ff_(struct FloatVector* this, f_Func_ff func, struct FloatVector x) {
@@ -552,10 +560,12 @@ void FloatVector_pow_(struct FloatVector* this, Int order) {
     for(Int i = 0; i < this->len; i++) this->data[i] = pow(this->data[i], order);
 }
 
-void FloatVector_normalize_(struct FloatVector* this) {
+void FloatVector_normalize2_(struct FloatVector* this) { FloatVector_normalize_(this, 2); }
+
+void FloatVector_normalize_(struct FloatVector* this, Int order) {
     if(this->len <= 0) return;
     Float nm;
-    nm = FloatVector_norm(this, 2);
+    nm = FloatVector_norm(this, order);
     if(nm == 0) error_invalid_argument("(FloatVector_normalize) norm is zero");
     FloatVector_div_scalar_(this, nm);
 }
@@ -618,7 +628,7 @@ void FloatVector_get_row_(struct FloatVector* this, struct FloatMatrix M, Int r)
         return;
     }
     FloatVector_alloc_(this, M.ncol);
-    for(Int i = 0; i < M.nrow; i++) this->data[i] = CBL_CALL(M, get, r, i);
+    for(Int i = 0; i < M.ncol; i++) this->data[i] = CBL_CALL(M, get, r, i);
 }
 
 void FloatVector_get_column_(struct FloatVector* this, struct FloatMatrix M, Int c) {

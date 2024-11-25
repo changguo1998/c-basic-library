@@ -1,11 +1,29 @@
 # Data Safty Checklist
 
+## Symbols
+
+|   Symbol   | Meaning                          |
+|:----------:|----------------------------------|
+|  *module*  |                                  |
+|            | module is not tested             |
+|   &sim;    | module testing is not finished   |
+|   &cir;    | some functions are skipped       |
+|  &#x2713;  | all tests are passed             |
+|  &#x2715;  | some functions are errored       |
+|            |                                  |
+| *function* |                                  |
+|            | function is not tested           |
+|   &sim;    | function testing is not finished |
+|   &cir;    | function testing is skipped      |
+|  &#x2713;  | function testing is passed       |
+|  &#x2715;  | function testing is errored      |
+
 ## Index
 
 | DataType                        |  Status  |
 |---------------------------------|:--------:|
-| [IntVector](#IntVector)         | &#x2714; |
-| [FloatVector](#FloatVector)     |    ?     |
+| [IntVector](#IntVector)         | &#x2713; |
+| [FloatVector](#FloatVector)     |  &cir;   |
 | [ComplexVector](#ComplexVector) |          |
 | [IntMatrix](#IntMatrix)         |          |
 | [FloatMatrix](#FloatMatrix)     |          |
@@ -15,93 +33,95 @@
 
 | Function        |  Status  |
 |-----------------|:--------:|
-| free            | &#x2714; |
-| alloc           | &#x2714; |
-| get             | &#x2714; |
-| index           | &#x2714; |
-| slice           | &#x2714; |
-| count           | &#x2714; |
-| index_flag      | &#x2714; |
-| set             | &#x2714; |
-| setas           | &#x2714; |
-| vcat            | &#x2714; |
-| rand            | &#x2714; |
-| rand_from       | &#x2714; |
-| fill            | &#x2714; |
-| range           | &#x2714; |
-| copy_           | &#x2714; |
-| find_trues      | &#x2714; |
-| filter          | &#x2714; |
-| push            | &#x2714; |
-| isequal         | &#x2714; |
-| sum             | &#x2714; |
-| prod            | &#x2714; |
-| min             | &#x2714; |
-| max             | &#x2714; |
-| argmin          | &#x2714; |
-| argmax          | &#x2714; |
-| cumsum          | &#x2714; |
-| cumprod         | &#x2714; |
-| sort            | &#x2714; |
-| sortperm        | &#x2714; |
-| dot             | &#x2714; |
-| coord_linear    | &#x2714; |
-| coord_cartesian | &#x2714; |
+| free            | &#x2713; |
+| alloc           | &#x2713; |
+| get             | &#x2713; |
+| index           | &#x2713; |
+| slice           | &#x2713; |
+| count           | &#x2713; |
+| index_flag      | &#x2713; |
+| set             | &#x2713; |
+| setas           | &#x2713; |
+| vcat            | &#x2713; |
+| rand            | &#x2713; |
+| rand_from       | &#x2713; |
+| fill            | &#x2713; |
+| range           | &#x2713; |
+| copy_           | &#x2713; |
+| find_trues      | &#x2713; |
+| filter          | &#x2713; |
+| push            | &#x2713; |
+| isequal         | &#x2713; |
+| sum             | &#x2713; |
+| prod            | &#x2713; |
+| min             | &#x2713; |
+| max             | &#x2713; |
+| argmin          | &#x2713; |
+| argmax          | &#x2713; |
+| cumsum          | &#x2713; |
+| cumprod         | &#x2713; |
+| sort            | &#x2713; |
+| sortperm        | &#x2713; |
+| dot             | &#x2713; |
+| coord_linear    | &#x2713; |
+| coord_cartesian | &#x2713; |
 
 ## FloatVector
 
 | Function    |  Status  |
 |-------------|:--------:|
-| free_       | &#x2714; |
-| alloc_      | &#x2714; |
-| get         | &#x2714; |
-| index_      | &#x2714; |
-| slice_      | &#x2714; |
-| index_flag_ | &#x2714; |
-| set_        | &#x2714; |
-| setas_      | &#x2714; |
-| vcat_       | &#x2714; |
-| rand_       | &#x2714; |
-| rand_from_  | &#x2714; |
-| fill_       | &#x2714; |
-| linrange_   | &#x2714; |
-| range_      | &#x2714; |
-| copy_       | &#x2714; |
-| sum         | &#x2714; |
-| mean        | &#x2714; |
-| var         | &#x2714; |
-| std         | &#x2714; |
-| norm        | &#x2714; |
-| prod        | &#x2714; |
-| min         | &#x2714; |
-| max         | &#x2714; |
-| argmin      | &#x2714; |
-| argmax      | &#x2714; |
-| cumsum_     |          |
-| cumprod_    |          |
-| sort_       |          |
-| sortperm_   |          |
-| dot         |          |
-| cross_      |          |
-| map_f_ff_   |          |
-| add_scalar_ |          |
-| sub_scalar_ |          |
-| mul_scalar_ |          |
-| div_scalar_ |          |
-| add_        |          |
-| sub_        |          |
-| mul_        |          |
-| div_        |          |
-| sqrt_       |          |
-| root_       |          |
-| pow_        |          |
-| normalize_  |          |
-| polyval     |          |
-| polyint_    |          |
-| polydiff_   |          |
-| get_row_    |          |
-| get_column_ |          |
-| ifft_       |          |
+| free_       | &#x2713; |
+| alloc_      | &#x2713; |
+| get         | &#x2713; |
+| index_      | &#x2713; |
+| slice_      | &#x2713; |
+| index_flag_ | &#x2713; |
+| set_        | &#x2713; |
+| setas_      | &#x2713; |
+| vcat_       | &#x2713; |
+| rand_       | &#x2713; |
+| rand_from_  | &#x2713; |
+| fill_       | &#x2713; |
+| linrange_   | &#x2713; |
+| range_      | &#x2713; |
+| copy_       | &#x2713; |
+| sum         | &#x2713; |
+| mean        | &#x2713; |
+| var         | &#x2713; |
+| std         | &#x2713; |
+| norm        | &#x2713; |
+| prod        | &#x2713; |
+| min         | &#x2713; |
+| max         | &#x2713; |
+| argmin      | &#x2713; |
+| argmax      | &#x2713; |
+| cumsum_     | &#x2713; |
+| cumprod_    | &#x2713; |
+| sort_       | &#x2713; |
+| sortperm_   | &#x2713; |
+| dot         | &#x2713; |
+| cross_      | &#x2713; |
+| map_f_f_    | &#x2713; |
+| map_f_ff_   | &#x2713; |
+| add_scalar_ | &#x2713; |
+| sub_scalar_ | &#x2713; |
+| mul_scalar_ | &#x2713; |
+| div_scalar_ | &#x2713; |
+| add_        | &#x2713; |
+| sub_        | &#x2713; |
+| mul_        | &#x2713; |
+| div_        | &#x2713; |
+| sqrt_       | &#x2713; |
+| root_       | &#x2713; |
+| pow_        | &#x2713; |
+| normalize2_ | &#x2713; |
+| normalize_  | &#x2713; |
+| polyval     | &#x2713; |
+| polyint_    | &#x2713; |
+| polydiff_   | &#x2713; |
+| get_row_    | &#x2713; |
+| get_column_ | &#x2713; |
+| ifft_       |  &cir;   |
 
 ## ComplexVector
 

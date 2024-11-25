@@ -1,25 +1,27 @@
-// MIT License
-//
-// Copyright (c) 2024 Chang Guo
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-//
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2024 Chang Guo                                                   *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ *                                                                                *
+ **********************************************************************************/
 
 #ifndef _CBL_FLOATVECTOR_H_
 #define _CBL_FLOATVECTOR_H_
@@ -62,6 +64,7 @@ struct FloatVectorMethods {
     void (* sortperm_)(struct FloatVector* this, struct IntVector* perm);
     Float (*dot)(const struct FloatVector* this, struct FloatVector b);
     void (* cross_)(struct FloatVector* this, struct FloatVector x, struct FloatVector y);
+    void (* map_f_f_)(struct FloatVector* this, f_Func_f func);
     void (* map_f_ff_)(struct FloatVector* this, f_Func_ff func, struct FloatVector x);
     void (* add_scalar_)(struct FloatVector* this, Float value);
     void (* sub_scalar_)(struct FloatVector* this, Float value);
@@ -74,7 +77,8 @@ struct FloatVectorMethods {
     void (* sqrt_)(struct FloatVector* this);
     void (* root_)(struct FloatVector* this, Int order);
     void (* pow_)(struct FloatVector* this, Int order);
-    void (* normalize_)(struct FloatVector* this);
+    void (* normalize2_)(struct FloatVector* this);
+    void (* normalize_)(struct FloatVector* this, Int order);
     // polynomial
     Float (*polyval)(const struct FloatVector* this, Float x);
     void (* polyint_)(struct FloatVector* this, Float y0);
@@ -125,6 +129,7 @@ void  FloatVector_sort_(struct FloatVector* this);
 void  FloatVector_sortperm_(struct FloatVector* this, struct IntVector* perm);
 Float FloatVector_dot(const struct FloatVector* this, struct FloatVector b);
 void  FloatVector_cross_(struct FloatVector* this, struct FloatVector x, struct FloatVector y);
+void  FloatVector_map_f_f_(struct FloatVector* this, f_Func_f func);
 void  FloatVector_map_f_ff_(struct FloatVector* this, f_Func_ff func, struct FloatVector x);
 void  FloatVector_add_scalar_(struct FloatVector* this, Float value);
 void  FloatVector_sub_scalar_(struct FloatVector* this, Float value);
@@ -137,7 +142,8 @@ void  FloatVector_div_(struct FloatVector* this, struct FloatVector b);
 void  FloatVector_sqrt_(struct FloatVector* this);
 void  FloatVector_root_(struct FloatVector* this, Int order);
 void  FloatVector_pow_(struct FloatVector* this, Int order);
-void  FloatVector_normalize_(struct FloatVector* this);
+void  FloatVector_normalize2_(struct FloatVector* this);
+void  FloatVector_normalize_(struct FloatVector* this, Int order);
 Float FloatVector_polyval(const struct FloatVector* this, Float x);
 void  FloatVector_polyint_(struct FloatVector* this, Float y0);
 void  FloatVector_polydiff_(struct FloatVector* this);

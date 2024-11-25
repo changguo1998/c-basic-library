@@ -6,6 +6,7 @@
     - [Type](#Type)
     - [Module](#Module)
 * [Progress functions](#Progress-functions)
+    - [String](#string-methods)
     - [IntVector](#IntVector-methods)
     - [FloatVector](#floatvector-methods)
     - [ComplexVector](#complexvector-methods)
@@ -20,7 +21,7 @@
 |                                         | file         |  header  | methods  |   test   |
 |-----------------------------------------|--------------|:--------:|:--------:|:--------:|
 | *non-numerical type*                    |              |          |          |          |
-| String                                  | String       | &#x2713; | &#x2713; |          |
+| [String](#String-methods)               | String       |          |          |          |
 | Date                                    | DateTime     | &#x2713; | &#x2713; |          |
 | Time                                    | DateTime     | &#x2713; | &#x2713; |          |
 | DateTime                                | DateTime     | &#x2713; | &#x2713; |          |
@@ -68,6 +69,26 @@
 | Log          |  Log  | &#x2713; | &#x2713; |      |
 
 ## Progress functions
+
+### String methods
+
+| Function   | Status |
+|------------|:------:|
+| free       |        |
+| set        |        |
+| isequal    |        |
+| append     |        |
+| join       |        |
+| nextmatch  |        |
+| startswith |        |
+| endswith   |        |
+| contains   |        |
+| substring  |        |
+| split      |        |
+| strip      |        |
+| replace    |        |
+| replaceall |        |
+| reverse    |        |
 
 ### IntVector methods
 

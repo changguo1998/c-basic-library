@@ -38,7 +38,7 @@
 int main() {
     Int    i, j, *pi, esize[NCOL], n_key1, n_key2, tc;
     Float  float_var;
-    Char   buf[STRING_MAX_LENGTH];
+    Char   buf[STRING_FIXED_BUFFER_LENGTH];
     Float* pf;
 
     CBL_DECLARE_VARS(Table, 2, sheet, sheet2);

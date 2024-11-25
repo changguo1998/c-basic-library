@@ -35,13 +35,13 @@
 
 #define USE_64_BIT 1
 
-// #define STRING_MAX_LENGTH 256
-// #define STRING_MAX_LENGTH 512
-#define STRING_MAX_LENGTH 1024
-// #define STRING_MAX_LENGTH 2048
-// #define STRING_MAX_LENGTH 4096
-// #define STRING_MAX_LENGTH 8192
-// #define STRING_MAX_LENGTH 16384
+// #define STRING_FIXED_BUFFER_LENGTH 256
+// #define STRING_FIXED_BUFFER_LENGTH 512
+#define STRING_FIXED_BUFFER_LENGTH 1024
+// #define STRING_FIXED_BUFFER_LENGTH 2048
+// #define STRING_FIXED_BUFFER_LENGTH 4096
+// #define STRING_FIXED_BUFFER_LENGTH 8192
+// #define STRING_FIXED_BUFFER_LENGTH 16384
 
 // 10^(-n) second
 // #define TIME_PRECISION 0
@@ -319,8 +319,9 @@ struct DateTime {
 };
 
 struct String {
-    Char str[STRING_MAX_LENGTH];
-    Int  len;
+    Char  str[STRING_FIXED_BUFFER_LENGTH];
+    Int   len;
+    Char* more;
 
     const struct StringMethods* methods;
 };

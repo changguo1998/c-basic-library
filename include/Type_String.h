@@ -40,7 +40,7 @@ struct StringMethods {
      * @param this struct String*
      * @return struct String
      */
-    struct String (*clean_)(struct String* this);
+    void (*free_)(struct String* this);
 
     /**
      * @brief initialize a String type using C like string array
@@ -86,7 +86,7 @@ struct StringMethods {
      * @param start Int
      * @return index of the beginning in this string
      */
-    Int (*next_match)(const struct String* this,
+    Int (*nextmatch)(const struct String* this,
                       struct String        pattern,
                       Int                  start);
 
@@ -95,14 +95,14 @@ struct StringMethods {
      * @param this
      * @param pattern struct String
      */
-    Bool (*starts_with)(const struct String* this, struct String pattern);
+    Bool (*startswith)(const struct String* this, struct String pattern);
 
     /**
      * @brief test if this string ends with pattern
      * @param this
      * @param pattern struct String
      */
-    Bool (*ends_with)(const struct String* this, struct String pattern);
+    Bool (*endswith)(const struct String* this, struct String pattern);
 
     /**
      * @brief test if str contains pattern
@@ -157,7 +157,7 @@ struct StringMethods {
      * @param replacement struct String
      * @return struct String
      */
-    struct String (*replace_all_)(struct String* this,
+    struct String (*replaceall_)(struct String* this,
                                   struct String  pattern,
                                   struct String  replacement);
 
@@ -173,8 +173,8 @@ struct StringMethods {
 extern const struct StringMethods _CBL_STRING_METHODS;
 
 
-struct String String_set(const char* str);
-struct String String_clean_(struct String* this);
+// struct String String_set(const char* str);
+void String_free_(struct String* this);
 struct String String_set_(struct String* this, const char* str);
 Bool          String_isequal(const struct String* this, struct String another);
 struct String String_append_(struct String* this, struct String another);
@@ -182,11 +182,11 @@ struct String String_join_(struct String*       this,
                            const struct String* list,
                            Int                  n,
                            struct String        delimiter);
-Int String_next_match(const struct String* this,
+Int String_nextmatch(const struct String* this,
                       struct String        pattern,
                       Int                  start);
-Bool String_starts_with(const struct String* this, struct String pattern);
-Bool String_ends_with(const struct String* this, struct String pattern);
+Bool String_startswith(const struct String* this, struct String pattern);
+Bool String_endswith(const struct String* this, struct String pattern);
 Bool String_contains(const struct String* this, struct String pattern);
 struct String String_substring_(struct String* this, Int start, Int stop);
 void String_split(const struct String* this,
@@ -197,14 +197,15 @@ struct String String_strip_(struct String* this);
 struct String String_replace_(struct String* this,
                               struct String  pattern,
                               struct String  replacement);
-struct String String_replace_all_(struct String* this,
+struct String String_replaceall_(struct String* this,
                                   struct String  pattern,
                                   struct String  replacement);
 struct String String_reverse_(struct String* this);
 
 static inline void String_new_(struct String* this) {
     this->len = 0;
-    memset(this->str, '\0', STRING_MAX_LENGTH * sizeof(Char));
+    memset(this->str, '\0', STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
+    this->more = NULL;
     this->methods = &_CBL_STRING_METHODS;
 }
 

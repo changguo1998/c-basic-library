@@ -28,52 +28,54 @@
 #include "Type_String.h"
 
 const struct StringMethods _CBL_STRING_METHODS = {
-    &String_clean_,
+    &String_free_,
     &String_set_,
     &String_isequal,
     &String_append_,
     &String_join_,
-    &String_next_match,
-    &String_starts_with,
-    &String_ends_with,
+    &String_nextmatch,
+    &String_startswith,
+    &String_endswith,
     &String_contains,
     &String_substring_,
     &String_split,
     &String_strip_,
     &String_replace_,
-    &String_replace_all_,
+    &String_replaceall_,
     &String_reverse_
 };
 
-struct String String_set(const char* str) {
-    struct String string;
-    String_new_(&string);
-    if(strlen(str)) {
-        if(strlen(str) > STRING_MAX_LENGTH) {
-            strncpy(string.str, str, STRING_MAX_LENGTH * sizeof(Char));
-            string.len = STRING_MAX_LENGTH;
-        }
-        else {
-            strcpy(string.str, str);
-            string.len = (Int)strlen(str);
-        }
-    }
-    return string;
-}
+// struct String String_set(const char* str) {
+//     struct String string;
+//     String_new_(&string);
+//     String_set_(&string, str);
+//     return string;
+// }
 
-struct String String_clean_(struct String* this) {
+void String_free_(struct String* this) {
+    if(this->more) {
+        free(this->more);
+        this->more = NULL;
+    }
     this->len = 0;
-    memset(this->str, '\0', sizeof(Char) * STRING_MAX_LENGTH);
-    return *this;
+    memset(this->str, '\0', sizeof(Char) * STRING_FIXED_BUFFER_LENGTH);
 }
 
 struct String String_set_(struct String* this, const char* str) {
-    String_clean_(this);
-    if(strlen(str) > STRING_MAX_LENGTH)
-        error_out_of_memory("(STR_String) Warning: string is too long\n");
-    else {
-        this->len = (Int)strlen(str);
-        strcpy(this->str, str);
+    Int n;
+    String_free_(this);
+    n = (Int)strlen(str);
+    if(n) {
+        if(n > STRING_FIXED_BUFFER_LENGTH) {
+            memcpy(this->str, str, STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
+            this->more = (Char*)calloc(n - STRING_FIXED_BUFFER_LENGTH + 1, sizeof(Char));
+            memcpy(this->more, &str[STRING_FIXED_BUFFER_LENGTH], (n - STRING_FIXED_BUFFER_LENGTH) * sizeof(Char));
+        }
+        else {
+            memcpy(this->str, str, n * sizeof(Char));
+            this->more = NULL;
+        }
+        this->len = n;
     }
     return *this;
 }
@@ -90,7 +92,7 @@ Bool String_isequal(const struct String* this, struct String another) {
 void _append_string(Char* str1, Int* n1, const Char* str2, Int n2) {
     Int i;
     for(i = 0; i < n2; i++)
-        if(*n1 >= STRING_MAX_LENGTH)
+        if(*n1 >= STRING_FIXED_BUFFER_LENGTH)
             error_out_of_memory("(_append_string) string is too long\n");
         else {
             str1[*n1] = str2[i];
@@ -108,7 +110,7 @@ struct String String_join_(struct String*       this,
                            Int                  n,
                            struct String        delimiter) {
     Int i_list;
-    String_clean_(this);
+    String_free_(this);
     if(n <= 0) return *this;
     _append_string(this->str, &(this->len), list[0].str, list[0].len);
     for(i_list = 1; i_list < n; i_list++) {
@@ -120,9 +122,9 @@ struct String String_join_(struct String*       this,
     return *this;
 }
 
-Int String_next_match(const struct String* this,
-                      struct String        pattern,
-                      Int                  start) {
+Int String_nextmatch(const struct String* this,
+                     struct String        pattern,
+                     Int                  start) {
     Int i, j;
     if(this->len == 0) return -1;
     if(pattern.len == 0) return -1;
@@ -138,7 +140,7 @@ Int String_next_match(const struct String* this,
     return -1;
 }
 
-Bool String_starts_with(const struct String* this, struct String pattern) {
+Bool String_startswith(const struct String* this, struct String pattern) {
     Int i;
     if(this->len < pattern.len) return false;
     for(i = 0; i < pattern.len; i++)
@@ -147,7 +149,7 @@ Bool String_starts_with(const struct String* this, struct String pattern) {
     return true;
 }
 
-Bool String_ends_with(const struct String* this, struct String pattern) {
+Bool String_endswith(const struct String* this, struct String pattern) {
     Int i;
     if(this->len < pattern.len) return false;
     for(i = 0; i < pattern.len; i++)
@@ -157,7 +159,7 @@ Bool String_ends_with(const struct String* this, struct String pattern) {
 }
 
 Bool String_contains(const struct String* this, struct String pattern) {
-    return String_next_match(this, pattern, 0) >= 0;
+    return String_nextmatch(this, pattern, 0) >= 0;
 }
 
 struct String String_substring_(struct String* this, Int start, Int stop) {
@@ -166,7 +168,7 @@ struct String String_substring_(struct String* this, Int start, Int stop) {
         error_index_out_of_bounds(
             "(String_substring_) index out of bounds\n");
     if(start > stop) {
-        String_clean_(this);
+        String_free_(this);
         return *this;
     }
     start0 = start < 0 ? 0 : start;
@@ -192,7 +194,7 @@ void String_split(const struct String* this,
     *n = 1;
     i = 0;
     while(i < this->len) {
-        next_slice = String_next_match(this, delimiter, i);
+        next_slice = String_nextmatch(this, delimiter, i);
         if(next_slice < 0) break;
         *n += 1;
         i = next_slice + delimiter.len;
@@ -201,7 +203,7 @@ void String_split(const struct String* this,
     slice_index[0] = 0;
     next_slice = 0;
     for(i = 1; i < *n; i++) {
-        slice_index[i] = String_next_match(this, delimiter, next_slice);
+        slice_index[i] = String_nextmatch(this, delimiter, next_slice);
         next_slice = slice_index[i] + delimiter.len;
     }
 
@@ -234,7 +236,7 @@ struct String String_replace_(struct String* this,
                               struct String  replacement) {
     Int           p;
     struct String buffer[3];
-    p = String_next_match(this, pattern, 0);
+    p = String_nextmatch(this, pattern, 0);
     if(p < 0) return *this;
     buffer[0] = *this;
     String_substring_(&(buffer[0]), 0, p - 1);
@@ -245,9 +247,9 @@ struct String String_replace_(struct String* this,
     return *this;
 }
 
-struct String String_replace_all_(struct String* this,
-                                  struct String  pattern,
-                                  struct String  replacement) {
+struct String String_replaceall_(struct String* this,
+                                 struct String  pattern,
+                                 struct String  replacement) {
     struct String* buffer = NULL;
     Int            n_slice;
     String_split(this, pattern, &buffer, &n_slice);
@@ -293,7 +295,7 @@ String STR_read_line(FILE* fp) {
     while(!feof(fp)) {
         c = (Char)fgetc(fp);
         if(c == '\n') break;
-        if(s.len == STRING_MAX_LENGTH) {
+        if(s.len == STRING_FIXED_BUFFER_LENGTH) {
             printf("(STR_read_line) Warning: line is too long\n");
             break;
         }
@@ -334,10 +336,10 @@ void STR_read_lines(String** string_list, FILE* fp) {
 }
 
 void STR_print_line(String str, FILE* fp) {
-    Char buffer[STRING_MAX_LENGTH + 1];
+    Char buffer[STRING_FIXED_BUFFER_LENGTH + 1];
     if(fp == NULL) return;
     memcpy(buffer, str.str, str.len * sizeof(Char));
-    buffer[STRING_MAX_LENGTH] = '\0';
+    buffer[STRING_FIXED_BUFFER_LENGTH] = '\0';
     fprintf(fp, "%s\n", buffer);
 }
 

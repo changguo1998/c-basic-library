@@ -235,7 +235,9 @@ struct String String_replace_(struct String* this,
                               struct String  pattern,
                               struct String  replacement) {
     Int           p;
-    struct String buffer[3];
+    struct String buffer[3], b;
+    String_new_(&b);
+    String_set_(&b, "");
     p = String_nextmatch(this, pattern, 0);
     if(p < 0) return *this;
     buffer[0] = *this;
@@ -243,7 +245,7 @@ struct String String_replace_(struct String* this,
     buffer[1] = replacement;
     buffer[2] = *this;
     String_substring_(&(buffer[2]), p + pattern.len, this->len - 1);
-    String_join_(this, buffer, 3, String_set(""));
+    String_join_(this, buffer, 3, b);
     return *this;
 }
 

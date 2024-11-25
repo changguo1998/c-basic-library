@@ -72,23 +72,23 @@
 
 ### String methods
 
-| Function   | Status |
-|------------|:------:|
-| free       |        |
-| set        |        |
-| isequal    |        |
-| append     |        |
-| join       |        |
-| nextmatch  |        |
-| startswith |        |
-| endswith   |        |
-| contains   |        |
-| substring  |        |
-| split      |        |
-| strip      |        |
-| replace    |        |
-| replaceall |        |
-| reverse    |        |
+| Function   |  Status  |
+|------------|:--------:|
+| free       | &#x2713; |
+| set        | &#x2713; |
+| isequal    |          |
+| append     |          |
+| join       |          |
+| nextmatch  |          |
+| startswith |          |
+| endswith   |          |
+| contains   |          |
+| substring  |          |
+| split      |          |
+| strip      |          |
+| replace    |          |
+| replaceall |          |
+| reverse    |          |
 
 ### IntVector methods
 

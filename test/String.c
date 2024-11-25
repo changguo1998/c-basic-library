@@ -25,16 +25,54 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "Module_Basic.h"
 #include "Type_String.h"
 
+#define TVI(n) i_tmpvar_##n
+#define _NEW_VECS(type, varnm, n)\
+    for(int TVI(varnm) = 0; TVI(varnm) < n; TVI(varnm)++) type##_new_(&varnm[TVI(varnm)]);
+
+#define _VECTOR_DEFINE(varnm, n) varnm[n]
+#define _VECTOR_DEFINE_1(varnm, n, ...) _VECTOR_DEFINE(varnm, n)
+#define _VECTOR_DEFINE_2(varnm, n, ...) _VECTOR_DEFINE(varnm, n), _VECTOR_DEFINE_1(__VA_ARGS__)
+#define _VECTOR_DEFINE_3(varnm, n, ...) _VECTOR_DEFINE(varnm, n), _VECTOR_DEFINE_2(__VA_ARGS__)
+
+void printsection(const char* s) { printf("\n----------------------------------------\n * %s\n\n", s); }
+
+void printstring(const char* vname, struct String s) {
+    Char buf[(STRING_FIXED_BUFFER_LENGTH) + 1] = {'\0'};
+    if(s.len >= STRING_FIXED_BUFFER_LENGTH) {
+        memcpy(buf, s.str, STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
+        printf("%s: %s%s", vname, buf, s.more);
+    }
+    else
+        printf("%s: %s", vname, s.str);
+    printf("\n");
+}
+
 int main() {
-    struct String  r[5], s[3], t[3], Sbuffer;
-    struct String* sp = NULL;
-
     Int  nslice, i;
-    char c,      buffer[100];
+    char c,      buffer[100] = {'\0'};
 
-    String_new_(&Sbuffer);
+    CBL_DECLARE_VARS(String, 1, s);
+
+    printsection("global");
+    printf("STRING_FIXED_BUFFER_LENGTH: %d\n", STRING_FIXED_BUFFER_LENGTH);
+    printsection("set");
+    CBL_CALL(s, set_, "tes");
+    printstring("s", s);
+    strncpy(buffer, s.str, STRING_FIXED_BUFFER_LENGTH);
+    printf("s: {len: %d, str: \"%s\", more: \"%s\"}\n", s.len, buffer, s.more);
+    CBL_CALL(s, set_, "testtesttest"); printstring("s", s);
+    strncpy(buffer, s.str, STRING_FIXED_BUFFER_LENGTH);
+    printf("s: {len: %d, str: \"%s\", more: \"%s\"}\n", s.len, buffer, s.more);
+
+    printsection("free");
+    CBL_FREE_VARS(String, 1, s);
+    return 0;
+}
+
+/*
     for(i = 0; i < 5; i++) String_new_(&(r[i]));
     for(i = 0; i < 3; i++) {
         String_new_(&(s[i]));
@@ -85,5 +123,4 @@ int main() {
     printf("n slice: %d\n", nslice);
     for(c = 0; c < nslice; c++) printf("slice[%d]: %s\n", c, sp[c].str);
     free(sp);
-    return 0;
-}
+*/

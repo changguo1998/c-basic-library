@@ -29,6 +29,7 @@
 
 const struct StringMethods _CBL_STRING_METHODS = {
     &String_free_,
+    &String_copy_,
     &String_set_,
     &String_isequal,
     &String_append_,
@@ -45,6 +46,67 @@ const struct StringMethods _CBL_STRING_METHODS = {
     &String_reverse_
 };
 
+// # ---------------------------------------------------------------------------
+// # internal functions
+
+void String_alloc_(struct String* this, Int len) {
+    if(this->len == len) return;
+    if(this->more) free(this->more);
+    this->more = NULL;
+    if(len <= STRING_FIXED_BUFFER_LENGTH) return;
+    this->more = (Char*)calloc(len - STRING_FIXED_BUFFER_LENGTH + 1,
+        sizeof(Char));
+}
+
+void _append_string(Int* n1, Char* s1, Char* d1, Int n2, const Char* s2) {
+    Int i;
+    for(i = 0; i < n2; i++) {
+        if(*n1 < STRING_FIXED_BUFFER_LENGTH) { s1[*n1] = s2[i]; }
+        else { d1[*n1 - STRING_FIXED_BUFFER_LENGTH] = s2[i]; }
+        *n1 += 1;
+    }
+}
+
+void _get_string(const struct String* this, Int* n, Char* s) {
+    Int i;
+    if(this->len <= 0) return;
+    if(this->len <= STRING_FIXED_BUFFER_LENGTH) {
+        for(i = 0; i < this->len; i++) {
+            s[*n] = this->str[i];
+            *n += 1;
+        }
+    }
+    else {
+        for(i = 0; i < STRING_FIXED_BUFFER_LENGTH; i++) {
+            s[*n] = this->str[i];
+            *n += 1;
+        }
+        for(i = 0; i < this->len - STRING_FIXED_BUFFER_LENGTH; i++) {
+            s[*n] = this->more[i];
+            *n += 1;
+        }
+    }
+}
+
+Char* _cache_string(const struct String* this) {
+    Char* buf = NULL;
+    Int   i;
+    if(this->len <= STRING_FIXED_BUFFER_LENGTH) return this->str;
+    buf = (Char*)calloc(this->len + 1, sizeof(Char));
+    i = 0;
+    _get_string(this, &i, buf);
+    return buf;
+}
+
+void _free_cached_string(const struct String* this, Char** buf) {
+    if(*buf != this->str)
+        free(*buf);
+    *buf = NULL;
+}
+
+// # ---------------------------------------------------------------------------
+// # external functions
+
 // struct String String_set(const char* str) {
 //     struct String string;
 //     String_new_(&string);
@@ -53,108 +115,185 @@ const struct StringMethods _CBL_STRING_METHODS = {
 // }
 
 void String_free_(struct String* this) {
-    if(this->more) {
-        free(this->more);
-        this->more = NULL;
-    }
+    if(this->more) free(this->more);
+    this->more = NULL;
+    this->str[0] = '\0';
     this->len = 0;
-    memset(this->str, '\0', sizeof(Char) * STRING_FIXED_BUFFER_LENGTH);
 }
 
-struct String String_set_(struct String* this, const char* str) {
-    Int n;
-    String_free_(this);
-    n = (Int)strlen(str);
-    if(n) {
-        if(n > STRING_FIXED_BUFFER_LENGTH) {
-            memcpy(this->str, str, STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
-            this->more = (Char*)calloc(n - STRING_FIXED_BUFFER_LENGTH + 1, sizeof(Char));
-            memcpy(this->more, &str[STRING_FIXED_BUFFER_LENGTH], (n - STRING_FIXED_BUFFER_LENGTH) * sizeof(Char));
-        }
-        else {
-            memcpy(this->str, str, n * sizeof(Char));
-            this->more = NULL;
-        }
-        this->len = n;
+void String_copy_(struct String* this, struct String other) {
+    if(other.len <= 0) {
+        String_free_(this);
+        return;
     }
-    return *this;
+    if(other.more) String_alloc_(this, other.len);
+    memcpy(this->str, other.str, STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
+    if(other.more) memcpy(this->more, other.more, (other.len - STRING_FIXED_BUFFER_LENGTH) * sizeof(Char));
+    this->len = other.len;
+}
+
+void String_set_(struct String* this, const char* str) {
+    Int n;
+    // String_free_(this);
+    n = (Int)strlen(str);
+    if(n <= 0) {
+        String_free_(this);
+        return;
+    }
+    String_alloc_(this, n);
+    if(n > STRING_FIXED_BUFFER_LENGTH) {
+        memcpy(this->str, str, STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
+        memcpy(this->more, &str[STRING_FIXED_BUFFER_LENGTH],
+            (n - STRING_FIXED_BUFFER_LENGTH) * sizeof(Char));
+        this->more[n - STRING_FIXED_BUFFER_LENGTH] = '\0';
+    }
+    else {
+        memset(this->str, '\0', STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
+        memcpy(this->str, str, n * sizeof(Char));
+    }
+    this->len = n;
 }
 
 Bool String_isequal(const struct String* this, struct String another) {
     Int i;
     if(this->len != another.len) return false;
-    for(i = 0; i < this->len; i++)
-        if(this->str[i] != another.str[i])
-            return false;
+    if(this->len <= STRING_FIXED_BUFFER_LENGTH) {
+        for(i = 0; i < this->len; i++)
+            if(this->str[i] != another.str[i]) return false;
+    }
+    else {
+        for(i = 0; i < STRING_FIXED_BUFFER_LENGTH; i++)
+            if(this->str[i] != another.str[i]) return false;
+        for(i = 0; i < this->len - STRING_FIXED_BUFFER_LENGTH; i++)
+            if(this->more[i] != another.more[i]) return false;
+    }
     return true;
 }
 
-void _append_string(Char* str1, Int* n1, const Char* str2, Int n2) {
-    Int i;
-    for(i = 0; i < n2; i++)
-        if(*n1 >= STRING_FIXED_BUFFER_LENGTH)
-            error_out_of_memory("(_append_string) string is too long\n");
-        else {
-            str1[*n1] = str2[i];
-            *n1 += 1;
-        }
-}
+void String_append_(struct String* this, struct String another) {
+    Char* buf = NULL;
+    Int   i, m2, n2, l, lc;
+    if(another.len <= 0) return;
 
-struct String String_append_(struct String* this, struct String another) {
-    _append_string(this->str, &(this->len), another.str, another.len);
-    return *this;
-}
+    m2 = (another.len <= STRING_FIXED_BUFFER_LENGTH) ? another.len : STRING_FIXED_BUFFER_LENGTH;
+    n2 = another.len - STRING_FIXED_BUFFER_LENGTH;
 
-struct String String_join_(struct String*       this,
-                           const struct String* list,
-                           Int                  n,
-                           struct String        delimiter) {
-    Int i_list;
-    String_free_(this);
-    if(n <= 0) return *this;
-    _append_string(this->str, &(this->len), list[0].str, list[0].len);
-    for(i_list = 1; i_list < n; i_list++) {
-        _append_string(this->str, &(this->len),
-            delimiter.str, delimiter.len);
-        _append_string(this->str, &(this->len),
-            list[i_list].str, list[i_list].len);
+    l = this->len + another.len;
+    if(l > STRING_FIXED_BUFFER_LENGTH) {
+        buf = (Char*)calloc(this->len + 1, sizeof(Char));
+        i = 0;
+        _get_string(this, &i, buf);
+        String_alloc_(this, l);
+        lc = 0;
+        _append_string(&lc, this->str, this->more, i, buf);
+        free(buf);
     }
-    return *this;
+    else
+        lc = this->len;
+    _append_string(&lc, this->str, this->more, m2, another.str);
+    if(n2 > 0) _append_string(&lc, this->str, this->more, n2, another.more);
+    this->len = l;
+}
+
+void String_join_(struct String*       this,
+                  const struct String* list,
+                  Int                  n,
+                  struct String        delimiter) {
+    Char* buf = NULL;
+    Int   i_list, i, ml, nl, l, lc;
+
+    String_free_(this);
+    if(n <= 0) return;
+
+    l = 0;
+    for(i_list = 0; i_list < n; i_list++) {
+        l += delimiter.len;
+        l += list[i_list].len;
+    }
+    l -= delimiter.len;
+    if(l > STRING_FIXED_BUFFER_LENGTH) String_alloc_(this, l);
+    lc = 0;
+    // list[i]
+    ml = (list[0].len <= STRING_FIXED_BUFFER_LENGTH) ? list[0].len : STRING_FIXED_BUFFER_LENGTH;
+    nl = list[0].len - STRING_FIXED_BUFFER_LENGTH;
+    _append_string(&lc, this->str, this->more, ml, list[0].str);
+    if(nl > 0) _append_string(&lc, this->str, this->more, nl, list[0].more);
+    // append
+    for(i_list = 1; i_list < n; i_list++) {
+        // delimiter
+        ml = (delimiter.len <= STRING_FIXED_BUFFER_LENGTH) ? delimiter.len : STRING_FIXED_BUFFER_LENGTH;
+        nl = delimiter.len - STRING_FIXED_BUFFER_LENGTH;
+        _append_string(&lc, this->str, this->more, ml, delimiter.str);
+        if(nl > 0) _append_string(&lc, this->str, this->more, nl, delimiter.more);
+        // list[i]
+        ml = (list[i_list].len <= STRING_FIXED_BUFFER_LENGTH) ? list[i_list].len : STRING_FIXED_BUFFER_LENGTH;
+        nl = list[i_list].len - STRING_FIXED_BUFFER_LENGTH;
+        _append_string(&lc, this->str, this->more, ml, list[i_list].str);
+        if(nl > 0) _append_string(&lc, this->str, this->more, nl, list[i_list].more);
+    }
+    this->len = l;
 }
 
 Int String_nextmatch(const struct String* this,
                      struct String        pattern,
                      Int                  start) {
-    Int i, j;
-    if(this->len == 0) return -1;
-    if(pattern.len == 0) return -1;
+    Int   i,         j;
+    Char *s = NULL, *t = NULL;
+    if(this->len <= 0) return -1;
+    if(pattern.len <= 0) return -1;
+    s = _cache_string(this);
+    t = _cache_string(&pattern);
+
     j = 0;
     for(i = start; i < this->len; i++) {
-        if(this->str[i] == pattern.str[j]) j += 1;
+        if(s[i] == t[j]) j += 1;
         else {
             i -= j;
             j = 0;
         }
-        if(j == pattern.len) return i - pattern.len + 1;
+        if(j == pattern.len) {
+            _free_cached_string(this, &s);
+            _free_cached_string(&pattern, &t);
+            return i - pattern.len + 1;
+        }
     }
+    _free_cached_string(this, &s);
+    _free_cached_string(&pattern, &t);
     return -1;
 }
 
 Bool String_startswith(const struct String* this, struct String pattern) {
-    Int i;
+    Int   i;
+    Char *s = NULL, *t = NULL;
     if(this->len < pattern.len) return false;
+    s = _cache_string(this);
+    t = _cache_string(&pattern);
     for(i = 0; i < pattern.len; i++)
-        if(this->str[i] != pattern.str[i])
+        if(s[i] != t[i]) {
+            _free_cached_string(this, &s);
+            _free_cached_string(&pattern, &t);
             return false;
+        }
+
+    _free_cached_string(this, &s);
+    _free_cached_string(&pattern, &t);
     return true;
 }
 
 Bool String_endswith(const struct String* this, struct String pattern) {
     Int i;
+    Char *s = NULL, *t = NULL;
     if(this->len < pattern.len) return false;
+    s = _cache_string(this);
+    t = _cache_string(&pattern);
     for(i = 0; i < pattern.len; i++)
-        if(this->str[this->len - 1 - i] != pattern.str[pattern.len - 1 - i])
+        if(s[this->len - 1 - i] != t[pattern.len - 1 - i]) {
+            _free_cached_string(this, &s);
+            _free_cached_string(&pattern, &t);
             return false;
+        }
+    _free_cached_string(this, &s);
+    _free_cached_string(&pattern, &t);
     return true;
 }
 
@@ -162,31 +301,34 @@ Bool String_contains(const struct String* this, struct String pattern) {
     return String_nextmatch(this, pattern, 0) >= 0;
 }
 
-struct String String_substring_(struct String* this, Int start, Int stop) {
+void String_substring_(struct String* this, Int start, Int stop) {
     Int i, n_sub, start0, stop0;
+    Char *buf = NULL;
     if((start < 0 && stop < 0) || (start >= this->len && stop >= this->len))
-        error_index_out_of_bounds(
-            "(String_substring_) index out of bounds\n");
-    if(start > stop) {
-        String_free_(this);
-        return *this;
-    }
-    start0 = start < 0 ? 0 : start;
-    start0 = start0 < this->len ? start0 : this->len - 1;
-    stop0 = stop < 0 ? 0 : stop;
-    stop0 = stop0 < this->len ? stop0 : this->len - 1;
+        error_index_out_of_bounds("(String_substring_) index out of bounds\n");
+    start0 = start < stop ? start : stop;
+    stop0 = start > stop ? start : stop;
     n_sub = stop0 - start0 + 1;
-    for(i = 0; i < n_sub; i++) this->str[i] = this->str[i + start];
-    for(i = n_sub; i < this->len; i++) this->str[i] = '\0';
+    if(n_sub <= 0) {
+        String_free_(this);
+        return;
+    }
+    buf = _cache_string(this);
+    for(i = 0; i < n_sub; i++) buf[i] = buf[i + start0];
+    buf[n_sub] = '\0';
+    if(this->len > STRING_FIXED_BUFFER_LENGTH)
+        String_set_(this, buf);
+    _free_cached_string(this, &buf);
     this->len = n_sub;
-    return *this;
+    if(start > stop) String_reverse_(this);
 }
 
 void String_split(const struct String* this,
                   struct String        delimiter,
                   struct String**      list,
                   Int*                 n) {
-    Int *slice_index = NULL, next_slice, i_slice, i;
+    Int *slice_start = NULL, *slice_stop = NULL, next_slice, i_slice, i, j;
+    Char *buf = NULL;
 
     if(*list != NULL)
         error_unexpected_allocated_memory(
@@ -199,77 +341,125 @@ void String_split(const struct String* this,
         *n += 1;
         i = next_slice + delimiter.len;
     }
-    slice_index = (Int*)malloc(sizeof(Int) * (*n));
-    slice_index[0] = 0;
+    // printf("(String_split) nslice: %d\n", *n);
+    slice_start = (Int*)malloc(sizeof(Int) * (*n));
+    slice_stop = (Int*)malloc(sizeof(Int) * (*n));
+    slice_start[0] = 0;
+    slice_stop[(*n)-1] = this->len-1;
     next_slice = 0;
     for(i = 1; i < *n; i++) {
-        slice_index[i] = String_nextmatch(this, delimiter, next_slice);
-        next_slice = slice_index[i] + delimiter.len;
+        j = String_nextmatch(this, delimiter, next_slice);
+        slice_start[i] = j + delimiter.len;
+        slice_stop[i-1] = j - 1;
+        next_slice = slice_start[i];
     }
-
+    // printf("(String_split) slice_index: ");
+    // for(i = 0; i < *n; i++) printf("(%d, %d), ", slice_start[i], slice_stop[i]);
+    // printf("\n(String_split) allocate list");
     *list = (struct String*)malloc(sizeof(struct String) * (*n));
+    for(i_slice = 0; i_slice < *n; i_slice++) String_new_(&((*list)[i_slice]));
 
+    // printf("\n(String_split) allocate list done");
+    buf = _cache_string(this);
+    // printf("\n(String_split) src string: \"%s\"\n", buf);
     for(i_slice = 0; i_slice < *n; i_slice++) {
-        memcpy(&((*list)[i_slice]), this, sizeof(struct String));
-        if(i_slice < *n - 1)
-            String_substring_(&((*list)[i_slice]),
-                slice_index[i_slice] + delimiter.len,
-                slice_index[i_slice + 1] - 1);
-        else
-            String_substring_(&((*list)[i_slice]),
-                slice_index[i_slice] + delimiter.len,
-                this->len - 1);
+        // printf("(String_split) process slice %d\n", i_slice);
+        i = slice_start[i_slice];
+        j = slice_stop[i_slice];
+        // printf("(String_split) i: %d, j: %d\n ", i, j);
+        (*list)[i_slice].len = 0;
+        String_alloc_(&((*list)[i_slice]), j - i + 1);
+        _append_string(&((*list)[i_slice].len), (*list)[i_slice].str, (*list)[i_slice].more, j-i+1, &(buf[i]));
     }
-    free(slice_index);
+    _free_cached_string(this, &buf);
+    free(slice_start);
+    free(slice_stop);
 }
 
-struct String String_strip_(struct String* this) {
+void String_strip_(struct String* this) {
     Int i, j;
-    for(i = 0; i < this->len; i++) if(this->str[i] != ' ') break;
-    for(j = this->len - 1; j >= 0; j--) if(this->str[j] != ' ') break;
-    if(j > i) return *this;
-    return String_substring_(this, i, j);
+    Char *buf = NULL;
+    buf = _cache_string(this);
+    for(i = 0; i < this->len; i++) if(buf[i] != ' ') break;
+    for(j = this->len - 1; j >= 0; j--) if(buf[j] != ' ') break;
+    _free_cached_string(this, &buf);
+    if(i > j) return;
+    String_substring_(this, i, j);
 }
 
-struct String String_replace_(struct String* this,
+void String_replace_(struct String* this,
                               struct String  pattern,
                               struct String  replacement) {
     Int           p;
-    struct String buffer[3], b;
-    String_new_(&b);
-    String_set_(&b, "");
+    CBL_DECLARE_VARS(String, 2, del, pos);
+
     p = String_nextmatch(this, pattern, 0);
-    if(p < 0) return *this;
-    buffer[0] = *this;
-    String_substring_(&(buffer[0]), 0, p - 1);
-    buffer[1] = replacement;
-    buffer[2] = *this;
-    String_substring_(&(buffer[2]), p + pattern.len, this->len - 1);
-    String_join_(this, buffer, 3, b);
-    return *this;
+    if(p < 0) return;
+    String_copy_(&pos, *this);
+    String_substring_(&pos, p + pattern.len, this->len - 1);
+    String_substring_(this, 0, p-1);
+    String_append_(this, replacement);
+    String_append_(this, pos);
+    CBL_FREE_VARS(String, 2, del, pos);
 }
 
-struct String String_replaceall_(struct String* this,
+void String_replaceall_(struct String* this,
                                  struct String  pattern,
                                  struct String  replacement) {
     struct String* buffer = NULL;
-    Int            n_slice;
+    Int            n_slice, i;
+
+    // Char *buf = NULL;
+
+    // buf = _cache_string(this);
+    // printf("(String_replaceall_) this: \"%s\"\n", buf);
+    // _free_cached_string(this, &buf);
+    // buf = _cache_string(&pattern);
+    // printf("(String_replaceall_) pattern: \"%s\"\n", buf);
+    // _free_cached_string(&pattern, &buf);
+    // buf = _cache_string(&replacement);
+    // printf("(String_replaceall_) replacement: \"%s\"\n", buf);
+    // _free_cached_string(&replacement, &buf);
+
     String_split(this, pattern, &buffer, &n_slice);
+
+    // printf("after split:\n");
+    // for(i = 0; i < n_slice; i++) {
+    //     buf = _cache_string(&buffer[i]);
+    //     printf("  buffer[%d]: \"%s\"\n", i, buf);
+    //     _free_cached_string(&buffer[i], &buf);
+    // }
+
+    String_free_(this);
+
+    // buf = _cache_string(this);
+    // printf("(String_replaceall_) after free, this: \"%s\"\n", buf);
+    // _free_cached_string(this, &buf);
+
     String_join_(this, buffer, n_slice, replacement);
+
+    // buf = _cache_string(this);
+    // printf("(String_replaceall_) after join,  this: \"%s\"\n", buf);
+    // _free_cached_string(this, &buf);
+
+    for(i = 0; i < n_slice; i++) String_free_(&(buffer[i]));
     free(buffer);
-    return *this;
 }
 
-struct String String_reverse_(struct String* this) {
+void String_reverse_(struct String* this) {
     Int  i, h;
-    Char c;
+    Char c, *buf=NULL;
+    buf = _cache_string(this);
     h = this->len / 2;
     for(i = 0; i < h; i++) {
-        c = this->str[i];
-        this->str[i] = this->str[this->len - 1 - i];
-        this->str[this->len - 1 - i] = c;
+        c = buf[i];
+        buf[i] = buf[this->len - 1 - i];
+        buf[this->len - 1 - i] = c;
     }
-    return *this;
+    if(this->len > STRING_FIXED_BUFFER_LENGTH) {
+        String_set_(this, buf);
+    }
+    _free_cached_string(this, &buf);
 }
 
 // ! ==========================================================================

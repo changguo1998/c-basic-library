@@ -41,12 +41,14 @@ void printsection(const char* s) { printf("\n-----------------------------------
 
 void printstring(const char* vname, struct String s) {
     Char buf[(STRING_FIXED_BUFFER_LENGTH) + 1] = {'\0'};
-    if(s.len >= STRING_FIXED_BUFFER_LENGTH) {
-        memcpy(buf, s.str, STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
-        printf("%s: %s%s", vname, buf, s.more);
+    printf("%s: ", vname);
+    if(s.len < STRING_FIXED_BUFFER_LENGTH) {
+        printf("\"%s\"\n", s.str);
+        return;
     }
-    else
-        printf("%s: %s", vname, s.str);
+    memcpy(buf, s.str, STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
+    printf("\"%s", buf);
+    if(s.more) printf("^%s\"", s.more);
     printf("\n");
 }
 
@@ -54,21 +56,159 @@ int main() {
     Int  nslice, i;
     char c,      buffer[100] = {'\0'};
 
-    CBL_DECLARE_VARS(String, 1, s);
+    CBL_DECLARE_VARS(String, 3, s, t, u);
+    struct String v[3], *strslices = NULL;
+    for(i = 0; i < 3; i++) String_new_(&v[i]);
 
+    // ! -----------------------------------------------------------------------
     printsection("global");
     printf("STRING_FIXED_BUFFER_LENGTH: %d\n", STRING_FIXED_BUFFER_LENGTH);
+
+    // ! -----------------------------------------------------------------------
     printsection("set");
     CBL_CALL(s, set_, "tes");
     printstring("s", s);
     strncpy(buffer, s.str, STRING_FIXED_BUFFER_LENGTH);
     printf("s: {len: %d, str: \"%s\", more: \"%s\"}\n", s.len, buffer, s.more);
-    CBL_CALL(s, set_, "testtesttest"); printstring("s", s);
+    CBL_CALL(s, set_, "testtesttest");
+    printstring("s", s);
     strncpy(buffer, s.str, STRING_FIXED_BUFFER_LENGTH);
     printf("s: {len: %d, str: \"%s\", more: \"%s\"}\n", s.len, buffer, s.more);
 
+    // ! -----------------------------------------------------------------------
+    printsection("isequal");
+    CBL_CALL(s, set_, "testtesttest");
+    printstring("s", s);
+    CBL_CALL(t, set_, "testtesttest");
+    printstring("t", t);
+    printf("isequal(s, t): %d\n", CBL_CALL(s, isequal, t));
+    CBL_CALL(s, set_, "testtesttest");
+    printstring("s", s);
+    CBL_CALL(t, set_, "testtesttesb");
+    printstring("t", t);
+    printf("isequal(s, t): %d\n", CBL_CALL(s, isequal, t));
+
+    // ! -----------------------------------------------------------------------
+    printsection("append");
+    CBL_CALL(s, set_, "123456789");
+    printstring("s", s);
+    CBL_CALL(t, set_, "abcd");
+    printstring("t", t);
+    CBL_CALL(s, append_, t);
+    printstring("s", s);
+
+    // ! -----------------------------------------------------------------------
+    printsection("join");
+    CBL_CALL(s, set_, "v[-1]");
+    printstring("s", s);
+    CBL_CALL(t, set_, ", ");
+    printstring("t", t);
+    for(i = 0; i < 3; i++) {
+        sprintf(buffer, "%d%04d", i + 1, i + 1);
+        CBL_CALL(v[i], set_, buffer);
+        sprintf(buffer, "v[%d]", i);
+        printstring(buffer, v[i]);
+    }
+    CBL_CALL(s, join_, v, 3, t);
+    printstring("s", s);
+
+    // ! -----------------------------------------------------------------------
+    printsection("nextmatch");
+    CBL_CALL(s, set_, "abcdefghijkl");
+    printstring("s", s);
+    CBL_CALL(t, set_, "def");
+    printstring("t", t);
+    printf("nextmatch(s, t, 0): %d\n", CBL_CALL(s, nextmatch, t, 0));
+    printf("nextmatch(s, t, 4): %d\n", CBL_CALL(s, nextmatch, t, 4));
+
+    // ! -----------------------------------------------------------------------
+    printsection("startswith");
+    CBL_CALL(s, set_, "abcdefghijkl");
+    printstring("s", s);
+    CBL_CALL(t, set_, "abc");
+    printstring("t", t);
+    printf("startswith(s, t, 0): %d\n", CBL_CALL(s, startswith, t));
+    CBL_CALL(t, set_, "bcd");
+    printstring("t", t);
+    printf("startswith(s, t, 4): %d\n", CBL_CALL(s, startswith, t));
+
+    // ! -----------------------------------------------------------------------
+    printsection("endswith");
+    CBL_CALL(s, set_, "abcdefghijkl");
+    printstring("s", s);
+    CBL_CALL(t, set_, "jkl");
+    printstring("t", t);
+    printf("endswith(s, t, 0): %d\n", CBL_CALL(s, endswith, t));
+    CBL_CALL(t, set_, "bcd");
+    printstring("t", t);
+    printf("endswith(s, t, 4): %d\n", CBL_CALL(s, endswith, t));
+
+    // ! -----------------------------------------------------------------------
+    printsection("contains");
+    CBL_CALL(s, set_, "abcdefghijkl");
+    printstring("s", s);
+    CBL_CALL(t, set_, "def");
+    printstring("t", t);
+    printf("contains(s, t, 0): %d\n", CBL_CALL(s, contains, t));
+    CBL_CALL(t, set_, "dcb");
+    printstring("t", t);
+    printf("contains(s, t, 4): %d\n", CBL_CALL(s, contains, t));
+
+    // ! -----------------------------------------------------------------------
+    printsection("substring");
+    CBL_CALL(s, set_, "abcdefghijkl");
+    printstring("s", s);
+    CBL_CALL(s, substring_, 3, 5);
+    printstring("s", s);
+    CBL_CALL(s, set_, "abcdefghijkl");
+    printstring("s", s);
+    CBL_CALL(s, substring_, 5, 3);
+    printstring("s", s);
+
+    // ! -----------------------------------------------------------------------
+    printsection("strip");
+    CBL_CALL(s, set_, "  abcdefghijkl  ");
+    printstring("s", s);
+    CBL_CALL(s, strip_);
+    printstring("s", s);
+
+    // ! -----------------------------------------------------------------------
+    printsection("split");
+    CBL_CALL(s, set_, ",1,23,456,7890,");
+    printstring("s", s);
+    CBL_CALL(t, set_, ",");
+    printstring("t", t);
+    CBL_CALL(s, split, t, &strslices, &nslice);
+    printf("nslice: %d\n", nslice);
+    for(i = 0; i < nslice; i++) {
+        sprintf(buffer, "strslice[%d]", i);
+        printstring(buffer, strslices[i]);
+    }
+
+    // ! -----------------------------------------------------------------------
+    printsection("replace");
+    CBL_CALL(s, set_, "abcdefghijkl"); printstring("s", s);
+    CBL_CALL(t, set_, "ghij"); printstring("t", t);
+    CBL_CALL(u, set_, "1234"); printstring("u", u);
+    CBL_CALL(s, replace_, t, u); printstring("s", s);
+
+    // ! -----------------------------------------------------------------------
+    printsection("replaceall");
+    CBL_CALL(s, set_, "abcabdabeabf"); printstring("s", s);
+    CBL_CALL(t, set_, "ab"); printstring("t", t);
+    CBL_CALL(u, set_, "1234"); printstring("u", u);
+    CBL_CALL(s, replaceall_, t, u); printstring("s", s);
+
+    // ! -----------------------------------------------------------------------
+    printsection("reverse");
+    CBL_CALL(s, set_, "0123456789");
+    printstring("s", s);
+    CBL_CALL(s, reverse_);
+    printstring("s", s);
+
+    // ! -----------------------------------------------------------------------
     printsection("free");
-    CBL_FREE_VARS(String, 1, s);
+    CBL_FREE_VARS(String, 3, s, t, u);
     return 0;
 }
 

@@ -21,7 +21,7 @@
 |                                         | file         |  header  | methods  |   test   |
 |-----------------------------------------|--------------|:--------:|:--------:|:--------:|
 | *non-numerical type*                    |              |          |          |          |
-| [String](#String-methods)               | String       |          |          |          |
+| [String](#String-methods)               | String       | &#x2713; | &#x2713; | &#x2713; |
 | Date                                    | DateTime     | &#x2713; | &#x2713; |          |
 | Time                                    | DateTime     | &#x2713; | &#x2713; |          |
 | DateTime                                | DateTime     | &#x2713; | &#x2713; |          |
@@ -75,20 +75,21 @@
 | Function   |  Status  |
 |------------|:--------:|
 | free       | &#x2713; |
+| copy       | &#x2713; |
 | set        | &#x2713; |
-| isequal    |          |
-| append     |          |
-| join       |          |
-| nextmatch  |          |
-| startswith |          |
-| endswith   |          |
-| contains   |          |
-| substring  |          |
-| split      |          |
-| strip      |          |
-| replace    |          |
-| replaceall |          |
-| reverse    |          |
+| isequal    | &#x2713; |
+| append     | &#x2713; |
+| join       | &#x2713; |
+| nextmatch  | &#x2713; |
+| startswith | &#x2713; |
+| endswith   | &#x2713; |
+| contains   | &#x2713; |
+| substring  | &#x2713; |
+| split      | &#x2713; |
+| strip      | &#x2713; |
+| replace    | &#x2713; |
+| replaceall | &#x2713; |
+| reverse    | &#x2713; |
 
 ### IntVector methods
 

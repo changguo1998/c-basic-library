@@ -34,139 +34,34 @@
  * @brief StringMethods
  */
 struct StringMethods {
-
-    /**
-     * @brief set String to empty
-     * @param this struct String*
-     * @return struct String
-     */
     void (*free_)(struct String* this);
-
-    /**
-     * @brief initialize a String type using C like string array
-     * @param this struct String*
-     * @param str const char*
-     * @return struct String
-     */
-    struct String (*set_)(struct String* this, const char* str);
-
-    /**
-     * @brief compare two String
-     * @param this const struct String*
-     * @param another struct String*
-     * @return true if equal, false if not equal or different in length
-     */
+    void (*copy_)(struct String* this, struct String other);
+    void (*set_)(struct String* this, const char* str);
     Bool (*isequal)(const struct String* this, struct String another);
-
-    /**
-     * @brief append a string to the current string
-     * @param this struct String*
-     * @param another struct String*
-     * @return struct String
-     */
-    struct String (*append_)(struct String* this, struct String another);
-
-    /**
-     * @brief join a list of string and store in current string
-     * @param this struct String*
-     * @param list struct String*
-     * @param n Int
-     * @param delimiter struct String
-     * @return struct String
-     */
-    struct String (*join_)(struct String*       this,
+    void (*append_)(struct String* this, struct String another);
+    void (*join_)(struct String*       this,
                            const struct String* list,
                            Int                  n,
                            struct String        delimiter);
-
-    /**
-     * @brief find next match in str with pattern
-     * @param this const struct String*
-     * @param pattern struct String
-     * @param start Int
-     * @return index of the beginning in this string
-     */
     Int (*nextmatch)(const struct String* this,
                       struct String        pattern,
                       Int                  start);
-
-    /**
-     * @brief test if this string starts with pattern
-     * @param this
-     * @param pattern struct String
-     */
     Bool (*startswith)(const struct String* this, struct String pattern);
-
-    /**
-     * @brief test if this string ends with pattern
-     * @param this
-     * @param pattern struct String
-     */
     Bool (*endswith)(const struct String* this, struct String pattern);
-
-    /**
-     * @brief test if str contains pattern
-     * @param this
-     * @param pattern struct String
-     */
     Bool (*contains)(const struct String* this, struct String pattern);
-
-    /**
-     * @brief get substring with from start to stop
-     * @param this const struct String*
-     * @param start Int
-     * @param stop Int
-     * @return struct String
-     */
-    struct String (*substring_)(struct String* this, Int start, Int stop);
-
-    /**
-     * @brief split String into Strings by delimiter, stored in list
-     * @param this const struct String*
-     * @param delimiter struct String
-     * @param list struct String**
-     * @param n Int*
-     */
+    void (*substring_)(struct String* this, Int start, Int stop);
     void (*split)(const struct String* this,
                   struct String        delimiter,
                   struct String**      list,
                   Int*                 n);
-
-    /**
-     * @brief remove blanks at the head and tail of str
-     * @param this const struct String*
-     * @return struct String
-     */
-    struct String (*strip_)(struct String* this);
-
-    /**
-     * @brief replace first pattern showed in this using replacement
-     * @param this struct String*
-     * @param pattern struct String
-     * @param replacement struct String
-     * @return struct String
-     */
-    struct String (*replace_)(struct String* this,
+    void (*strip_)(struct String* this);
+    void (*replace_)(struct String* this,
                               struct String  pattern,
                               struct String  replacement);
-
-    /**
-     * @brief replace all pattern showed in this using replacement
-     * @param this struct String*
-     * @param pattern struct String
-     * @param replacement struct String
-     * @return struct String
-     */
-    struct String (*replaceall_)(struct String* this,
+    void (*replaceall_)(struct String* this,
                                   struct String  pattern,
                                   struct String  replacement);
-
-    /**
-     * @brief reverse string
-     * @param this
-     * @return struct String
-     */
-    struct String (*reverse_)(struct String* this);
+    void (*reverse_)(struct String* this);
 };
 
 
@@ -175,10 +70,11 @@ extern const struct StringMethods _CBL_STRING_METHODS;
 
 // struct String String_set(const char* str);
 void String_free_(struct String* this);
-struct String String_set_(struct String* this, const char* str);
+void String_copy_(struct String* this, struct String other);
+void String_set_(struct String* this, const char* str);
 Bool          String_isequal(const struct String* this, struct String another);
-struct String String_append_(struct String* this, struct String another);
-struct String String_join_(struct String*       this,
+void String_append_(struct String* this, struct String another);
+void String_join_(struct String*       this,
                            const struct String* list,
                            Int                  n,
                            struct String        delimiter);
@@ -188,19 +84,19 @@ Int String_nextmatch(const struct String* this,
 Bool String_startswith(const struct String* this, struct String pattern);
 Bool String_endswith(const struct String* this, struct String pattern);
 Bool String_contains(const struct String* this, struct String pattern);
-struct String String_substring_(struct String* this, Int start, Int stop);
+void String_substring_(struct String* this, Int start, Int stop);
 void String_split(const struct String* this,
                   struct String        delimiter,
                   struct String**      list,
                   Int*                 n);
-struct String String_strip_(struct String* this);
-struct String String_replace_(struct String* this,
+void String_strip_(struct String* this);
+void String_replace_(struct String* this,
                               struct String  pattern,
                               struct String  replacement);
-struct String String_replaceall_(struct String* this,
+void String_replaceall_(struct String* this,
                                   struct String  pattern,
                                   struct String  replacement);
-struct String String_reverse_(struct String* this);
+void String_reverse_(struct String* this);
 
 static inline void String_new_(struct String* this) {
     this->len = 0;

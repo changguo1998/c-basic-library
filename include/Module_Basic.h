@@ -67,74 +67,24 @@
 // # Type define
 
 // Bool
-/**
- * @brief true/false
- */
 typedef bool Bool;
 
 // Char
-/**
- * @brief signed char
- */
 typedef char Char;
 
 // Integer
-
-/**
- * @brief unsigned 8-bit integer
- */
-typedef unsigned char UInt8;
-
-/**
- * @brief signed 8-bit integer
- */
-typedef signed char Int8;
-
-/**
- * @brief unsigned 32-bit integer
- */
-typedef unsigned int UInt32;
-
-/**
- * @brief signed 32-bit integer
- */
-typedef int Int32;
-
-/**
- * @brief unsigned 64-bit integer
- */
-typedef unsigned long int UInt64;
-
-/**
- * @brief signed 64-bit integer
- */
-typedef signed long int Int64;
-
-/**
- * @brief unsigned 128-bit integer
- */
+typedef unsigned char          UInt8;
+typedef signed char            Int8;
+typedef unsigned int           UInt32;
+typedef int                    Int32;
+typedef unsigned long int      UInt64;
+typedef signed long int        Int64;
 typedef unsigned long long int UInt128;
-
-/**
- * @brief signed 128-bit integer
- */
-typedef signed long long int Int128;
+typedef signed long long int   Int128;
 
 // Float
-
-/**
- * @brief 32-bit float
- */
-typedef float Float32;
-
-/**
- * @brief 64-bit float
- */
-typedef double Float64;
-
-/**
- * @brief 128-bit float
- */
+typedef float       Float32;
+typedef double      Float64;
 typedef long double Float128;
 
 // Complex
@@ -143,17 +93,6 @@ typedef long double Float128;
 
 // Pointer
 typedef void* Address;
-
-// type code
-// 7 single 0 / array 1
-// 6 \.
-// 5  \.
-// 4   \.
-// 3    - bit type
-// 2   /
-// 1  /
-// 0 /
-
 
 #define TYPECODE_UNKNOWN    0
 #define TYPECODE_INT8       1
@@ -179,19 +118,8 @@ typedef void* Address;
 
 #if USE_64_BIT == 1
 
-/**
- * @brief 64-bit integer
- */
-typedef Int64 Int;
-
-/**
- * @brief 64-bit unsigned integer
- */
-typedef UInt64 UInt;
-
-/**
- * @brief 64-bit float
- */
+typedef Int64   Int;
+typedef UInt64  UInt;
 typedef Float64 Float;
 
 #define TYPECODE_INT     TYPECODE_INT64
@@ -204,26 +132,17 @@ typedef Float64 Float;
 #define CBL_INT_MAX LONG_MAX
 #define CBL_FLOAT_MIN DBL_MIN
 #define CBL_FLOAT_MAX DBL_MAX
-
 #define _VECTOR_N_VA_ARG_TYPE_Int long
 #define _VECTOR_N_VA_ARG_MIN_Int LONG_MIN
 #define _VECTOR_N_VA_ARG_MAX_Int LONG_MAX
 #define _VECTOR_N_VA_ARG_TYPE_Float double
 #define _VECTOR_N_VA_ARG_MIN_Float DBL_MIN
 #define _VECTOR_N_VA_ARG_MAX_Float DBL_MAX
-#else
-/**
- * @brief 32-bit integer
- */
-typedef Int32     Int;
 
-/**
- * @brief 32-bit unsigned integer
- */
+#else
+
+typedef Int32     Int;
 typedef UInt32    UInt;
-/**
- * @brief 32-bit float
- */
 typedef Float32   Float;
 
 #define TYPECODE_INT     TYPECODE_INT32
@@ -236,7 +155,6 @@ typedef Float32   Float;
 #define CBL_INT_MAX INT_MAX
 #define CBL_FLOAT_MIN FLT_MIN
 #define CBL_FLOAT_MAX FLT_MAX
-
 #define _VECTOR_N_VA_ARG_TYPE_Int int
 #define _VECTOR_N_VA_ARG_MIN_Int INT_MIN
 #define _VECTOR_N_VA_ARG_MAX_Int INT_MAX
@@ -278,9 +196,6 @@ void error_failed_open_file(const char* msg);
 
 // newly defined types
 
-/**
- * @brief Date: year; month; day;
- */
 struct Date {
     Int year, month, day;
 
@@ -318,14 +233,6 @@ struct String {
     const struct StringMethods* methods;
 };
 
-/**
- * @brief struct StaticDict
- * @param key String[]
- * @param flag Bool[]
- * @param typecode Int[]
- * @param address Address[]
- * @param methods
- */
 struct StaticDict {
     struct String key[STATIC_DICT_SIZE];
 
@@ -379,6 +286,13 @@ struct ComplexVector {
 
 // Matrixs
 
+struct IntMatrix {
+    Int  nrow, ncol;
+    Int* data;
+
+    struct IntMatrixMethods* methods;
+};
+
 struct FloatMatrix {
     Int    nrow, ncol;
     Float* data;
@@ -391,6 +305,52 @@ struct ComplexMatrix {
     Complex* data;
 
     struct ComplexMatrixMethods* methods;
+};
+
+// Tensor
+
+struct IntTensor {
+    Int  nrow, ncol, npage;
+    Int* data;
+
+    struct IntTensorMethods* methods;
+};
+
+struct FloatTensor {
+    Int    nrow, ncol, npage;
+    Float* data;
+
+    struct FloatTensorMethods* methods;
+};
+
+struct ComplexTensor {
+    Int      nrow, ncol, npage;
+    Complex* data;
+
+    struct ComplexTensorMethods* methods;
+};
+
+// Array
+
+struct IntArray {
+    Int* data;
+
+    struct IntVector        size;
+    struct IntArrayMethods* methods;
+};
+
+struct FloatArray {
+    Float* data;
+
+    struct IntVector        size;
+    struct IntArrayMethods* methods;
+};
+
+struct ComplexArray {
+    Complex* data;
+
+    struct IntVector        size;
+    struct IntArrayMethods* methods;
 };
 
 // general function types

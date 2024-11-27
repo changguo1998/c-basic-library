@@ -49,7 +49,7 @@ int main() {
     printf("[test_DateTime.c] Modified Julian date: %d\n", CBL_CALL(d, julian));
     mjd = CBL_CALL(d, julian);
     CBL_CALL(d, set_julian_, mjd);
-    msg = CBL_CALL(d, string);
+    CBL_CALL(d, string, &msg);
     printf("[test_DateTime.c] Modified Julian to Date: %s\n\n", msg.str);
     // d.year = 1858;
     // d.month = 11;
@@ -64,47 +64,47 @@ int main() {
     printf("[test_DateTime.c] date isless: %s\n", CBL_CALL(dt.date, lessthan, d) ? "True" : "False");
     printf("[test_DateTime.c] date diff: %d\n\n", CBL_CALL(d, diff, dt.date));
 
-    msg = CBL_CALL(dt, string);
+    CBL_CALL(dt, string, &msg);
     printf("[test_DateTime.c] current time: %s\n", msg.str);
     printf("[test_DateTime.c] modified julian date: %f\n", CBL_CALL(dt, julian));
     jd = CBL_CALL(dt, julian);
     printf("[test_DateTime.c] julian date: %f\n", jd);
     CBL_CALL(dt, set_julian_, jd);
-    msg = CBL_CALL(dt, string);
+    CBL_CALL(dt, string, &msg);
     printf("[test_DateTime.c] back to date: %s\n", msg.str);
 
     t = dt.time;
-    msg = CBL_CALL(t, string);
+    CBL_CALL(t, string, &msg);
     printf("[test_DateTime.c] time: %s\n", msg.str);
     CBL_CALL(t, add_second_, 300);
-    msg = CBL_CALL(t, string);
+    CBL_CALL(t, string, &msg);
     printf("[test_DateTime.c] time+300s: %s\n", msg.str);
     CBL_CALL(dt, add_second_, 300);
-    msg = CBL_CALL(dt, string);
+    CBL_CALL(dt, string, &msg);
     printf("[test_DateTime.c] current time: %s\n\n", msg.str);
 
     printf("[test_DateTime.c] test regularize\n");
     CBL_CALL(d, set_, 3, 2024L, 10L, -5L);
-    msg = CBL_CALL(d, string);
+    CBL_CALL(d, string, &msg);
     printf("[test_DateTime.c] before regularize: %s\n", msg.str);
     CBL_CALL(d, regularize_);
-    msg = CBL_CALL(d, string);
+    CBL_CALL(d, string, &msg);
     printf("[test_DateTime.c] after regularize: %s\n", msg.str);
 
     CBL_CALL(t, set_, 1, 1L);
     CBL_CALL(t, add_, -1);
     t.hour = -2;
-    msg = CBL_CALL(t, string);
+    CBL_CALL(t, string, &msg);
     printf("[test_DateTime.c] before regularize: %s\n", msg.str);
     CBL_CALL(t, regularize_);
-    msg = CBL_CALL(t, string);
+    CBL_CALL(t, string, &msg);
     printf("[test_DateTime.c] after regularize: %s\n", msg.str);
 
     CBL_CALL(dt, set_, 6, 2024l, 10l, -5l, 1l, -15l, -5l);
-    msg = CBL_CALL(dt, string);
+    CBL_CALL(dt, string, &msg);
     printf("[test_DateTime.c] before regularize: %s\n", msg.str);
     CBL_CALL(dt, regularize_);
-    msg = CBL_CALL(dt, string);
+    CBL_CALL(dt, string, &msg);
     printf("[test_DateTime.c] after regularize: %s\n", msg.str);
     return 0;
 }

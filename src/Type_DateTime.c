@@ -237,13 +237,11 @@ struct Date Date_regularize_(struct Date* this) {
     return *this;
 }
 
-struct String Date_string(const struct Date* this) {
-    struct String buffer;
-    String_new_(&buffer);
-    sprintf(buffer.str, "%04d-%02d-%02d",
-        this->year, this->month, this->day);
-    buffer.len = (Int)strlen(buffer.str);
-    return buffer;
+void Date_string(const struct Date* this, struct String* str) {
+    Char buffer[11] = {'\0'};
+    String_free_(str);
+    sprintf(buffer, "%04d-%02d-%02d", this->year, this->month, this->day);
+    CBL_CALL(*str, set_, buffer);
 }
 
 // # ========================================================================
@@ -355,11 +353,13 @@ struct Time Time_regularize_(struct Time* this) {
     return *this;
 }
 
-struct String Time_string(const struct Time* this) {
-    struct String buffer;
-    Int           h, m, s, ms, us, ns;
-    Char          sign = ' ';
-    String_new_(&buffer);
+void Time_string(const struct Time* this, struct String* str) {
+    Char buffer[20] = {'\0'};
+    Int  h, m, s, ms, us, ns;
+    Char sign = ' ';
+
+    String_free_(str);
+
     h = _bm_abs_int(this->hour);
     if(this->hour < 0) sign = '-';
     m = _bm_abs_int(this->minute);
@@ -382,16 +382,15 @@ struct String Time_string(const struct Time* this) {
 
 
 #if TIME_PRECISION == 0
-    sprintf(buffer.str, "%c%02d:%02d:%02d", sign, h, m, s);
+    sprintf(buffer, "%c%02d:%02d:%02d", sign, h, m, s);
 #elif TIME_PRECISION == 3
-    sprintf(buffer.str, "%c%02d:%02d:%02d.%03d", sign, h, m, s, ms);
+    sprintf(buffer, "%c%02d:%02d:%02d.%03d", sign, h, m, s, ms);
 #elif TIME_PRECISION == 6
-    sprintf(buffer.str, "%c%02d:%02d:%02d.%03d%03d", sign, h, m, s, ms, us);
+    sprintf(buffer, "%c%02d:%02d:%02d.%03d%03d", sign, h, m, s, ms, us);
 #elif TIME_PRECISION == 9
-    sprintf(buffer.str, "%c%02d:%02d:%02d.%03d%03d%03d", sign, h, m, s, ms, us, ns);
+    sprintf(buffer, "%c%02d:%02d:%02d.%03d%03d%03d", sign, h, m, s, ms, us, ns);
 #endif
-    buffer.len = (Int)strlen(buffer.str);
-    return buffer;
+    CBL_CALL(*str, set_, buffer);
 }
 
 Int Time_diff(const struct Time* this, struct Time time) {
@@ -598,14 +597,15 @@ Float DateTime_julian(const struct DateTime* this) {
     return (Float)Date_julian(&(this->date)) - 0.5 + second_residual;
 }
 
-struct String DateTime_string(const struct DateTime* this) {
-    struct String date_str, time_str, buffer_str;
-    String_new_(&date_str);
-    String_new_(&time_str);
-    String_new_(&buffer_str);
-    date_str = Date_string(&(this->date));
-    time_str = Time_string(&(this->time));
-    sprintf(buffer_str.str, "%s %s", date_str.str, time_str.str);
-    buffer_str.len = (Int)strlen(buffer_str.str);
-    return buffer_str;
+void DateTime_string(const struct DateTime* this, struct String* str) {
+    CBL_DECLARE_VARS(String, 1, tmp);
+    String_free_(str);
+    CBL_CALL(this->date, string, str);
+
+    CBL_CALL(tmp, set_, " ");
+    CBL_CALL(*str, append_, tmp);
+
+    CBL_CALL(this->time, string, &tmp);
+    CBL_CALL(*str, append_, tmp);
+    CBL_FREE_VARS(String, 1, tmp);
 }

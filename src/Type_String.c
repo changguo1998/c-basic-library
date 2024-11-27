@@ -91,10 +91,12 @@ void _get_string(const struct String* this, Int* n, Char* s) {
 Char* _cache_string(const struct String* this) {
     Char* buf = NULL;
     Int   i;
-    if(this->len <= STRING_FIXED_BUFFER_LENGTH) return this->str;
-    buf = (Char*)calloc(this->len + 1, sizeof(Char));
-    i = 0;
-    _get_string(this, &i, buf);
+    if(this->len <= STRING_FIXED_BUFFER_LENGTH) { buf = (Char*)this->str; }
+    else {
+        buf = (Char*)calloc(this->len + 1, sizeof(Char));
+        i = 0;
+        _get_string(this, &i, buf);
+    }
     return buf;
 }
 
@@ -281,7 +283,7 @@ Bool String_startswith(const struct String* this, struct String pattern) {
 }
 
 Bool String_endswith(const struct String* this, struct String pattern) {
-    Int i;
+    Int   i;
     Char *s = NULL, *t = NULL;
     if(this->len < pattern.len) return false;
     s = _cache_string(this);
@@ -302,8 +304,8 @@ Bool String_contains(const struct String* this, struct String pattern) {
 }
 
 void String_substring_(struct String* this, Int start, Int stop) {
-    Int i, n_sub, start0, stop0;
-    Char *buf = NULL;
+    Int   i, n_sub, start0, stop0;
+    Char* buf = NULL;
     if((start < 0 && stop < 0) || (start >= this->len && stop >= this->len))
         error_index_out_of_bounds("(String_substring_) index out of bounds\n");
     start0 = start < stop ? start : stop;
@@ -327,8 +329,8 @@ void String_split(const struct String* this,
                   struct String        delimiter,
                   struct String**      list,
                   Int*                 n) {
-    Int *slice_start = NULL, *slice_stop = NULL, next_slice, i_slice, i, j;
-    Char *buf = NULL;
+    Int * slice_start = NULL, *slice_stop = NULL, next_slice, i_slice, i, j;
+    Char* buf = NULL;
 
     if(*list != NULL)
         error_unexpected_allocated_memory(
@@ -345,12 +347,12 @@ void String_split(const struct String* this,
     slice_start = (Int*)malloc(sizeof(Int) * (*n));
     slice_stop = (Int*)malloc(sizeof(Int) * (*n));
     slice_start[0] = 0;
-    slice_stop[(*n)-1] = this->len-1;
+    slice_stop[(*n) - 1] = this->len - 1;
     next_slice = 0;
     for(i = 1; i < *n; i++) {
         j = String_nextmatch(this, delimiter, next_slice);
         slice_start[i] = j + delimiter.len;
-        slice_stop[i-1] = j - 1;
+        slice_stop[i - 1] = j - 1;
         next_slice = slice_start[i];
     }
     // printf("(String_split) slice_index: ");
@@ -369,7 +371,7 @@ void String_split(const struct String* this,
         // printf("(String_split) i: %d, j: %d\n ", i, j);
         (*list)[i_slice].len = 0;
         String_alloc_(&((*list)[i_slice]), j - i + 1);
-        _append_string(&((*list)[i_slice].len), (*list)[i_slice].str, (*list)[i_slice].more, j-i+1, &(buf[i]));
+        _append_string(&((*list)[i_slice].len), (*list)[i_slice].str, (*list)[i_slice].more, j - i + 1, &(buf[i]));
     }
     _free_cached_string(this, &buf);
     free(slice_start);
@@ -377,8 +379,8 @@ void String_split(const struct String* this,
 }
 
 void String_strip_(struct String* this) {
-    Int i, j;
-    Char *buf = NULL;
+    Int   i, j;
+    Char* buf = NULL;
     buf = _cache_string(this);
     for(i = 0; i < this->len; i++) if(buf[i] != ' ') break;
     for(j = this->len - 1; j >= 0; j--) if(buf[j] != ' ') break;
@@ -388,24 +390,24 @@ void String_strip_(struct String* this) {
 }
 
 void String_replace_(struct String* this,
-                              struct String  pattern,
-                              struct String  replacement) {
-    Int           p;
+                     struct String  pattern,
+                     struct String  replacement) {
+    Int p;
     CBL_DECLARE_VARS(String, 2, del, pos);
 
     p = String_nextmatch(this, pattern, 0);
     if(p < 0) return;
     String_copy_(&pos, *this);
     String_substring_(&pos, p + pattern.len, this->len - 1);
-    String_substring_(this, 0, p-1);
+    String_substring_(this, 0, p - 1);
     String_append_(this, replacement);
     String_append_(this, pos);
     CBL_FREE_VARS(String, 2, del, pos);
 }
 
 void String_replaceall_(struct String* this,
-                                 struct String  pattern,
-                                 struct String  replacement) {
+                        struct String  pattern,
+                        struct String  replacement) {
     struct String* buffer = NULL;
     Int            n_slice, i;
 
@@ -447,8 +449,8 @@ void String_replaceall_(struct String* this,
 }
 
 void String_reverse_(struct String* this) {
-    Int  i, h;
-    Char c, *buf=NULL;
+    Int  i,  h;
+    Char c, *buf = NULL;
     buf = _cache_string(this);
     h = this->len / 2;
     for(i = 0; i < h; i++) {
@@ -456,9 +458,7 @@ void String_reverse_(struct String* this) {
         buf[i] = buf[this->len - 1 - i];
         buf[this->len - 1 - i] = c;
     }
-    if(this->len > STRING_FIXED_BUFFER_LENGTH) {
-        String_set_(this, buf);
-    }
+    if(this->len > STRING_FIXED_BUFFER_LENGTH) { String_set_(this, buf); }
     _free_cached_string(this, &buf);
 }
 

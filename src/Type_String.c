@@ -30,6 +30,7 @@
 const struct StringMethods _CBL_STRING_METHODS = {
     &String_free_,
     &String_copy_,
+    &String_cstr_,
     &String_set_,
     &String_isequal,
     &String_append_,
@@ -132,6 +133,18 @@ void String_copy_(struct String* this, struct String other) {
     memcpy(this->str, other.str, STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
     if(other.more) memcpy(this->more, other.more, (other.len - STRING_FIXED_BUFFER_LENGTH) * sizeof(Char));
     this->len = other.len;
+}
+
+void String_cstr_(const struct String* this, Char** cstr) {
+    Int i;
+    if(*cstr) free(*cstr);
+    if(this->len <= 0) {
+        *cstr = (Char*)calloc(1, sizeof(Char));
+        return;
+    }
+    *cstr = (Char*)calloc(this->len + 1, sizeof(Char));
+    i = 0;
+    _get_string(this, &i, *cstr);
 }
 
 void String_set_(struct String* this, const char* str) {

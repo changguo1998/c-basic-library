@@ -54,7 +54,7 @@ void printstring(const char* vname, struct String s) {
 
 int main() {
     Int  nslice, i;
-    char c,      buffer[100] = {'\0'};
+    char c,      buffer[10000] = {'\0'}, *vbuf = NULL;
 
     CBL_DECLARE_VARS(String, 3, s, t, u);
     struct String v[3], *strslices = NULL;
@@ -74,6 +74,12 @@ int main() {
     printstring("s", s);
     strncpy(buffer, s.str, STRING_FIXED_BUFFER_LENGTH);
     printf("s: {len: %d, str: \"%s\", more: \"%s\"}\n", s.len, buffer, s.more);
+
+    // ! -----------------------------------------------------------------------
+    printsection("cstr");
+    CBL_CALL(s, set_, "test1234"); printstring("s", s);
+    CBL_CALL(s, cstr_, &vbuf); printf("vbuf: \"%s\"\n", vbuf);
+    free(vbuf); vbuf = NULL;
 
     // ! -----------------------------------------------------------------------
     printsection("isequal");

@@ -36,6 +36,8 @@ struct FloatMatrixMethods {
     Float (*get)(const struct FloatMatrix* this, Int irow, Int icol);
     void (* set_)(struct FloatMatrix* this, Int irow, Int icol, Float value);
     void (* set_vector_)(struct FloatMatrix* this, struct FloatVector fv);
+    void (* setas_rowfirst_)(struct FloatMatrix* this, Int nrow, Int ncol, ...);
+    void (* setas_colfirst_)(struct FloatMatrix* this, Int nrow, Int ncol, ...);
     void (* hcatv_)(struct FloatMatrix* this, Int n, ...);
     void (* hcat_)(struct FloatMatrix* this, Int nmat, ...);
     void (* vcat_)(struct FloatMatrix* this, Int nmat, ...);
@@ -63,6 +65,8 @@ void  FloatMatrix_alloc_(struct FloatMatrix* this, Int nrow, Int ncol);
 Float FloatMatrix_get(const struct FloatMatrix* this, Int irow, Int icol);
 void  FloatMatrix_set_(struct FloatMatrix* this, Int irow, Int icol, Float value);
 void  FloatMatrix_set_vector_(struct FloatMatrix* this, struct FloatVector fv);
+void  FloatMatrix_setas_rowfirst_(struct FloatMatrix* this, Int nrow, Int ncol, ...);
+void  FloatMatrix_setas_colfirst_(struct FloatMatrix* this, Int nrow, Int ncol, ...);
 void  FloatMatrix_hcatv_(struct FloatMatrix* this, Int n, ...);
 void  FloatMatrix_hcat_(struct FloatMatrix* this, Int nmat, ...);
 void  FloatMatrix_vcat_(struct FloatMatrix* this, Int nmat, ...);

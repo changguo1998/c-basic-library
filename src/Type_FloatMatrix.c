@@ -39,6 +39,8 @@ struct FloatMatrixMethods _CBL_FLOAT_MATRIX_METHODS = {
     &FloatMatrix_get,
     &FloatMatrix_set_,
     &FloatMatrix_set_vector_,
+    &FloatMatrix_setas_rowfirst_,
+    &FloatMatrix_setas_colfirst_,
     &FloatMatrix_hcatv_,
     &FloatMatrix_hcat_,
     &FloatMatrix_vcat_,
@@ -51,7 +53,12 @@ struct FloatMatrixMethods _CBL_FLOAT_MATRIX_METHODS = {
     &FloatMatrix_product_
 };
 
-static inline Int _idx(Int r, Int c, Int m, Int n) { return r + m * c; }
+// internal functions
+static inline Int _linindex_row_first(Int r, Int c, Int ncol) { return c + r * ncol; }
+static inline Int _linindex_col_first(Int r, Int c, Int nrow) { return r + c * nrow; }
+static inline Int _linindex(Int irow, Int icol, Int nrow, Int ncol) { return _linindex_col_first(irow, icol, nrow); }
+
+// external methods
 
 void FloatMatrix_free_(struct FloatMatrix* this) {
     if(this->data != NULL) {
@@ -76,13 +83,13 @@ void FloatMatrix_alloc_(struct FloatMatrix* this, Int nrow, Int ncol) {
 Float FloatMatrix_get(const struct FloatMatrix* this, Int irow, Int icol) {
     if(irow < 0 || irow >= this->nrow) error_index_out_of_bounds("(FloatMatrix_get) irow");
     if(icol < 0 || icol >= this->ncol) error_index_out_of_bounds("(FloatMatrix_get) icol");
-    return this->data[_idx(irow, icol, this->nrow, this->ncol)];
+    return this->data[_linindex(irow, icol, this->nrow, this->ncol)];
 }
 
 void FloatMatrix_set_(struct FloatMatrix* this, Int irow, Int icol, Float value) {
     if(irow < 0 || irow >= this->nrow) error_index_out_of_bounds("(FloatMatrix_get) irow");
     if(icol < 0 || icol >= this->ncol) error_index_out_of_bounds("(FloatMatrix_get) icol");
-    this->data[_idx(irow, icol, this->nrow, this->ncol)] = value;
+    this->data[_linindex(irow, icol, this->nrow, this->ncol)] = value;
 }
 
 void FloatMatrix_set_vector_(struct FloatMatrix* this, struct FloatVector fv) {
@@ -92,6 +99,42 @@ void FloatMatrix_set_vector_(struct FloatMatrix* this, struct FloatVector fv) {
     }
     FloatMatrix_alloc_(this, fv.len, 1);
     memcpy(this->data, fv.data, fv.len * sizeof(Float));
+}
+
+void FloatMatrix_setas_rowfirst_(struct FloatMatrix* this, Int nrow, Int ncol, ...) {
+    Int     ir, ic, il;
+    va_list ap;
+
+    if(nrow <= 0 || ncol <= 0) {
+        FloatMatrix_free_(this);
+        return;
+    }
+    FloatMatrix_alloc_(this, nrow, ncol);
+    va_start(ap, ncol);
+    for(ic = 0; ic < ncol; ic++)
+        for(ir = 0; ir < nrow; ir++) {
+            il = _linindex_col_first(ir, ic, nrow);
+            this->data[il] = va_arg(ap, _VECTOR_N_VA_ARG_TYPE_Float);
+        }
+    va_end(ap);
+}
+
+void FloatMatrix_setas_colfirst_(struct FloatMatrix* this, Int nrow, Int ncol, ...) {
+    Int     ir, ic, il;
+    va_list ap;
+
+    if(nrow <= 0 || ncol <= 0) {
+        FloatMatrix_free_(this);
+        return;
+    }
+    FloatMatrix_alloc_(this, nrow, ncol);
+    va_start(ap, ncol);
+    for(ir = 0; ir < nrow; ir++)
+        for(ic = 0; ic < ncol; ic++) {
+            il = _linindex_col_first(ir, ic, nrow);
+            this->data[il] = va_arg(ap, _VECTOR_N_VA_ARG_TYPE_Float);
+        }
+    va_end(ap);
 }
 
 void FloatMatrix_hcatv_(struct FloatMatrix* this, Int n, ...) {
@@ -111,7 +154,7 @@ void FloatMatrix_hcatv_(struct FloatMatrix* this, Int n, ...) {
             error_invalid_argument("(FloatMatrix_hcatv) vector length not equal");
     FloatMatrix_alloc_(this, m, n);
     for(ic = 0; ic < n; ic++)
-        for(ir = 0; ir < m; ir++) this->data[_idx(ir, ic, m, n)] = pvec[ic].data[ir];
+        for(ir = 0; ir < m; ir++) this->data[_linindex(ir, ic, m, n)] = pvec[ic].data[ir];
     free(pvec);
 }
 
@@ -139,8 +182,8 @@ void FloatMatrix_hcat_(struct FloatMatrix* this, Int nmat, ...) {
     for(imat = 0; imat < nmat; imat++) {
         for(jc = 0; jc < pmat[imat].ncol; jc++) {
             for(ir = 0; ir < nrow; ir++) {
-                buf[_idx(ir, ic, nrow, ncol)] =
-                    pmat[imat].data[_idx(ir, jc, pmat[imat].nrow, pmat[imat].ncol)];
+                buf[_linindex(ir, ic, nrow, ncol)] =
+                    pmat[imat].data[_linindex(ir, jc, pmat[imat].nrow, pmat[imat].ncol)];
             } // ir
             ic += 1;
         } // jc
@@ -175,8 +218,8 @@ void FloatMatrix_vcat_(struct FloatMatrix* this, Int nmat, ...) {
     for(imat = 0; imat < nmat; imat++) {
         for(jr = 0; jr < pmat[imat].nrow; jr++) {
             for(ic = 0; ic < ncol; ic++) {
-                buf[_idx(ir, ic, nrow, ncol)] =
-                    pmat[imat].data[_idx(jr, ic, pmat[imat].nrow, pmat[imat].ncol)];
+                buf[_linindex(ir, ic, nrow, ncol)] =
+                    pmat[imat].data[_linindex(jr, ic, pmat[imat].nrow, pmat[imat].ncol)];
             } // ic
             ir += 1;
         } // jr
@@ -239,7 +282,7 @@ void FloatMatrix_diag_(struct FloatMatrix* this, struct FloatVector dv) {
         return;
     }
     FloatMatrix_alloc_(this, dv.len, dv.len);
-    for(i = 0; i < dv.len; i++) this->data[_idx(i, i, dv.len, dv.len)] = dv.data[i];
+    for(i = 0; i < dv.len; i++) this->data[_linindex(i, i, dv.len, dv.len)] = dv.data[i];
 }
 
 void FloatMatrix_add_(struct FloatMatrix* this, struct FloatMatrix X) {
@@ -261,12 +304,12 @@ void FloatMatrix_product_(struct FloatMatrix* this, struct FloatMatrix X, struct
     buf = (Float*)calloc(X.nrow * Y.ncol, sizeof(Float));
     for(i = 0; i < X.nrow; i++)
         for(j = 0; j < Y.ncol; j++) {
-            li = _idx(i, j, X.nrow, Y.ncol);
+            li = _linindex(i, j, X.nrow, Y.ncol);
             buf[li] = 0.0;
             for(k = 0; k < X.ncol; k++)
                 buf[li] +=
-                    X.data[_idx(i, k, X.nrow, X.ncol)] *
-                    Y.data[_idx(k, j, Y.nrow, Y.ncol)];
+                    X.data[_linindex(i, k, X.nrow, X.ncol)] *
+                    Y.data[_linindex(k, j, Y.nrow, Y.ncol)];
         }
     FloatMatrix_alloc_(this, X.nrow, Y.ncol);
     memcpy(this->data, buf, X.nrow * Y.ncol * sizeof(Float));

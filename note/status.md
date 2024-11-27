@@ -74,6 +74,7 @@
 |------------|:--------:|
 | free       | &#x2713; |
 | copy       | &#x2713; |
+| cstr       | &#x2713; |
 | set        | &#x2713; |
 | isequal    | &#x2713; |
 | append     | &#x2713; |
@@ -188,5 +189,25 @@
 ### IntMatrix methods
 
 ### FloatMatrix methods
+
+| Function        | Status |
+|-----------------|:------:|
+| free_           |        |
+| alloc_          |        |
+| get             |        |
+| set_            |        |
+| set_vector_     |        |
+| setas_rowfirst_ |        |
+| setas_colfirst_ |        |
+| hcatv_          |        |
+| hcat_           |        |
+| vcat_           |        |
+| rand_           |        |
+| rand_from_      |        |
+| fill_           |        |
+| copy_           |        |
+| diag_           |        |
+| add_            |        |
+| product_        |        |
 
 ### ComplexMatrix methods

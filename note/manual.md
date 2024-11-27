@@ -34,6 +34,11 @@ Methods for arrays such as FloatVector which also follows old->new data flow
 
 Though the arrays are modified inplace, the methods should keep data-safty and thread-safty.
 
+## Array element arrange
+
+For high dimension arrays like matrix or tensor, the internal data is supposed to be
+**column first**.
+
 ## Q&A
 
 ###### FFTW3 not working

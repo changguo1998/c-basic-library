@@ -287,15 +287,6 @@ struct Date {
     struct DateMethods* methods;
 };
 
-/**
- * @brief Time struct
- * @param hour Hour
- * @param minute Minute
- * @param second Second
- * @param millisecond Millisecond (possible not exit depending on time precision)
- * @param macrosecond Macrosecond (possible not exit depending on time precision)
- * @param Nanosecond Nanosecond (possible not exit depending on time precision)
- */
 struct Time {
     Int hour;
     Int minute;
@@ -345,26 +336,11 @@ struct StaticDict {
     struct StaticDictMethods* methods;
 };
 
-/**
- * @brief struct Dict\n
- * Address get(Dict* this, String key, Int* typecode);
- */
 struct DynamicDict {
     struct DynamicDictNode*    data;
     struct DynamicDictMethods* methods;
 };
 
-/**
- * @brief Table struct
- * @param nrow Int
- * @param ncol Int
- * @param linear_row Bool
- * @param elsize Int[TABLE_MAX_COLUMNS]
- * @param addr Address[TABLE_MAX_COLUMNS]
- * @param row_name struct String*
- * @param col_name struct String[TABLE_MAX_COLUMNS]
- * @param methods
- */
 struct Table {
     Int  nrow, ncol;
     Bool linear_row;

@@ -27,11 +27,13 @@
 #include <unistd.h>
 #include "Module_Log.h"
 
+void waitamoment() { usleep((useconds_t)(0.5 * 1000 * 1000)); }
+
 int main() {
     LOG_terminal_output = true;
-    LOG_file_output     = true;
+    LOG_file_output = true;
     LOG_init("log.txt");
-    usleep((useconds_t)(0.5 * 1000 * 1000));
+    waitamoment();
     printf("===== Default state ======================\n");
     LOG_print_state();
     LOG_print_debug("debug");
@@ -39,7 +41,7 @@ int main() {
     LOG_print_warning("warning");
     LOG_print_error("error");
 
-    usleep((useconds_t)(0.5 * 1000 * 1000));
+    waitamoment();
     printf("===== set level to 0 ======================\n");
     LOG_output_level = LOG_LEVEL_NONE;
     LOG_print_debug("debug");
@@ -47,7 +49,7 @@ int main() {
     LOG_print_warning("warning");
     LOG_print_error("error");
 
-    usleep((useconds_t)(0.5 * 1000 * 1000));
+    waitamoment();
     printf("===== set level to debug level ======================\n");
     LOG_output_level = LOG_LEVEL_DEBUG;
     LOG_print_debug("debug");
@@ -55,7 +57,7 @@ int main() {
     LOG_print_warning("warning");
     LOG_print_error("error");
 
-    usleep((useconds_t)(0.5 * 1000 * 1000));
+    waitamoment();
     printf("===== turn on all output format ======================\n");
     LOG_prefix_format |= LOG_PREFIX_ALL;
     LOG_print_debug("debug");
@@ -64,7 +66,7 @@ int main() {
     LOG_print_error("error");
     LOG_print_message("level debug + 10", LOG_LEVEL_DEBUG + 10);
 
-    usleep((useconds_t)(0.5 * 1000 * 1000));
+    waitamoment();
     printf("===== set level to all ======================\n");
     LOG_prefix_format |= LOG_PREFIX_DATE | LOG_PREFIX_CLOCK_HMS;
     LOG_prefix_format &= ~LOG_PREFIX_CLOCK_SEC;
@@ -74,7 +76,10 @@ int main() {
     LOG_print_warning("warning");
     LOG_print_error("error");
     LOG_print_message("level trace + 10", LOG_LEVEL_TRACE + 10);
-    sleep(1);
+    waitamoment();
+    printf("===== multi-lines ======================\n");
+    LOG_print_info("info line 1\ninfo line 2\ninfo line 3");
+    waitamoment();
     LOG_final();
     printf("end =======================\n");
     return 0;

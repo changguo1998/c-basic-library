@@ -67,98 +67,124 @@ void LOG_close_log_file() {
     printf("\n\nLog file '%s' closed\n\n", LOG_file_name);
 }
 
-struct String LOG_prefix(Int level) {
-    struct String   info_vector[LOG_PREFIX_PART], prefix, delimiter;
-    struct DateTime dt;
+void LOG_prefix(Int level, struct String* prefix) {
+    clock_t current_clock;
+    Int     i;
+    Float   rc;
+    Char    buf1[64];
 
-    clock_t     current_clock;
-    struct Time t;
-    Int         i;
-    Float       rc;
-
+    struct String info_vector[LOG_PREFIX_PART];
     for(i = 0; i < LOG_PREFIX_PART; i++) String_new_(&info_vector[i]);
-    String_new_(&prefix);
-    String_new_(&delimiter);
-    DateTime_new_(&dt);
-    Time_new_(&t);
-
-    for(i = 0; i < LOG_PREFIX_PART; i++) String_new_(&info_vector[i]);
+    CBL_DECLARE_VARS(String, 1, delimiter);
+    CBL_DECLARE_VARS(Time, 1, t);
+    CBL_DECLARE_VARS(DateTime, 1, dt);
 
     if((LOG_prefix_format & LOG_PREFIX_BRACKET) > 0) {
-        info_vector[0].methods->set_(&info_vector[0], "[");
-        info_vector[0].methods->set_(&info_vector[5], "]");
+        CBL_CALL(info_vector[0], set_, "[");
+        CBL_CALL(info_vector[5], set_, "]");
     }
     if((LOG_prefix_format & LOG_PREFIX_LEVEL_TAG) > 0) {
         if(level >= LOG_LEVEL_TRACE)
-            info_vector[1].methods->set_(&info_vector[1], "  TRACE");
+            CBL_CALL(info_vector[1], set_, "  TRACE");
         else if(level >= LOG_LEVEL_DEBUG)
-            info_vector[1].methods->set_(&info_vector[1], "  DEBUG");
+            CBL_CALL(info_vector[1], set_, "  DEBUG");
         else if(level >= LOG_LEVEL_INFO)
-            info_vector[1].methods->set_(&info_vector[1], "   INFO");
+            CBL_CALL(info_vector[1], set_, "   INFO");
         else if(level >= LOG_LEVEL_WARNING)
-            info_vector[1].methods->set_(&info_vector[1], "WARNING");
+            CBL_CALL(info_vector[1], set_, "WARNING");
         else if(level >= LOG_LEVEL_ERROR)
-            info_vector[1].methods->set_(&info_vector[1], "  ERROR");
+            CBL_CALL(info_vector[1], set_, "  ERROR");
     }
-    dt.methods->now_(&dt, 1);
+    CBL_CALL(dt, now_, 1);
     if(LOG_prefix_format & LOG_PREFIX_DATE)
-        info_vector[2] = dt.date.methods->string(&(dt.date));
-
+        CBL_CALL(dt.date, string, &info_vector[2]);
     if(LOG_prefix_format & LOG_PREFIX_TIME)
-        info_vector[3] = dt.time.methods->string(&(dt.time));
+        CBL_CALL(dt.time, string, &info_vector[3]);
 
     if(LOG_prefix_format & (LOG_PREFIX_CLOCK_HMS | LOG_PREFIX_CLOCK_SEC)) {
         current_clock = clock();
-        t.methods->zero_(&t);
+        CBL_CALL(t, zero_);
         rc = (current_clock - LOG_start_clock) / ((Float)CLOCKS_PER_SEC);
         if(LOG_prefix_format & LOG_PREFIX_CLOCK_SEC) {
-            sprintf(info_vector[4].str, "%.3fs", rc);
-            info_vector[4].len = (Int)strlen(info_vector[4].str);
+            sprintf(buf1, "%.3fs", rc);
+            CBL_CALL(info_vector[4], set_, buf1);
         }
         else if(LOG_prefix_format & LOG_PREFIX_CLOCK_HMS) {
-            t.methods->add_second_(&t, rc);
-            info_vector[4] = t.methods->string(&t);
+            CBL_CALL(t, add_second_, rc);
+            CBL_CALL(t, string, &info_vector[4]);
         }
     }
-    prefix.methods->set_(&prefix, "");
-    delimiter.methods->set_(&delimiter, " ");
-    prefix.methods->join_(&prefix, info_vector, 6, delimiter);
-    return prefix;
+    CBL_CALL(*prefix, free_);
+    CBL_CALL(delimiter, set_, " ");
+    CBL_CALL(*prefix, join_, info_vector, 6, delimiter);
+    CBL_FREE_VARS(String, 1, delimiter);
+    for(i = 0; i < LOG_PREFIX_PART; i++) String_free_(&info_vector[i]);
 }
 
 void LOG_print_message(const char* message, Int level) {
-    struct String s_message, *lines = NULL, prefix;
-    Int           n_lines,    i;
-    if(level > LOG_output_level) return;
-    String_new_(&s_message);
-    String_new_(&prefix);
+    struct String* lines = NULL;
+    CBL_DECLARE_VARS(String, 3, s_message, prefix, LF);
+    Int   n_lines,      i;
+    Char *buf1 = NULL, *buf2 = NULL;
 
-    s_message.methods->set_(&s_message, message);
-    prefix = LOG_prefix(level);
-    i = s_message.methods->next_match(&s_message, String_set("\n"), 0);
+    if(level > LOG_output_level) return;
+
+    CBL_CALL(s_message, set_, message);
+    LOG_prefix(level, &prefix);
+    CBL_CALL(LF, set_, "\n");
+    i = CBL_CALL(s_message, nextmatch, LF, 0);
     if(i < 0) {
-        if(LOG_terminal_output) printf("%s %s\n", prefix.str, message);
+        if(buf1) {
+            free(buf1);
+            buf1 = NULL;
+        }
+        CBL_CALL(prefix, cstr_, &buf1);
+        if(LOG_terminal_output) printf("%s %s\n", buf1, message);
 
         if(LOG_file_output) {
             if(LOG_fp == NULL) LOG_open_log_file();
-            fprintf(LOG_fp, "%s %s\n", prefix.str, message);
+            fprintf(LOG_fp, "%s %s\n", buf1, message);
+        }
+        if(buf1) {
+            free(buf1);
+            buf1 = NULL;
         }
         return;
     }
-    s_message.methods->split(&s_message, String_set("\n"), &lines, &n_lines);
+    CBL_CALL(s_message, split, LF, &lines, &n_lines);
     for(i = 0; i < n_lines; i++) {
-        if(LOG_terminal_output) printf("%s %s\n", prefix.str, lines[i].str);
-
+        if(buf1) {
+            free(buf1);
+            buf1 = NULL;
+        }
+        if(buf2) {
+            free(buf2);
+            buf2 = NULL;
+        }
+        CBL_CALL(prefix, cstr_, &buf1);
+        CBL_CALL(lines[i], cstr_, &buf2);
+        if(LOG_terminal_output)printf("%s %s\n", buf1, buf2);
         if(LOG_file_output) {
             if(LOG_fp == NULL) LOG_open_log_file();
-            fprintf(LOG_fp, "%s %s\n", prefix.str, lines[i].str);
+            fprintf(LOG_fp, "%s %s\n", buf1, buf2);
         }
+        CBL_CALL(lines[i], free_);
+    }
+    if(buf1) {
+        free(buf1);
+        buf1 = NULL;
+    }
+    if(buf2) {
+        free(buf2);
+        buf2 = NULL;
     }
     free(lines);
+    CBL_FREE_VARS(String, 3, s_message, prefix, LF);
 }
 
 void LOG_print_state() {
-    struct String prefix;
+    Char* buf = NULL;
+    CBL_DECLARE_VARS(String, 1, prefix);
     printf("Logging state:\n");
     printf("Logging level: %d\n", LOG_output_level);
     printf("Terminal output: %s\n", LOG_terminal_output ? "on" : "off");
@@ -167,6 +193,8 @@ void LOG_print_state() {
         printf("Log file name: %s\n", LOG_file_name);
         printf("Log file is %s\n", LOG_fp ? "open" : "closed");
     }
-    prefix = LOG_prefix(LOG_LEVEL_DEBUG);
-    printf("prefix format: %s\n", prefix.str);
+    LOG_prefix(LOG_LEVEL_DEBUG, &prefix);
+    CBL_CALL(prefix, cstr_, &buf);
+    printf("prefix format: %s\n", buf);
+    free(buf);
 }

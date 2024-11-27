@@ -22,12 +22,12 @@
 |-----------------------------------------|--------------|:--------:|:--------:|:--------:|
 | *non-numerical type*                    |              |          |          |          |
 | [String](#String-methods)               | String       | &#x2713; | &#x2713; | &#x2713; |
-| Date                                    | DateTime     | &#x2713; | &#x2713; |          |
-| Time                                    | DateTime     | &#x2713; | &#x2713; |          |
-| DateTime                                | DateTime     | &#x2713; | &#x2713; |          |
-| StaticDict                              | Dict         | &#x2713; | &#x2713; |          |
-| DynamicDict                             | Dict         | &#x2713; | &#x2713; |          |
-| Sheet                                   | Dict         | &#x2713; | &#x2713; |          |
+| Date                                    | DateTime     |          |          |          |
+| Time                                    | DateTime     |          |          |          |
+| DateTime                                | DateTime     |          |          |          |
+| StaticDict                              | Dict         |          |          |          |
+| DynamicDict                             | Dict         |          |          |          |
+| Sheet                                   | Dict         |          |          |          |
 |                                         |              |          |          |          |
 | *General Array Type*                    |              |          |          |          |
 | Vector                                  | Vector       |          |          |          |
@@ -60,13 +60,11 @@
 
 ### Module
 
-|              | file  |  header  | methods  | test |
-|--------------|:-----:|:--------:|:--------:|:----:|
-| type defines | Basic | &#x2713; | &#x2713; |      |
-| basic error  | Basic | &#x2713; | &#x2713; |      |
-|              |       |          |          |      |
-| *Basic Type* |       |          |          |      |
-| Log          |  Log  | &#x2713; | &#x2713; |      |
+|              | file  |  header  | methods  |   test   |
+|--------------|:-----:|:--------:|:--------:|:--------:|
+| type defines | Basic | &#x2713; | &#x2713; |          |
+| basic error  | Basic | &#x2713; | &#x2713; |          |
+| Log          |  Log  | &#x2713; | &#x2713; | &#x2713; |
 
 ## Progress functions
 

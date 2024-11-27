@@ -51,9 +51,6 @@ extern Bool LOG_terminal_output;
  */
 extern Bool LOG_file_output;
 
-/**
- * @brief LOG_file_name
- */
 extern Char LOG_file_name[LOG_MAX_FILE_NAME_LENGTH];
 
 /**
@@ -94,36 +91,18 @@ LOG_PREFIX_DATE | LOG_PREFIX_TIME | LOG_PREFIX_CLOCK_SEC)
 
 #define LOG_PREFIX_PART 6
 
-/**
- * @brief initialize global variables
- */
 void LOG_init(const char* file_name);
 
-/**
- * @brief flush file buffer of log file if opened
- */
 void LOG_flush();
 
-/**
- * @brief finalize process, including closing log file
- */
 void LOG_final();
 
-/**
- * @brief open log file if it is not opened, file name stored in global variable LOG_file_name
- */
 void LOG_open_log_file();
 
-/**
- * @brief close log file if it is opened
- */
 void LOG_close_log_file();
 
 void LOG_print_message(const char* message, Int level);
 
-/**
- * @brief print current log global variable
- */
 void LOG_print_state();
 
 static void LOG_print_error(const char* message) { LOG_print_message(message, LOG_LEVEL_ERROR); }

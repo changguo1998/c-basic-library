@@ -72,19 +72,19 @@
 
 | Function    |  Status  |
 |-------------|:--------:|
-| read_       |          |
-| write_      |          |
+| read_       | &#x2713; |
+| write_      | &#x2713; |
 | today_      | &#x2713; |
 | set_        | &#x2713; |
-| set_julian_ |          |
-| lessthan    |          |
-| isequal     |          |
-| day_of_year |          |
-| diff        |          |
-| julian      |          |
-| add_        |          |
-| regularize_ |          |
-| string      |          |
+| set_julian_ | &#x2713; |
+| lessthan    | &#x2713; |
+| isequal     | &#x2713; |
+| day_of_year | &#x2713; |
+| diff        | &#x2713; |
+| julian      | &#x2713; |
+| add_        | &#x2713; |
+| regularize_ | &#x2713; |
+| string      | &#x2713; |
 
 ### Time methods
 

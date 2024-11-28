@@ -33,6 +33,8 @@
 
 
 struct DateMethods _CBL_DATE_METHODS = {
+    &Date_read_,
+    &Date_write_,
     &Date_today_,
     &Date_set_,
     &Date_set_julian_,
@@ -47,6 +49,8 @@ struct DateMethods _CBL_DATE_METHODS = {
 };
 
 struct TimeMethods _CBL_TIME_METHODS = {
+    &Time_read_,
+    &Time_write_,
     &Time_now_,
     &Time_set_,
     &Time_zero_,
@@ -61,6 +65,8 @@ struct TimeMethods _CBL_TIME_METHODS = {
 };
 
 struct DateTimeMethods _CBL_DATETIME_METHODS = {
+    &DateTime_read_,
+    &DateTime_write_,
     &DateTime_now_,
     &DateTime_set_,
     &DateTime_set_julian_,
@@ -179,6 +185,18 @@ struct Date Date_set_julian_(struct Date* this, Int mjday) {
     return *this;
 }
 
+void Date_read_(struct Date* this, FILE* fp) {
+    fread(&this->year, sizeof(Int), 1, fp);
+    fread(&this->month, sizeof(Int), 1, fp);
+    fread(&this->day, sizeof(Int), 1, fp);
+}
+
+void Date_write_(struct Date* this, FILE* fp) {
+    fwrite(&this->year, sizeof(Int), 1, fp);
+    fwrite(&this->month, sizeof(Int), 1, fp);
+    fwrite(&this->day, sizeof(Int), 1, fp);
+}
+
 Bool Date_lessthan(const struct Date* this, struct Date another) {
     if(this->year < another.year) return true;
     if(this->year > another.year) return false;
@@ -264,7 +282,7 @@ struct Time Time_set_(struct Time* this, Int n, ...) {
     this->millisecond = (n > 3) ? va_arg(args, int) : 0;
 #endif
 #if TIME_PRECISION > 3
-    this->macrosecond = (n > 4) ? va_arg(args, int) : 0;
+    this->microsecond = (n > 4) ? va_arg(args, int) : 0;
 #endif
 #if TIME_PRECISION > 6
     this->nanosecond = (n > 5) ? va_arg(args, int) : 0;
@@ -281,7 +299,7 @@ struct Time Time_zero_(struct Time* this) {
     this->millisecond = 0;
 #endif
 #if TIME_PRECISION > 3
-    this->macrosecond = 0;
+    this->microsecond = 0;
 #endif
 #if TIME_PRECISION > 6
     this->nanosecond = 0;
@@ -319,21 +337,21 @@ struct Time Time_regularize_(struct Time* this) {
     // printf("millisecond: %d, t1: %lld\n", this->millisecond, t1);
 #endif
 #if TIME_PRECISION > 3
-    t1 = this->macrosecond + t1 * 1000; // t1: macrosecond
-    // printf("macrosecond: %d, t1: %lld\n", this->macrosecond, t1);
+    t1 = this->microsecond + t1 * 1000; // t1: microsecond
+    // printf("microsecond: %d, t1: %lld\n", this->microsecond, t1);
 #endif
 #if TIME_PRECISION > 6
     t1 = this->nanosecond + t1 * 1000; // t1: nanosecond
 
     _time_round_same_sign(&t2, &t1, 1000);
     this->nanosecond = (Int)t1;
-    t1 = t2; // macrosecond
+    t1 = t2; // microsecond
 #endif
 #if TIME_PRECISION > 3
     _time_round_same_sign(&t2, &t1, 1000);
-    this->macrosecond = (Int)t1;
+    this->microsecond = (Int)t1;
     t1 = t2; // millisecond
-    // printf("macrosecond: %d, t1: %lld\n", this->macrosecond, t1);
+    // printf("microsecond: %d, t1: %lld\n", this->microsecond, t1);
 #endif
 #if TIME_PRECISION > 0
     _time_round_same_sign(&t2, &t1, 1000);
@@ -351,6 +369,50 @@ struct Time Time_regularize_(struct Time* this) {
     // printf("minute: %d, t1: %lld\n", this->minute, t1);
     // printf("hour: %d, t2: %lld\n", this->hour, t2);
     return *this;
+}
+
+void Time_read_(struct Time* this, FILE* fp) {
+    Int n, buf[6];
+    fread(&n, sizeof(Int), 1, fp);
+    fread(buf, sizeof(Int), n, fp);
+    this->hour = buf[0];
+    this->minute = buf[1];
+    this->second = buf[2];
+#if TIME_PRECISION > 0
+    this->millisecond = buf[3];
+#endif
+#if TIME_PRECISION > 3
+    this->microsecond = buf[4];
+#endif
+#if TIME_PRECISION > 6
+    this->nanosecond = buf[5];
+#endif
+}
+
+void Time_write_(struct Time* this, FILE* fp) {
+    Int n;
+#if TIME_PRECISION == 0
+    n = 3;
+#elif TIME_PRECISION == 3
+    n = 4;
+#elif TIME_PRECISION == 6
+    n = 5;
+#elif TIME_PRECISION == 9
+    n = 6;
+#endif
+    fwrite(&n, sizeof(Int), 1, fp);
+    fwrite(&this->hour, sizeof(Int), 1, fp);
+    fwrite(&this->minute, sizeof(Int), 1, fp);
+    fwrite(&this->second, sizeof(Int), 1, fp);
+#if TIME_PRECISION > 0
+    fwrite(&this->millisecond, sizeof(Int), 1, fp);
+#endif
+#if TIME_PRECISION > 3
+    fwrite(&this->microsecond, sizeof(Int), 1, fp);
+#endif
+#if TIME_PRECISION > 6
+    fwrite(&this->nanosecond, sizeof(Int), 1, fp);
+#endif
 }
 
 void Time_string(const struct Time* this, struct String* str) {
@@ -372,8 +434,8 @@ void Time_string(const struct Time* this, struct String* str) {
     if(this->millisecond < 0) sign = '-';
 #endif
 #if TIME_PRECISION > 3
-    us = _bm_abs_int(this->macrosecond);
-    if(this->macrosecond < 0) sign = '-';
+    us = _bm_abs_int(this->microsecond);
+    if(this->microsecond < 0) sign = '-';
 #endif
 #if TIME_PRECISION > 6
     ns = _bm_abs_int(this->nanosecond);
@@ -402,7 +464,7 @@ Int Time_diff(const struct Time* this, struct Time time) {
     buf = buf * 1000 + this->millisecond - time.millisecond;
 #endif
 #if TIME_PRECISION > 3
-    buf = buf * 1000 + this->macrosecond - time.macrosecond;
+    buf = buf * 1000 + this->microsecond - time.microsecond;
 #endif
 #if TIME_PRECISION > 6
     buf = buf * 1000 + this->nanosecond - time.nanosecond;
@@ -419,7 +481,7 @@ Float Time_diff_second(const struct Time* this, struct Time time) {
     buf = buf + (this->millisecond - time.millisecond) * 1.0e-3;
 #endif
 #if TIME_PRECISION > 3
-    buf = buf + (this->macrosecond - time.macrosecond) * 1.0e-6;
+    buf = buf + (this->microsecond - time.microsecond) * 1.0e-6;
 #endif
 #if TIME_PRECISION > 6
     buf = buf + (this->nanosecond - time.nanosecond) * 1.0e-9;
@@ -445,7 +507,7 @@ struct Time Time_add_(struct Time* this, Int precision) {
 #if TIME_PRECISION > 6
     this->nanosecond += precision;
 #elif TIME_PRECISION > 3
-    this->macrosecond += precision;
+    this->microsecond += precision;
 #elif TIME_PRECISION > 0
     this->millisecond += precision;
 #else
@@ -481,7 +543,7 @@ struct DateTime DateTime_now_(struct DateTime* this, Int tz) {
     this->time.millisecond = 0;
 #endif
 #if TIME_PRECISION > 3
-    this->time.macrosecond = 0;
+    this->time.microsecond = 0;
 #endif
 #if TIME_PRECISION > 6
     this->time.nanosecond = 0;
@@ -503,7 +565,7 @@ struct DateTime DateTime_set_(struct DateTime* this, Int n, ...) {
     this->time.millisecond = (n > 6) ? va_arg(ap, long) : 0;
 #endif
 #if TIME_PRECISION > 3
-    this->time.macrosecond = (n > 7) ? va_arg(ap, long) : 0;
+    this->time.microsecond = (n > 7) ? va_arg(ap, long) : 0;
 #endif
 #if TIME_PRECISION > 6
     this->time.nanosecond = (n > 8) ? va_arg(ap, long) : 0;
@@ -543,6 +605,16 @@ struct DateTime DateTime_regularize_(struct DateTime* this) {
     return *this;
 }
 
+void DateTime_read_(struct DateTime* this, FILE* fp) {
+    Date_read_(&(this->date), fp);
+    Time_read_(&(this->time), fp);
+}
+
+void DateTime_write_(struct DateTime* this, FILE* fp) {
+    Date_write_(&(this->date), fp);
+    Time_write_(&(this->time), fp);
+}
+
 Int DateTime_diff(const struct DateTime* this, struct DateTime datetime) {
     Int day_diff, time_diff;
     day_diff = Date_diff(&(this->date), datetime.date);
@@ -574,7 +646,7 @@ struct DateTime DateTime_add_(struct DateTime* this, Int precision) {
 #if TIME_PRECISION > 6
     this->time.nanosecond += precision;
 #elif TIME_PRECISION > 3
-    this->time.macrosecond += precision;
+    this->time.microsecond += precision;
 #elif TIME_PRECISION > 0
     this->time.millisecond += precision;
 #else

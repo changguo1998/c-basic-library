@@ -25,7 +25,31 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
+
 #include "Type_DateTime.h"
+
+void printsection(const char* s) { printf("\n----------------------------------------\n * %s\n\n", s); }
+
+static struct String _buffer;
+static Char*         _buffer_cstr;
+
+#define printdt(dt) CBL_CALL(dt, string, &_buffer); \
+    CBL_CALL(_buffer, cstr_, &_buffer_cstr); \
+    printf("%s: %s\n", #dt, _buffer_cstr)
+
+void printstring(const char* vname, struct String s) {
+    Char buf[(STRING_FIXED_BUFFER_LENGTH) + 1] = {'\0'};
+    printf("%s: ", vname);
+    if(s.len < STRING_FIXED_BUFFER_LENGTH) {
+        printf("\"%s\"\n", s.str);
+        return;
+    }
+    memcpy(buf, s.str, STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
+    printf("\"%s", buf);
+    if(s.more) printf("^%s\"", s.more);
+    printf("\n");
+}
 
 int main() {
     CBL_DECLARE_VARS(DateTime, 1, dt);
@@ -33,12 +57,102 @@ int main() {
     CBL_DECLARE_VARS(Time, 1, t);
     CBL_DECLARE_VARS(String, 1, msg);
 
+    String_new_(&_buffer);
+    _buffer_cstr = NULL;
+
     Float jd;
     Int   mjd;
+    FILE* fp;
 
+    CBL_CALL(dt, now_, 1);
+    CBL_CALL(msg, set_, "-");
+    CBL_CALL(msg, repeat_, 40);
+
+    // ! -----------------------------------------------------------------------
+    CBL_CALL(msg, cstr_, &_buffer_cstr);
+    printf("%s\n # Date\n%s\n", _buffer_cstr, _buffer_cstr);
+    printsection("today_");
+    CBL_CALL(d, today_, 1);
+    printdt(d);
+
+    // ! -----------------------------------------------------------------------
+    printsection("string");
+    CBL_CALL(_buffer, free_);
+    CBL_CALL(d, string, &_buffer);
+    printstring("_buffer: ", _buffer);
+
+    // ! -----------------------------------------------------------------------
+    printsection("set_");
+    CBL_CALL(d, set_, 3, 2024, 11, 32);
+    printdt(d);
+
+    // ! -----------------------------------------------------------------------
+    printsection("regularize");
+    CBL_CALL(d, regularize_);
+    printdt(d);
+
+    // ! -----------------------------------------------------------------------
+    printsection("add");
+    CBL_CALL(d, add_, 3);
+    printdt(d);
+
+    // ! -----------------------------------------------------------------------
+    printsection("julian");
+    printdt(d);
+    mjd = CBL_CALL(d, julian);
+    printf("julian: %d\n", mjd);
+
+    // ! -----------------------------------------------------------------------
+    printsection("set_julian_");
+    CBL_CALL(d, set_julian_, mjd);
+    printdt(d);
+
+    // ! -----------------------------------------------------------------------
+    printsection("lessthan/isequal");
+    printdt(dt);
+    printdt(d);
+    printf("lessthan: %s\n", CBL_CALL(dt.date, lessthan, d) ? "true" : "false");
+    printf("isequal: %s\n", CBL_CALL(dt.date, isequal, d) ? "true" : "false");
+
+    // ! -----------------------------------------------------------------------
+    printsection("diff");
+    mjd = CBL_CALL(d, diff, dt.date);
+    printf("diff: %d\n", mjd);
+
+    // ! -----------------------------------------------------------------------
+    printsection("dayofyear");
+    mjd = CBL_CALL(d, day_of_year);
+    printf("day of year: %d\n", mjd);
+
+    // ! -----------------------------------------------------------------------
+    printsection("write");
+    fp = fopen("test_DateTime.bin", "wb");
+    CBL_CALL(d, write_, fp);
+    fclose(fp);
+
+    // ! -----------------------------------------------------------------------
+    printsection("read");
+    CBL_CALL(d, set_, 3, 0, 0, 0); printdt(d);
+    fp = fopen("test_DateTime.bin", "rb");
+    CBL_CALL(d, read_, fp); printdt(d);
+    fclose(fp);
+
+    // ! -----------------------------------------------------------------------
+    CBL_CALL(msg, cstr_, &_buffer_cstr);
+    printf("%s\n # Time\n%s\n", _buffer_cstr, _buffer_cstr);
+
+    // ! -----------------------------------------------------------------------
+    CBL_CALL(msg, cstr_, &_buffer_cstr);
+    printf("%s\n # DateTime\n%s\n", _buffer_cstr, _buffer_cstr);
+
+    // ! -----------------------------------------------------------------------
+    printsection("end");
+
+    CBL_FREE_VARS(String, 2, msg, _buffer);
+    return 0;
+    // ! =======================================================================
     printf("[test_DateTime.c] begin\n");
     CBL_CALL(dt, now_, 1);
-    CBL_CALL(d, today_, 1);
 
     printf("[test_DateTime.c] current date: %04d-%02d-%02d\n",
         d.year, d.month, d.day);

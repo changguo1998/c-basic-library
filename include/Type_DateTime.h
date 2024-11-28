@@ -41,6 +41,11 @@ Int DateTime_second2precision(Float s);
 Float DateTime_precision2second(Int tp);
 
 struct DateMethods {
+    // # io
+
+    void (*read_)(struct Date* this, FILE* fp);
+    void (*write_)(struct Date* this, FILE* fp);
+
     // # set value
 
     // 0-GMT,1-local time
@@ -67,6 +72,8 @@ struct DateMethods {
     void (*       string)(const struct Date* this, struct String* str);
 };
 
+void        Date_read_(struct Date* this, FILE* fp);
+void        Date_write_(struct Date* this, FILE* fp);
 struct Date Date_today_(struct Date* this, Int type);
 struct Date Date_set_(struct Date* this, Int n, ...);
 struct Date Date_set_julian_(struct Date* this, Int mjday);
@@ -81,6 +88,8 @@ void        Date_string(const struct Date* this, struct String* str);
 
 
 struct TimeMethods {
+    void (*read_)(struct Time* this, FILE* fp);
+    void (*write_)(struct Time* this, FILE* fp);
     struct Time (*now_)(struct Time* this, Int type);
     struct Time (*set_)(struct Time* this, Int n, ...);
     struct Time (*zero_)(struct Time* this);
@@ -105,6 +114,8 @@ struct TimeMethods {
     struct Time (*add_second_)(struct Time* this, Float seconds);
 };
 
+void        Time_read_(struct Time* this, FILE* fp);
+void        Time_write_(struct Time* this, FILE* fp);
 struct Time Time_now_(struct Time* this, Int type);
 struct Time Time_set_(struct Time* this, Int n, ...);
 struct Time Time_zero_(struct Time* this);
@@ -123,6 +134,11 @@ struct Time Time_add_second_(struct Time* this, Float seconds);
  * @param time Time
  */
 struct DateTimeMethods {
+    // # io
+
+    void (*read_)(struct DateTime* this, FILE* fp);
+    void (*write_)(struct DateTime* this, FILE* fp);
+
     // # set value
     //* 0:GMT, 1:LocalTime
     struct DateTime (*now_)(struct DateTime* this, Int tz);
@@ -139,6 +155,8 @@ struct DateTimeMethods {
     void (*           string)(const struct DateTime* this, struct String* str);
 };
 
+void        DateTime_read_(struct DateTime* this, FILE* fp);
+void        DateTime_write_(struct DateTime* this, FILE* fp);
 struct DateTime DateTime_now_(struct DateTime* this, Int tz);
 struct DateTime DateTime_set_(struct DateTime* this, Int n, ...);
 struct DateTime DateTime_set_julian_(struct DateTime* this, Float mjdatetime);
@@ -164,7 +182,7 @@ static inline void Time_new_(struct Time* this) {
     this->millisecond = 0;
 #endif
 #if TIME_PRECISION > 3
-    this->macrosecond = 0;
+    this->microsecond = 0;
 #endif
 #if TIME_PRECISION > 6
     this->nanosecond = 0;

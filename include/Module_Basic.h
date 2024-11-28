@@ -47,8 +47,8 @@
 // 10^(-n) second
 // #define TIME_PRECISION 0
 // #define TIME_PRECISION 3
-// #define TIME_PRECISION 6
-#define TIME_PRECISION 9
+#define TIME_PRECISION 6
+// #define TIME_PRECISION 9
 
 #define LOG_MAX_FILE_NAME_LENGTH 2048
 
@@ -73,14 +73,12 @@ typedef bool Bool;
 typedef char Char;
 
 // Integer
-typedef unsigned char          UInt8;
-typedef signed char            Int8;
-typedef unsigned int           UInt32;
-typedef int                    Int32;
-typedef unsigned long int      UInt64;
-typedef signed long int        Int64;
-typedef unsigned long long int UInt128;
-typedef signed long long int   Int128;
+typedef unsigned char      UInt8;
+typedef char               Int8;
+typedef unsigned int       UInt32;
+typedef int                Int32;
+typedef unsigned long long UInt64;
+typedef long long          Int64;
 
 // Float
 typedef float       Float32;
@@ -88,7 +86,6 @@ typedef double      Float64;
 typedef long double Float128;
 
 // Complex
-
 #include "Type_Complex.h"
 
 // Pointer
@@ -213,7 +210,7 @@ struct Time {
     Int microsecond;
 #endif
 #if TIME_PRECISION > 6
- Int nanosecond;
+    Int nanosecond;
 #endif
     struct TimeMethods* methods;
 };
@@ -226,11 +223,12 @@ struct DateTime {
 };
 
 struct String {
-    Char  str[STRING_FIXED_BUFFER_LENGTH];
-    Int   len;
     Char* more;
 
     const struct StringMethods* methods;
+
+    Int  len;
+    Char str[STRING_FIXED_BUFFER_LENGTH];
 };
 
 struct StaticDict {
@@ -333,24 +331,21 @@ struct ComplexTensor {
 // Array
 
 struct IntArray {
-    Int* data;
-
     struct IntVector        size;
+    Int*                    data;
     struct IntArrayMethods* methods;
 };
 
 struct FloatArray {
-    Float* data;
-
-    struct IntVector        size;
-    struct IntArrayMethods* methods;
+    struct IntVector          size;
+    Float*                    data;
+    struct FloatArrayMethods* methods;
 };
 
 struct ComplexArray {
-    Complex* data;
-
-    struct IntVector        size;
-    struct IntArrayMethods* methods;
+    struct IntVector            size;
+    Complex*                    data;
+    struct ComplexArrayMethods* methods;
 };
 
 // general function types

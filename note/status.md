@@ -22,9 +22,9 @@
 |-----------------------------------------|--------------|:--------:|:--------:|:--------:|
 | *non-numerical type*                    |              |          |          |          |
 | [String](#String-methods)               | String       | &#x2713; | &#x2713; | &#x2713; |
-| Date                                    | DateTime     |          |          |          |
-| Time                                    | DateTime     |          |          |          |
-| DateTime                                | DateTime     |          |          |          |
+| [Date](#Date-methods)                   | DateTime     |          |          |          |
+| [Time](#Time-methods)                   | DateTime     |          |          |          |
+| [DateTime](#DateTime-methods)           | DateTime     |          |          |          |
 | StaticDict                              | Dict         |          |          |          |
 | DynamicDict                             | Dict         |          |          |          |
 | Sheet                                   | Dict         |          |          |          |
@@ -68,6 +68,61 @@
 
 ## Progress functions
 
+### Date methods
+
+| Function    | Status |
+|-------------|:------:|
+| read_       |        |
+| write_      |        |
+| today_      |        |
+| set_        |        |
+| set_julian_ |        |
+| lessthan    |        |
+| isequal     |        |
+| day_of_year |        |
+| diff        |        |
+| julian      |        |
+| add_        |        |
+| regularize_ |        |
+| string      |        |
+
+### Time methods
+
+| Function    | Status |
+|-------------|:------:|
+| read_       |        |
+| write_      |        |
+| now_        |        |
+| set_        |        |
+| zero_       |        |
+| regularize_ |        |
+| string      |        |
+| diff        |        |
+| diff_second |        |
+| lessthan    |        |
+| isequal     |        |
+| add_        |        |
+| add_second_ |        |
+
+### DateTime methods
+
+| Function    | Status |
+|-------------|:------:|
+| read_       |        |
+| write_      |        |
+| now_        |        |
+| set_        |        |
+| set_julian_ |        |
+| regularize_ |        |
+| diff        |        |
+| diff_second |        |
+| lessthan    |        |
+| isequal     |        |
+| add_        |        |
+| add_second_ |        |
+| julian      |        |
+| string      |        |
+
 ### String methods
 
 | Function   |  Status  |
@@ -75,6 +130,13 @@
 | free       | &#x2713; |
 | copy       | &#x2713; |
 | cstr       | &#x2713; |
+| read_      | &#x2713; |
+| readuntil_ | &#x2713; |
+| readline_  | &#x2713; |
+| readfile_  | &#x2713; |
+| write_     | &#x2713; |
+| print_     | &#x2713; |
+| println_   | &#x2713; |
 | set        | &#x2713; |
 | isequal    | &#x2713; |
 | append     | &#x2713; |

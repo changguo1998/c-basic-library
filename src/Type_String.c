@@ -31,6 +31,13 @@ const struct StringMethods _CBL_STRING_METHODS = {
     &String_free_,
     &String_copy_,
     &String_cstr_,
+    &String_read_,
+    &String_readuntil_,
+    &String_readline_,
+    &String_readfile_,
+    &String_write,
+    &String_print,
+    &String_println,
     &String_set_,
     &String_isequal,
     &String_append_,
@@ -107,6 +114,21 @@ void _free_cached_string(const struct String* this, Char** buf) {
     *buf = NULL;
 }
 
+void _read_until_or_n(Char* str, Int* i, Int max, FILE* fp, Char flag, Int *flag_triggered) {
+    Char c;
+    *flag_triggered = 0;
+    while(!feof(fp)) {
+        if(*i >= max) break;
+        c = (Char)fgetc(fp);
+        if(c == flag) {
+            (*flag_triggered) = 1;
+            break;
+        }
+        str[*i] = c;
+        (*i) += 1;
+    }
+}
+
 // # ---------------------------------------------------------------------------
 // # external functions
 
@@ -145,6 +167,71 @@ void String_cstr_(const struct String* this, Char** cstr) {
     *cstr = (Char*)calloc(this->len + 1, sizeof(Char));
     i = 0;
     _get_string(this, &i, *cstr);
+}
+
+void String_read_(struct String* this, FILE* fp) {
+    Char* buf = NULL;
+    Int   n;
+    String_free_(this);
+    fread(&n, sizeof(Int), 1, fp);
+    if(n <= 0) return;
+    buf = (Char*)calloc(n + 1, sizeof(Char));
+    fread(buf, sizeof(Char), n, fp);
+    String_set_(this, buf);
+    free(buf);
+}
+
+void String_readuntil_(struct String* this, FILE* fp, Char c) {
+    CBL_DECLARE_VARS(String, 1, buf);
+    Int flag;
+    flag = 0;
+    String_free_(this);
+    while(!flag) {
+        if(feof(fp)) break;
+        memset(buf.str, '\0', STRING_FIXED_BUFFER_LENGTH * sizeof(Char));
+        buf.len = 0;
+        _read_until_or_n(buf.str, &buf.len, STRING_FIXED_BUFFER_LENGTH, fp, c, &flag);
+        String_append_(this, buf);
+    }
+}
+
+void String_readline_(struct String* this, FILE* fp) { String_readuntil_(this, fp, '\n'); }
+
+void String_readfile_(struct String* this, FILE* fp) {
+    long fsize;
+    Char *buf;
+    fseek(fp, 0, SEEK_END);
+    fsize = ftell(fp);
+    if(fsize <= 0) {
+        String_free_(this);
+        return;
+    }
+    fseek(fp, 0, SEEK_SET);
+    buf = (Char*)malloc(fsize + sizeof(Char));
+    fread(buf, 1, fsize, fp);
+    String_set_(this, buf);
+    free(buf);
+}
+
+void String_write(struct String* this, FILE* fp) {
+    Char* buf = NULL;
+    fwrite(&this->len, sizeof(Int), 1, fp);
+    if(this->len <= 0) return;
+    buf = _cache_string(this);
+    fwrite(buf, sizeof(Char), this->len, fp);
+    _free_cached_string(this, &buf);
+}
+
+void String_print(struct String* this, FILE* fp) {
+    Char* buf = NULL;
+    buf = _cache_string(this);
+    fwrite(buf, sizeof(Char), this->len, fp);
+    _free_cached_string(this, &buf);
+}
+
+void String_println(struct String* this, FILE* fp) {
+    String_print(this, fp);
+    fputc('\n', fp);
 }
 
 void String_set_(struct String* this, const char* str) {

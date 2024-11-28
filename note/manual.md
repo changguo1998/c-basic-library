@@ -49,15 +49,17 @@ Solutin: add .../fftw3/bin into path. (make dll in searching path)
 
 ### Add new method function
 
-| `FunctionName` | Status | Item                                           |     Position     |
-|:--------------:|--------|:-----------------------------------------------|:----------------:|
-|       1        |        | update infomation in `status.md` file          | `note/status.md` |
-|       2        |        | function pointer in method struct definition   |   `include/.h`   |
-|       3        |        | function declaration                           |   `include/.h`   |
-|       4        |        | initial value in method struct global variable |     `src/.c`     |
-|       5        |        | function definition                            |     `src/.c`     |
-|       6        |        | test                                           |    `test/.c`     |
-|       7        |        | update progress in `status.md` file            | `note/status.md` |
+`FunctionName`
+
+| No. | Status | Item                                           | Position         |
+|:---:|:------:|:-----------------------------------------------|------------------|
+|  1  |        | update infomation in `status.md` file          | `note/status.md` |
+|  2  |        | function pointer in method struct definition   | `include/.h`     |
+|  3  |        | function declaration                           | `include/.h`     |
+|  4  |        | initial value in method struct global variable | `src/.c`         |
+|  5  |        | function definition                            | `src/.c`         |
+|  6  |        | test                                           | `test/.c`        |
+|  7  |        | update progress in `status.md` file            | `note/status.md` |
 
 ### Status Symbol
 

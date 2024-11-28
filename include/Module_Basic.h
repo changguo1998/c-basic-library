@@ -35,10 +35,10 @@
 
 #define USE_64_BIT 1
 
-// #define STRING_FIXED_BUFFER_LENGTH 8
+#define STRING_FIXED_BUFFER_LENGTH 8
 // #define STRING_FIXED_BUFFER_LENGTH 256
 // #define STRING_FIXED_BUFFER_LENGTH 512
-#define STRING_FIXED_BUFFER_LENGTH 1024
+// #define STRING_FIXED_BUFFER_LENGTH 1024
 // #define STRING_FIXED_BUFFER_LENGTH 2048
 // #define STRING_FIXED_BUFFER_LENGTH 4096
 // #define STRING_FIXED_BUFFER_LENGTH 8192
@@ -47,8 +47,8 @@
 // 10^(-n) second
 // #define TIME_PRECISION 0
 // #define TIME_PRECISION 3
-#define TIME_PRECISION 6
-// #define TIME_PRECISION 9
+// #define TIME_PRECISION 6
+#define TIME_PRECISION 9
 
 #define LOG_MAX_FILE_NAME_LENGTH 2048
 
@@ -210,7 +210,7 @@ struct Time {
     Int millisecond;
 #endif
 #if TIME_PRECISION > 3
-    Int macrosecond;
+    Int microsecond;
 #endif
 #if TIME_PRECISION > 6
  Int nanosecond;

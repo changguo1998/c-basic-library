@@ -53,7 +53,8 @@ void printstring(const char* vname, struct String s) {
 }
 
 int main() {
-    Int  nslice, i;
+    FILE *fp;
+    Int  i, nslice;
     char c,      buffer[10000] = {'\0'}, *vbuf = NULL;
 
     CBL_DECLARE_VARS(String, 3, s, t, u);
@@ -213,60 +214,45 @@ int main() {
     printstring("s", s);
 
     // ! -----------------------------------------------------------------------
+    printsection("print");
+    CBL_CALL(s, set_, "AAAAAAAAAAA_"); printstring("s", s);
+    fp = fopen("test_string.txt", "w");
+    CBL_CALL(s, print, fp);
+
+    // ! -----------------------------------------------------------------------
+    printsection("println");
+    CBL_CALL(s, println, fp);
+    CBL_CALL(s, print, fp);
+    fclose(fp);
+
+    // ! -----------------------------------------------------------------------
+    printsection("readuntil/readline");
+    fp = fopen("test_string.txt", "r");
+    CBL_CALL(t, readline_, fp); printstring("t", t);
+    fclose(fp);
+
+    // ! -----------------------------------------------------------------------
+    printsection("readfile");
+    fp = fopen("test_string.txt", "r");
+    CBL_CALL(t, readfile_, fp); printstring("t", t);
+    fclose(fp);
+
+    // ! -----------------------------------------------------------------------
+    printsection("write");
+    printstring("s", s);
+    fp = fopen("test_string.bin", "w");
+    CBL_CALL(s, write, fp);
+    fclose(fp);
+
+    // ! -----------------------------------------------------------------------
+    printsection("read");
+    CBL_CALL(s, free_); printstring("s", s);
+    fp = fopen("test_string.bin", "r");
+    CBL_CALL(s, read_, fp); printstring("s", s);
+    fclose(fp);
+
+    // ! -----------------------------------------------------------------------
     printsection("free");
     CBL_FREE_VARS(String, 3, s, t, u);
     return 0;
 }
-
-/*
-    for(i = 0; i < 5; i++) String_new_(&(r[i]));
-    for(i = 0; i < 3; i++) {
-        String_new_(&(s[i]));
-        String_new_(&(t[i]));
-    }
-
-    for(c = 'a'; c <= 'e'; c++) {
-        sprintf(buffer, "ab%c", c);
-        printf("%s\n", buffer);
-        String_set_(&(r[(Int)(c - 'a')]), buffer);
-    }
-
-    s[0].methods->join_(&s[0], r, 5, String_set(""));
-    s[1] = s[0];
-    printf("s0: %s\ns1: %s\n", s[0].str, s[1].str);
-    printf("s0 == s1 : %d\n", s[0].methods->isequal(&s[0], s[1]));
-    s[1].methods->reverse_(&s[1]);
-    printf("s0: %s\ns1: %s\n", s[0].str, s[1].str);
-    printf("s0 == s1 : %d\n", s[0].methods->isequal(&s[0], s[1]));
-    s[2] = s[0];
-    s[2].methods->substring_(&s[2], 0, 1);
-    printf("s2: %s\n", s[2].str);
-    printf("s0 startswith s2: %d\n", s[0].methods->starts_with(&s[0], s[2]));
-    printf("s0 endswith s2: %d\n", s[0].methods->ends_with(&s[0], s[2]));
-    printf("s0 contains s2: %d\n", s[0].methods->contains(&s[0], s[2]));
-    printf("s0 == s2 : %d\n", s[0].methods->isequal(&s[0], s[2]));
-    t[0].methods->join_(&t[0], r, 5, Sbuffer.methods->set_(&Sbuffer, "_"));
-    printf("join of r[0-4]: %s\n", t[0].str);
-    t[0].methods->set_(&t[0], "ab");
-    printf("t[0]: %s\n", t[0].str);
-    t[1].methods->set_(&t[1], "xy");
-    printf("t[1]: %s\n", t[1].str);
-    t[2] = s[0];
-    printf("t[2]: %s\n", t[2].str);
-    t[2].methods->replace_(&t[2], t[0], t[1]);
-    printf("replace %s with %s in %s, get: %s\n", t[0].str, t[1].str, s[0].str,
-        t[2].str);
-    t[2] = s[0];
-    t[2].methods->replace_all_(&t[2], t[0], t[1]);
-    printf("replace all %s with %s in %s, get: %s\n", t[0].str, t[1].str,
-        s[0].str, t[2].str);
-
-    t[2].methods->append_(&t[2], t[1]);
-
-    printf("t[1]: %s\n", t[1].str);
-    printf("t[2]: %s\n", t[2].str);
-    t[2].methods->split(&t[2], t[1], &sp, &nslice);
-    printf("n slice: %d\n", nslice);
-    for(c = 0; c < nslice; c++) printf("slice[%d]: %s\n", c, sp[c].str);
-    free(sp);
-*/

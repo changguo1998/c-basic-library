@@ -70,6 +70,7 @@ struct StringMethods {
                         struct String  pattern,
                         struct String  replacement);
     void (*reverse_)(struct String* this);
+    void (*repeat_)(struct String* this, Int n);
 };
 
 
@@ -113,6 +114,7 @@ void String_replaceall_(struct String* this,
                         struct String  pattern,
                         struct String  replacement);
 void String_reverse_(struct String* this);
+void String_repeat_(struct String* this, Int n);
 
 static inline void String_new_(struct String* this) {
     this->len = 0;

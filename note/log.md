@@ -16,6 +16,18 @@
 
 # 2024-11-27
 
+## `String.repeat`
+
+| No. |  Status  | Item                                           | Position                |
+|:---:|:--------:|:-----------------------------------------------|-------------------------|
+|  1  | &#x2713; | update infomation in `status.md` file          | `note/status.md`        |
+|  2  | &#x2713; | function pointer in method struct definition   | `include/Type_String.h` |
+|  3  | &#x2713; | function declaration                           | `include/Type_String.h` |
+|  4  | &#x2713; | initial value in method struct global variable | `src/Type_String.c`     |
+|  5  | &#x2713; | function definition                            | `src/Type_String.c`     |
+|  6  | &#x2713; | test                                           | `test/String.c`         |
+|  7  | &#x2713; | update progress in `status.md` file            | `note/status.md`        |
+
 ## IO function
 
 ### Date

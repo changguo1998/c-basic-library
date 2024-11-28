@@ -53,9 +53,9 @@ void printstring(const char* vname, struct String s) {
 }
 
 int main() {
-    FILE *fp;
-    Int  i, nslice;
-    char c,      buffer[10000] = {'\0'}, *vbuf = NULL;
+    FILE* fp;
+    Int   i, nslice;
+    char  c, buffer[10000] = {'\0'}, *vbuf = NULL;
 
     CBL_DECLARE_VARS(String, 3, s, t, u);
     struct String v[3], *strslices = NULL;
@@ -78,9 +78,12 @@ int main() {
 
     // ! -----------------------------------------------------------------------
     printsection("cstr");
-    CBL_CALL(s, set_, "test1234"); printstring("s", s);
-    CBL_CALL(s, cstr_, &vbuf); printf("vbuf: \"%s\"\n", vbuf);
-    free(vbuf); vbuf = NULL;
+    CBL_CALL(s, set_, "test1234");
+    printstring("s", s);
+    CBL_CALL(s, cstr_, &vbuf);
+    printf("vbuf: \"%s\"\n", vbuf);
+    free(vbuf);
+    vbuf = NULL;
 
     // ! -----------------------------------------------------------------------
     printsection("isequal");
@@ -194,17 +197,25 @@ int main() {
 
     // ! -----------------------------------------------------------------------
     printsection("replace");
-    CBL_CALL(s, set_, "abcdefghijkl"); printstring("s", s);
-    CBL_CALL(t, set_, "ghij"); printstring("t", t);
-    CBL_CALL(u, set_, "1234"); printstring("u", u);
-    CBL_CALL(s, replace_, t, u); printstring("s", s);
+    CBL_CALL(s, set_, "abcdefghijkl");
+    printstring("s", s);
+    CBL_CALL(t, set_, "ghij");
+    printstring("t", t);
+    CBL_CALL(u, set_, "1234");
+    printstring("u", u);
+    CBL_CALL(s, replace_, t, u);
+    printstring("s", s);
 
     // ! -----------------------------------------------------------------------
     printsection("replaceall");
-    CBL_CALL(s, set_, "abcabdabeabf"); printstring("s", s);
-    CBL_CALL(t, set_, "ab"); printstring("t", t);
-    CBL_CALL(u, set_, "1234"); printstring("u", u);
-    CBL_CALL(s, replaceall_, t, u); printstring("s", s);
+    CBL_CALL(s, set_, "abcabdabeabf");
+    printstring("s", s);
+    CBL_CALL(t, set_, "ab");
+    printstring("t", t);
+    CBL_CALL(u, set_, "1234");
+    printstring("u", u);
+    CBL_CALL(s, replaceall_, t, u);
+    printstring("s", s);
 
     // ! -----------------------------------------------------------------------
     printsection("reverse");
@@ -214,8 +225,16 @@ int main() {
     printstring("s", s);
 
     // ! -----------------------------------------------------------------------
+    printsection("repeat");
+    CBL_CALL(s, set_, "123_");
+    printstring("s", s);
+    CBL_CALL(s, repeat_, 3);
+    printstring("s", s);
+
+    // ! -----------------------------------------------------------------------
     printsection("print");
-    CBL_CALL(s, set_, "AAAAAAAAAAA_"); printstring("s", s);
+    CBL_CALL(s, set_, "AAAAAAAAAAA_");
+    printstring("s", s);
     fp = fopen("test_string.txt", "w");
     CBL_CALL(s, print, fp);
 
@@ -228,13 +247,15 @@ int main() {
     // ! -----------------------------------------------------------------------
     printsection("readuntil/readline");
     fp = fopen("test_string.txt", "r");
-    CBL_CALL(t, readline_, fp); printstring("t", t);
+    CBL_CALL(t, readline_, fp);
+    printstring("t", t);
     fclose(fp);
 
     // ! -----------------------------------------------------------------------
     printsection("readfile");
     fp = fopen("test_string.txt", "r");
-    CBL_CALL(t, readfile_, fp); printstring("t", t);
+    CBL_CALL(t, readfile_, fp);
+    printstring("t", t);
     fclose(fp);
 
     // ! -----------------------------------------------------------------------
@@ -246,9 +267,11 @@ int main() {
 
     // ! -----------------------------------------------------------------------
     printsection("read");
-    CBL_CALL(s, free_); printstring("s", s);
+    CBL_CALL(s, free_);
+    printstring("s", s);
     fp = fopen("test_string.bin", "r");
-    CBL_CALL(s, read_, fp); printstring("s", s);
+    CBL_CALL(s, read_, fp);
+    printstring("s", s);
     fclose(fp);
 
     // ! -----------------------------------------------------------------------

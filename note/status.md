@@ -70,21 +70,21 @@
 
 ### Date methods
 
-| Function    | Status |
-|-------------|:------:|
-| read_       |        |
-| write_      |        |
-| today_      |        |
-| set_        |        |
-| set_julian_ |        |
-| lessthan    |        |
-| isequal     |        |
-| day_of_year |        |
-| diff        |        |
-| julian      |        |
-| add_        |        |
-| regularize_ |        |
-| string      |        |
+| Function    |  Status  |
+|-------------|:--------:|
+| read_       |          |
+| write_      |          |
+| today_      | &#x2713; |
+| set_        | &#x2713; |
+| set_julian_ |          |
+| lessthan    |          |
+| isequal     |          |
+| day_of_year |          |
+| diff        |          |
+| julian      |          |
+| add_        |          |
+| regularize_ |          |
+| string      |          |
 
 ### Time methods
 
@@ -151,6 +151,7 @@
 | replace    | &#x2713; |
 | replaceall | &#x2713; |
 | reverse    | &#x2713; |
+| repeat_    | &#x2713; |
 
 ### IntVector methods
 
